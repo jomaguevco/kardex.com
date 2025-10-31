@@ -86,7 +86,23 @@ function VentasContent() {
         total
       };
 
-      await ventaService.createVenta(ventaData);
+      // Asegurar que los detalles tengan todos los campos requeridos
+      const detallesCompletos = ventaData.detalles.map(detalle => ({
+        producto_id: detalle.producto_id,
+        cantidad: detalle.cantidad,
+        precio_unitario: detalle.precio_unitario,
+        descuento: detalle.descuento || 0,
+        subtotal: detalle.subtotal || (detalle.cantidad * detalle.precio_unitario)
+      }));
+
+      const ventaDataCompleto = {
+        ...ventaData,
+        detalles: detallesCompletos,
+        numero_factura: ventaData.numero_factura || `FAC-${Date.now()}`
+      };
+
+      console.log('Enviando venta:', ventaDataCompleto);
+      await ventaService.createVenta(ventaDataCompleto);
       setShowModal(false);
       setFormData({
         numero_factura: '',
@@ -101,7 +117,12 @@ function VentasContent() {
       });
       loadData();
     } catch (err: any) {
-      setError(err.message || 'Error al crear venta');
+      console.error('Error al crear venta:', err);
+      const errorMessage = err.response?.data?.details 
+        ? err.response.data.details.join(', ')
+        : err.response?.data?.message || err.message || 'Error al crear venta';
+      setError(errorMessage);
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -109,9 +130,14 @@ function VentasContent() {
     if (nuevoDetalle.producto_id && nuevoDetalle.cantidad > 0) {
       const producto = productos.find(p => p.id === nuevoDetalle.producto_id);
       if (producto) {
+        const precioUnitario = nuevoDetalle.precio_unitario || producto.precio_venta;
+        const subtotal = nuevoDetalle.cantidad * precioUnitario - (nuevoDetalle.descuento || 0);
         const detalle = {
-          ...nuevoDetalle,
-          precio_unitario: nuevoDetalle.precio_unitario || producto.precio_venta
+          producto_id: nuevoDetalle.producto_id,
+          cantidad: nuevoDetalle.cantidad,
+          precio_unitario: precioUnitario,
+          descuento: nuevoDetalle.descuento || 0,
+          subtotal: subtotal
         };
         setFormData({
           ...formData,
