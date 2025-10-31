@@ -7,7 +7,7 @@ class ApiService {
   constructor() {
     this.api = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api',
-      timeout: 10000,
+      timeout: 30000, // 30 segundos para operaciones que pueden tomar más tiempo (crear ventas con múltiples productos)
       headers: {
         'Content-Type': 'application/json',
       },
