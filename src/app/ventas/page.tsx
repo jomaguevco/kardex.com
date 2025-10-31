@@ -665,8 +665,9 @@ function VentasContent() {
               backgroundColor: 'white',
               borderRadius: '8px',
               padding: '24px',
-              width: '600px',
-              maxHeight: '80vh',
+              width: '90%',
+              maxWidth: '1200px',
+              maxHeight: '95vh',
               overflow: 'auto'
             }}>
               <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 16px 0' }}>
