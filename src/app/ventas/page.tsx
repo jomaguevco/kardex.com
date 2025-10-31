@@ -784,30 +784,30 @@ function VentasContent() {
                     <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                          <tr style={{ backgroundColor: '#f9fafb' }}>
-                            <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: '12px', fontWeight: '600' }}>Producto</th>
-                            <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: '12px', fontWeight: '600' }}>Cantidad</th>
-                            <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: '12px', fontWeight: '600' }}>Precio</th>
-                            <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: '12px', fontWeight: '600' }}>Subtotal</th>
-                            <th style={{ padding: '8px 12px', textAlign: 'center', fontSize: '12px', fontWeight: '600' }}>Acción</th>
+                          <tr style={{ backgroundColor: '#f3f4f6' }}>
+                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Producto</th>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Cantidad</th>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Precio</th>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Subtotal</th>
+                            <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Acción</th>
                           </tr>
                         </thead>
                         <tbody>
                           {formData.detalles.map((detalle, index) => (
-                            <tr key={index}>
-                              <td style={{ padding: '8px 12px', fontSize: '12px' }}>
+                            <tr key={index} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                              <td style={{ padding: '12px', fontSize: '14px', color: '#111827', fontWeight: '500' }}>
                                 {getProductoNombre(detalle.producto_id)}
                               </td>
-                              <td style={{ padding: '8px 12px', fontSize: '12px', textAlign: 'right' }}>
+                              <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right', color: '#374151' }}>
                                 {detalle.cantidad}
                               </td>
-                              <td style={{ padding: '8px 12px', fontSize: '12px', textAlign: 'right' }}>
+                              <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right', color: '#374151' }}>
                                 ${Number(detalle.precio_unitario).toFixed(2)}
                               </td>
-                              <td style={{ padding: '8px 12px', fontSize: '12px', textAlign: 'right' }}>
+                              <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right', color: '#111827', fontWeight: '600' }}>
                                 ${(Number(detalle.cantidad) * Number(detalle.precio_unitario)).toFixed(2)}
                               </td>
-                              <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                              <td style={{ padding: '12px', textAlign: 'center' }}>
                                 <button
                                   type="button"
                                   onClick={() => eliminarDetalle(index)}
@@ -815,10 +815,11 @@ function VentasContent() {
                                     backgroundColor: '#ef4444',
                                     color: 'white',
                                     border: 'none',
-                                    padding: '4px 8px',
+                                    padding: '6px 12px',
                                     borderRadius: '4px',
                                     cursor: 'pointer',
-                                    fontSize: '10px'
+                                    fontSize: '12px',
+                                    fontWeight: '500'
                                   }}
                                 >
                                   Eliminar
@@ -829,8 +830,8 @@ function VentasContent() {
                         </tbody>
                       </table>
                     </div>
-                    <div style={{ padding: '12px', backgroundColor: '#f9fafb', textAlign: 'right' }}>
-                      <strong style={{ fontSize: '16px' }}>
+                    <div style={{ padding: '16px', backgroundColor: '#f9fafb', textAlign: 'right', borderTop: '2px solid #e5e7eb' }}>
+                      <strong style={{ fontSize: '18px', color: '#111827', fontWeight: '700' }}>
                         Total: ${Number(calcularTotalVenta(formData.detalles)).toFixed(2)}
                       </strong>
                     </div>
