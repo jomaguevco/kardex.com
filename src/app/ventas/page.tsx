@@ -974,12 +974,14 @@ function VentasContent() {
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white'
+                        backgroundColor: 'white',
+                        color: '#111827',
+                        fontWeight: '500'
                       }}
                     >
-                      <option value="PENDIENTE">PENDIENTE</option>
-                      <option value="PROCESADA">PROCESADA</option>
-                      <option value="ANULADA">ANULADA</option>
+                      <option value="PENDIENTE" style={{ color: '#111827', backgroundColor: 'white' }}>PENDIENTE</option>
+                      <option value="PROCESADA" style={{ color: '#111827', backgroundColor: 'white' }}>PROCESADA</option>
+                      <option value="ANULADA" style={{ color: '#111827', backgroundColor: 'white' }}>ANULADA</option>
                     </select>
                   </div>
                   <div>
