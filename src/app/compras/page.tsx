@@ -627,12 +627,15 @@ function ComprasContent() {
                         padding: '8px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        backgroundColor: 'white',
+                        color: '#111827',
+                        fontWeight: '500'
                       }}
                     >
-                      <option value={0}>Seleccionar proveedor</option>
+                      <option value={0} style={{ color: '#111827', backgroundColor: 'white' }}>Seleccionar proveedor</option>
                       {proveedores.map((proveedor) => (
-                        <option key={proveedor.id} value={proveedor.id}>
+                        <option key={proveedor.id} value={proveedor.id} style={{ color: '#111827', backgroundColor: 'white' }}>
                           {proveedor.nombre}
                         </option>
                       ))}
@@ -671,12 +674,15 @@ function ComprasContent() {
                         padding: '8px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        backgroundColor: 'white',
+                        color: '#111827',
+                        fontWeight: '500'
                       }}
                     >
-                      <option value={0}>Seleccionar producto</option>
+                      <option value={0} style={{ color: '#111827', backgroundColor: 'white' }}>Seleccionar producto</option>
                       {productos.map((producto) => (
-                        <option key={producto.id} value={producto.id}>
+                        <option key={producto.id} value={producto.id} style={{ color: '#111827', backgroundColor: 'white' }}>
                           {producto.nombre} - ${Number(producto.precio_compra).toFixed(2)}
                         </option>
                       ))}
