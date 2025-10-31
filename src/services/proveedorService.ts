@@ -71,7 +71,9 @@ class ProveedorService {
 
   async getProveedoresActivos(): Promise<Proveedor[]> {
     const response = await apiService.get('/proveedores/activos');
-    return (response.data as any).data;
+    // El backend devuelve { success: true, data: proveedores }
+    // apiService.get ya extrae el .data, entonces tenemos { success: true, data: proveedores }
+    return (response as any)?.data || [];
   }
 }
 
