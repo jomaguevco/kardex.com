@@ -655,7 +655,9 @@ function ComprasContent() {
                         padding: '8px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        backgroundColor: 'white',
+                        color: '#111827'
                       }}
                     />
                   </div>
@@ -698,7 +700,9 @@ function ComprasContent() {
                         padding: '8px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        backgroundColor: 'white',
+                        color: '#111827'
                       }}
                     />
                     
@@ -713,7 +717,9 @@ function ComprasContent() {
                         padding: '8px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        backgroundColor: 'white',
+                        color: '#111827'
                       }}
                     />
                     
@@ -741,41 +747,41 @@ function ComprasContent() {
                   {formData.detalles.length > 0 && (
                     <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead style={{ backgroundColor: '#f9fafb' }}>
+                        <thead style={{ backgroundColor: '#f3f4f6' }}>
                           <tr>
-                            <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: '12px', fontWeight: '600' }}>
+                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
                               Producto
                             </th>
-                            <th style={{ padding: '8px 12px', textAlign: 'center', fontSize: '12px', fontWeight: '600' }}>
+                            <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
                               Cantidad
                             </th>
-                            <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: '12px', fontWeight: '600' }}>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
                               Precio Unit.
                             </th>
-                            <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: '12px', fontWeight: '600' }}>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
                               Subtotal
                             </th>
-                            <th style={{ padding: '8px 12px', textAlign: 'center', fontSize: '12px', fontWeight: '600' }}>
+                            <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
                               Acciones
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           {formData.detalles.map((detalle, index) => (
-                            <tr key={index} style={{ borderTop: '1px solid #e5e7eb' }}>
-                              <td style={{ padding: '8px 12px', fontSize: '14px' }}>
+                            <tr key={index} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                              <td style={{ padding: '12px', fontSize: '14px', color: '#111827', fontWeight: '500' }}>
                                 {getProductoNombre(detalle)}
                               </td>
-                              <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: '14px' }}>
+                              <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#374151' }}>
                                 {detalle.cantidad}
                               </td>
-                              <td style={{ padding: '8px 12px', textAlign: 'right', fontSize: '14px' }}>
+                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#374151' }}>
                                 ${Number(detalle.precio_unitario).toFixed(2)}
                               </td>
-                              <td style={{ padding: '8px 12px', textAlign: 'right', fontSize: '14px' }}>
+                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#111827', fontWeight: '600' }}>
                                 ${(Number(detalle.cantidad) * Number(detalle.precio_unitario)).toFixed(2)}
                               </td>
-                              <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                              <td style={{ padding: '12px', textAlign: 'center' }}>
                                 <button
                                   type="button"
                                   onClick={() => removeDetalle(index)}
@@ -783,10 +789,11 @@ function ComprasContent() {
                                     backgroundColor: '#ef4444',
                                     color: 'white',
                                     border: 'none',
-                                    padding: '4px 8px',
+                                    padding: '6px 12px',
                                     borderRadius: '4px',
                                     cursor: 'pointer',
-                                    fontSize: '12px'
+                                    fontSize: '12px',
+                                    fontWeight: '500'
                                   }}
                                 >
                                   Eliminar
