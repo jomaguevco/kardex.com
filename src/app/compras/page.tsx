@@ -628,14 +628,14 @@ function ComprasContent() {
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white',
-                        color: '#111827',
+                        backgroundColor: 'white !important',
+                        color: '#000000 !important',
                         fontWeight: '500'
                       }}
                     >
-                      <option value={0} style={{ color: '#111827', backgroundColor: 'white' }}>Seleccionar proveedor</option>
+                      <option value={0} style={{ color: '#000000 !important', backgroundColor: 'white !important' }}>Seleccionar proveedor</option>
                       {proveedores.map((proveedor) => (
-                        <option key={proveedor.id} value={proveedor.id} style={{ color: '#111827', backgroundColor: 'white' }}>
+                        <option key={proveedor.id} value={proveedor.id} style={{ color: '#000000 !important', backgroundColor: 'white !important' }}>
                           {proveedor.nombre}
                         </option>
                       ))}
@@ -656,8 +656,8 @@ function ComprasContent() {
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white',
-                        color: '#111827'
+                        backgroundColor: 'white !important',
+                        color: '#000000 !important'
                       }}
                     />
                   </div>
@@ -677,14 +677,14 @@ function ComprasContent() {
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white',
-                        color: '#111827',
+                        backgroundColor: 'white !important',
+                        color: '#000000 !important',
                         fontWeight: '500'
                       }}
                     >
-                      <option value={0} style={{ color: '#111827', backgroundColor: 'white' }}>Seleccionar producto</option>
+                      <option value={0} style={{ color: '#000000 !important', backgroundColor: 'white !important' }}>Seleccionar producto</option>
                       {productos.map((producto) => (
-                        <option key={producto.id} value={producto.id} style={{ color: '#111827', backgroundColor: 'white' }}>
+                        <option key={producto.id} value={producto.id} style={{ color: '#000000 !important', backgroundColor: 'white !important' }}>
                           {producto.nombre} - ${Number(producto.precio_compra).toFixed(2)}
                         </option>
                       ))}
@@ -701,8 +701,8 @@ function ComprasContent() {
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white',
-                        color: '#111827'
+                        backgroundColor: 'white !important',
+                        color: '#000000 !important'
                       }}
                     />
                     
@@ -718,8 +718,8 @@ function ComprasContent() {
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white',
-                        color: '#111827'
+                        backgroundColor: 'white !important',
+                        color: '#000000 !important'
                       }}
                     />
                     
@@ -749,19 +749,19 @@ function ComprasContent() {
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead style={{ backgroundColor: '#f3f4f6' }}>
                           <tr>
-                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
+                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                               Producto
                             </th>
-                            <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
+                            <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                               Cantidad
                             </th>
-                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                               Precio Unit.
                             </th>
-                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                               Subtotal
                             </th>
-                            <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>
+                            <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                               Acciones
                             </th>
                           </tr>
@@ -769,16 +769,16 @@ function ComprasContent() {
                         <tbody>
                           {formData.detalles.map((detalle, index) => (
                             <tr key={index} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
-                              <td style={{ padding: '12px', fontSize: '14px', color: '#111827', fontWeight: '500' }}>
+                              <td style={{ padding: '12px', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
                                 {getProductoNombre(detalle)}
                               </td>
-                              <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#374151' }}>
+                              <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
                                 {detalle.cantidad}
                               </td>
-                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#374151' }}>
+                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
                                 ${Number(detalle.precio_unitario).toFixed(2)}
                               </td>
-                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#111827', fontWeight: '600' }}>
+                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '700' }}>
                                 ${(Number(detalle.cantidad) * Number(detalle.precio_unitario)).toFixed(2)}
                               </td>
                               <td style={{ padding: '12px', textAlign: 'center' }}>
