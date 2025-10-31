@@ -622,20 +622,21 @@ function ComprasContent() {
                       value={formData.proveedor_id}
                       onChange={(e) => setFormData({ ...formData, proveedor_id: Number(e.target.value) })}
                       required
+                      className="select-visible"
                       style={{
                         width: '100%',
                         padding: '8px 12px',
-                        border: '1px solid #d1d5db',
+                        border: '2px solid #000000',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white !important',
-                        color: '#000000 !important',
-                        fontWeight: '500'
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        fontWeight: '600'
                       }}
                     >
-                      <option value={0} style={{ color: '#000000 !important', backgroundColor: 'white !important' }}>Seleccionar proveedor</option>
+                      <option value={0} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '600' }}>Seleccionar proveedor</option>
                       {proveedores.map((proveedor) => (
-                        <option key={proveedor.id} value={proveedor.id} style={{ color: '#000000 !important', backgroundColor: 'white !important' }}>
+                        <option key={proveedor.id} value={proveedor.id} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '600' }}>
                           {proveedor.nombre}
                         </option>
                       ))}
@@ -653,11 +654,12 @@ function ComprasContent() {
                       style={{
                         width: '100%',
                         padding: '8px 12px',
-                        border: '1px solid #d1d5db',
+                        border: '2px solid #000000',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white !important',
-                        color: '#000000 !important'
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        fontWeight: '500'
                       }}
                     />
                   </div>
@@ -672,19 +674,20 @@ function ComprasContent() {
                     <select
                       value={nuevoDetalle.producto_id}
                       onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, producto_id: Number(e.target.value) })}
+                      className="select-visible"
                       style={{
                         padding: '8px 12px',
-                        border: '1px solid #d1d5db',
+                        border: '2px solid #000000',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white !important',
-                        color: '#000000 !important',
-                        fontWeight: '500'
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        fontWeight: '600'
                       }}
                     >
-                      <option value={0} style={{ color: '#000000 !important', backgroundColor: 'white !important' }}>Seleccionar producto</option>
+                      <option value={0} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '600' }}>Seleccionar producto</option>
                       {productos.map((producto) => (
-                        <option key={producto.id} value={producto.id} style={{ color: '#000000 !important', backgroundColor: 'white !important' }}>
+                        <option key={producto.id} value={producto.id} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '600' }}>
                           {producto.nombre} - ${Number(producto.precio_compra).toFixed(2)}
                         </option>
                       ))}
@@ -698,11 +701,12 @@ function ComprasContent() {
                       min="1"
                       style={{
                         padding: '8px 12px',
-                        border: '1px solid #d1d5db',
+                        border: '2px solid #000000',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white !important',
-                        color: '#000000 !important'
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        fontWeight: '500'
                       }}
                     />
                     
@@ -715,11 +719,12 @@ function ComprasContent() {
                       step="0.01"
                       style={{
                         padding: '8px 12px',
-                        border: '1px solid #d1d5db',
+                        border: '2px solid #000000',
                         borderRadius: '6px',
                         fontSize: '14px',
-                        backgroundColor: 'white !important',
-                        color: '#000000 !important'
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        fontWeight: '500'
                       }}
                     />
                     

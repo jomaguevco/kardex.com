@@ -127,3 +127,16 @@ a {
   @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
 }
 
+/* Asegurar visibilidad en selects */
+select.select-visible,
+select.select-visible option {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+select.select-visible:focus {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
