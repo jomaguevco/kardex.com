@@ -95,11 +95,17 @@ function VentasContent() {
         subtotal: detalle.subtotal || (detalle.cantidad * detalle.precio_unitario)
       }));
 
-      const ventaDataCompleto = {
+      // Limpiar campos vacíos antes de enviar
+      const ventaDataCompleto: any = {
         ...ventaData,
         detalles: detallesCompletos,
         numero_factura: ventaData.numero_factura || `FAC-${Date.now()}`
       };
+      
+      // Eliminar observaciones si está vacía
+      if (!ventaDataCompleto.observaciones || ventaDataCompleto.observaciones.trim() === '') {
+        delete ventaDataCompleto.observaciones;
+      }
 
       console.log('Enviando venta:', ventaDataCompleto);
       await ventaService.createVenta(ventaDataCompleto);
