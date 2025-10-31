@@ -957,9 +957,30 @@ function VentasContent() {
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
                       Estado
                     </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {selectedVenta.estado}
-                    </p>
+                    <select
+                      value={selectedVenta.estado}
+                      onChange={async (e) => {
+                        try {
+                          await ventaService.updateVenta(selectedVenta.id, { estado: e.target.value as any });
+                          setSelectedVenta({ ...selectedVenta, estado: e.target.value as any });
+                          loadData(); // Recargar lista
+                        } catch (err: any) {
+                          alert('Error al actualizar el estado: ' + (err.response?.data?.message || err.message));
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        backgroundColor: 'white'
+                      }}
+                    >
+                      <option value="PENDIENTE">PENDIENTE</option>
+                      <option value="PROCESADA">PROCESADA</option>
+                      <option value="ANULADA">ANULADA</option>
+                    </select>
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
