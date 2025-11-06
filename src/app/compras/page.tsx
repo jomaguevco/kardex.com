@@ -900,7 +900,32 @@ function ComprasContent() {
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
                       Estado
                     </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>{selectedCompra.estado}</p>
+                    <select
+                      value={selectedCompra.estado}
+                      onChange={async (e) => {
+                        try {
+                          await compraService.updateCompra(selectedCompra.id, { estado: e.target.value });
+                          setSelectedCompra(prev => prev ? { ...prev, estado: e.target.value } : null);
+                          loadData(); // Recargar lista
+                        } catch (err: any) {
+                          alert('Error al actualizar el estado: ' + (err.response?.data?.message || err.message));
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        backgroundColor: 'white',
+                        color: '#111827',
+                        fontWeight: '500'
+                      }}
+                    >
+                      <option value="PENDIENTE" style={{ color: '#111827', backgroundColor: 'white' }}>PENDIENTE</option>
+                      <option value="PROCESADA" style={{ color: '#111827', backgroundColor: 'white' }}>PROCESADA</option>
+                      <option value="ANULADA" style={{ color: '#111827', backgroundColor: 'white' }}>ANULADA</option>
+                    </select>
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
