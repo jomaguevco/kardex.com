@@ -1109,8 +1109,14 @@ function ComprasContent() {
                             <td className="table-cell-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', fontWeight: 500 }}>
                               ${Number(detalle.precio_unitario).toFixed(2)}
                             </td>
+                            <td className="table-cell-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', fontWeight: 500 }}>
+                              ${Number(detalle.descuento || 0).toFixed(2)}
+                            </td>
+                            <td className="table-cell-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', fontWeight: 600 }}>
+                              ${(Number(detalle.precio_unitario) - Number(detalle.descuento || 0)).toFixed(2)}
+                            </td>
                             <td className="table-cell-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', fontWeight: 700 }}>
-                              ${Number(detalle.subtotal || (detalle.cantidad * detalle.precio_unitario)).toFixed(2)}
+                              ${Number(detalle.subtotal || ((Number(detalle.precio_unitario) - Number(detalle.descuento || 0)) * Number(detalle.cantidad))).toFixed(2)}
                             </td>
                           </tr>
                         ))}
