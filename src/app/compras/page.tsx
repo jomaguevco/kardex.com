@@ -507,49 +507,60 @@ function ComprasContent() {
             }}>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead style={{ backgroundColor: '#f9fafb' }}>
+                <thead style={{ backgroundColor: '#f3f4f6' }}>
                   <tr>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                       Factura
                     </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                       Proveedor
                     </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                       Fecha
                     </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                       Total
                     </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                       Estado
                     </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                       Acciones
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {compras.map((compra) => (
-                    <tr key={compra.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
+                  {compras.map((compra, index) => (
+                    <tr key={compra.id} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
                         {compra.numero_factura}
                       </td>
-                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
+                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
                         {getProveedorNombre(compra)}
                       </td>
-                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
+                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
                         {new Date(compra.fecha_compra).toLocaleDateString()}
                       </td>
-                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                        ${Number(compra.total).toFixed(2)}
+                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#000000', fontWeight: '700', textAlign: 'right' }}>
+                        ${(() => {
+                          // Calcular total basándose en detalles si el total es 0
+                          if (Number(compra.total) === 0 && (compra as any).detalles && (compra as any).detalles.length > 0) {
+                            const detalles = (compra as any).detalles;
+                            const subtotalCalc = detalles.reduce((sum: number, det: any) => {
+                              return sum + (Number(det.cantidad) * Number(det.precio_unitario) - Number(det.descuento || 0));
+                            }, 0);
+                            const descuentoCalc = detalles.reduce((sum: number, det: any) => sum + Number(det.descuento || 0), 0);
+                            return (subtotalCalc - descuentoCalc + Number(compra.impuestos || 0)).toFixed(2);
+                          }
+                          return Number(compra.total).toFixed(2);
+                        })()}
                       </td>
                       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                         <span style={{
                           padding: '4px 8px',
                           borderRadius: '4px',
                           fontSize: '12px',
-                          fontWeight: '500',
+                          fontWeight: '600',
                           backgroundColor: compra.estado === 'PROCESADA' ? '#dcfce7' : 
                                           compra.estado === 'PENDIENTE' ? '#fef3c7' : '#fecaca',
                           color: compra.estado === 'PROCESADA' ? '#166534' : 
@@ -568,7 +579,8 @@ function ComprasContent() {
                             padding: '6px 12px',
                             borderRadius: '4px',
                             cursor: 'pointer',
-                            fontSize: '12px'
+                            fontSize: '12px',
+                            fontWeight: '600'
                           }}
                           onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#2563eb'}
                           onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = '#3b82f6'}
@@ -1023,36 +1035,36 @@ function ComprasContent() {
                 {selectedCompra.detalles && selectedCompra.detalles.length > 0 ? (
                   <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead style={{ backgroundColor: '#f9fafb' }}>
+                      <thead style={{ backgroundColor: '#f3f4f6' }}>
                         <tr>
-                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600' }}>
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                             Producto
                           </th>
-                          <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
+                          <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                             Cantidad
                           </th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600' }}>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                             Precio Unit.
                           </th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600' }}>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                             Subtotal
                           </th>
                         </tr>
                       </thead>
                       <tbody>
                         {selectedCompra.detalles.map((detalle, index) => (
-                          <tr key={index} style={{ borderTop: '1px solid #e5e7eb' }}>
-                            <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>
+                          <tr key={index} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
                               {getProductoNombre(detalle)}
                             </td>
-                            <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#111827' }}>
+                            <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
                               {detalle.cantidad}
                             </td>
-                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#111827' }}>
+                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
                               ${Number(detalle.precio_unitario).toFixed(2)}
                             </td>
-                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#111827' }}>
-                              ${Number(detalle.subtotal).toFixed(2)}
+                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '700' }}>
+                              ${Number(detalle.subtotal || (detalle.cantidad * detalle.precio_unitario)).toFixed(2)}
                             </td>
                           </tr>
                         ))}
