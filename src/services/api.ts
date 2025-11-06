@@ -50,8 +50,12 @@ class ApiService {
     );
   }
 
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T> | any> {
     const response = await this.api.get(url, config);
+    // Si es blob, retornar la respuesta completa
+    if (config?.responseType === 'blob') {
+      return response;
+    }
     return response.data;
   }
 

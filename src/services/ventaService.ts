@@ -39,5 +39,27 @@ export const ventaService = {
   async getClientes() {
     const response = await apiService.get('/ventas/clientes');
     return response.data!;
+  },
+
+  async downloadFacturaPDF(id: number): Promise<void> {
+    try {
+      const response = await apiService.get(`/ventas/${id}/pdf`, {
+        responseType: 'blob'
+      });
+      
+      // Crear un blob y descargarlo
+      const blob = new Blob([(response as any).data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `factura-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error('Error al descargar PDF:', error);
+      throw error;
+    }
   }
 };

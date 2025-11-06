@@ -1008,25 +1008,53 @@ function VentasContent() {
                   <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#111827' }}>
                     Productos Vendidos
                   </h3>
-                  <button
-                    type="button"
-                    onClick={handleReloadDetails}
-                    disabled={loadingDetails}
-                    style={{
-                      backgroundColor: loadingDetails ? '#9ca3af' : '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      cursor: loadingDetails ? 'not-allowed' : 'pointer',
-                      fontSize: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    {loadingDetails ? 'Cargando...' : '🔄 Recargar'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!selectedVenta) return;
+                        try {
+                          await ventaService.downloadFacturaPDF(selectedVenta.id);
+                        } catch (err: any) {
+                          alert('Error al descargar la factura: ' + (err.response?.data?.message || err.message));
+                        }
+                      }}
+                      style={{
+                        backgroundColor: '#10b981',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      📄 Descargar Factura PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleReloadDetails}
+                      disabled={loadingDetails}
+                      style={{
+                        backgroundColor: loadingDetails ? '#9ca3af' : '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        cursor: loadingDetails ? 'not-allowed' : 'pointer',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      {loadingDetails ? 'Cargando...' : '🔄 Recargar'}
+                    </button>
+                  </div>
                 </div>
                 
                 {loadingDetails ? (
