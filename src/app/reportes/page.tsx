@@ -5,7 +5,11 @@ import { reporteService } from '@/services/reporteService';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 
 export default function ReportesPage() {
-  return <ReportesContent />;
+  return (
+    <ProtectedRoute>
+      <ReportesContent />
+    </ProtectedRoute>
+  );
 }
 
 function ReportesContent() {
