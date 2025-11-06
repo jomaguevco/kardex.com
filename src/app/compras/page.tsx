@@ -685,104 +685,184 @@ function ComprasContent() {
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#111827' }}>
-                    Productos
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: '#111827' }}>
+                    Agregar Producto
                   </h3>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto', gap: '12px', marginBottom: '12px' }}>
-                    <select
-                      value={nuevoDetalle.producto_id}
-                      onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, producto_id: Number(e.target.value) })}
-                      className="select-visible"
-                      style={{
-                        padding: '8px 12px',
-                        border: '2px solid #000000',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        backgroundColor: '#ffffff',
-                        color: '#000000',
-                        fontWeight: '600'
-                      }}
-                    >
-                      <option value={0} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '600' }}>Seleccionar producto</option>
-                      {productos.map((producto) => (
-                        <option key={producto.id} value={producto.id} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '600' }}>
-                          {producto.nombre} - ${Number(producto.precio_compra).toFixed(2)}
-                        </option>
-                      ))}
-                    </select>
-                    
-                    <input
-                      type="number"
-                      placeholder="Cantidad"
-                      value={nuevoDetalle.cantidad}
-                      onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, cantidad: Number(e.target.value) })}
-                      min="1"
-                      style={{
-                        padding: '8px 12px',
-                        border: '2px solid #000000',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        backgroundColor: '#ffffff',
-                        color: '#000000',
-                        fontWeight: '500'
-                      }}
-                    />
-                    
-                    <input
-                      type="number"
-                      placeholder="Precio Compra"
-                      value={nuevoDetalle.precio_unitario}
-                      onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, precio_unitario: Number(e.target.value) })}
-                      min="0"
-                      step="0.01"
-                      style={{
-                        padding: '8px 12px',
-                        border: '2px solid #000000',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        backgroundColor: '#ffffff',
-                        color: '#000000',
-                        fontWeight: '500'
-                      }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="Descuento"
-                      value={nuevoDetalle.descuento}
-                      onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, descuento: Number(e.target.value) })}
-                      min="0"
-                      step="0.01"
-                      style={{
-                        padding: '8px 12px',
-                        border: '2px solid #000000',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        backgroundColor: '#ffffff',
-                        color: '#000000',
-                        fontWeight: '500'
-                      }}
-                    />
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', fontSize: '14px', fontWeight: '500', color: '#000000' }}>
-                      ${((Number(nuevoDetalle.precio_unitario) - Number(nuevoDetalle.descuento || 0)) * Number(nuevoDetalle.cantidad)).toFixed(2)}
+                  <div style={{ 
+                    backgroundColor: '#f9fafb', 
+                    padding: '16px', 
+                    borderRadius: '8px', 
+                    border: '1px solid #e5e7eb',
+                    marginBottom: '16px'
+                  }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr auto', gap: '16px', alignItems: 'end' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px', color: '#374151' }}>
+                          Producto *
+                        </label>
+                        <select
+                          value={nuevoDetalle.producto_id}
+                          onChange={(e) => {
+                            const producto = productos.find(p => p.id === Number(e.target.value));
+                            setNuevoDetalle({ 
+                              ...nuevoDetalle, 
+                              producto_id: Number(e.target.value),
+                              precio_unitario: producto ? Number(producto.precio_compra) : 0
+                            });
+                          }}
+                          className="select-visible"
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '2px solid #d1d5db',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            backgroundColor: '#ffffff',
+                            color: '#000000',
+                            fontWeight: '500',
+                            transition: 'border-color 0.2s'
+                          }}
+                          onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                          onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                        >
+                          <option value={0} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '500' }}>Seleccionar producto</option>
+                          {productos.map((producto) => (
+                            <option key={producto.id} value={producto.id} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '500' }}>
+                              {producto.nombre} - ${Number(producto.precio_compra).toFixed(2)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px', color: '#374151' }}>
+                          Cantidad *
+                        </label>
+                        <input
+                          type="number"
+                          value={nuevoDetalle.cantidad}
+                          onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, cantidad: Number(e.target.value) })}
+                          min="1"
+                          step="1"
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '2px solid #d1d5db',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            backgroundColor: '#ffffff',
+                            color: '#000000',
+                            fontWeight: '500',
+                            transition: 'border-color 0.2s'
+                          }}
+                          onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                          onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px', color: '#374151' }}>
+                          Precio Compra *
+                        </label>
+                        <input
+                          type="number"
+                          value={nuevoDetalle.precio_unitario}
+                          onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, precio_unitario: Number(e.target.value) })}
+                          min="0"
+                          step="0.01"
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '2px solid #d1d5db',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            backgroundColor: '#ffffff',
+                            color: '#000000',
+                            fontWeight: '500',
+                            transition: 'border-color 0.2s'
+                          }}
+                          onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                          onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px', color: '#374151' }}>
+                          Descuento
+                        </label>
+                        <input
+                          type="number"
+                          value={nuevoDetalle.descuento}
+                          onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, descuento: Number(e.target.value) })}
+                          min="0"
+                          step="0.01"
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '2px solid #d1d5db',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            backgroundColor: '#ffffff',
+                            color: '#000000',
+                            fontWeight: '500',
+                            transition: 'border-color 0.2s'
+                          }}
+                          onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                          onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px', color: '#374151' }}>
+                          Precio Total
+                        </label>
+                        <div style={{ 
+                          padding: '10px 12px',
+                          backgroundColor: '#eff6ff',
+                          border: '2px solid #bfdbfe',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          color: '#1d4ed8',
+                          textAlign: 'center'
+                        }}>
+                          ${((Number(nuevoDetalle.precio_unitario) - Number(nuevoDetalle.descuento || 0)) * Number(nuevoDetalle.cantidad)).toFixed(2)}
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                        <button
+                          type="button"
+                          onClick={addDetalle}
+                          disabled={!nuevoDetalle.producto_id || nuevoDetalle.cantidad <= 0 || nuevoDetalle.precio_unitario <= 0}
+                          style={{
+                            backgroundColor: nuevoDetalle.producto_id && nuevoDetalle.cantidad > 0 && nuevoDetalle.precio_unitario > 0 ? '#10b981' : '#9ca3af',
+                            color: 'white',
+                            border: 'none',
+                            padding: '10px 20px',
+                            borderRadius: '6px',
+                            cursor: nuevoDetalle.producto_id && nuevoDetalle.cantidad > 0 && nuevoDetalle.precio_unitario > 0 ? 'pointer' : 'not-allowed',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            transition: 'background-color 0.2s',
+                            whiteSpace: 'nowrap'
+                          }}
+                          onMouseOver={(e) => {
+                            if (nuevoDetalle.producto_id && nuevoDetalle.cantidad > 0 && nuevoDetalle.precio_unitario > 0) {
+                              e.currentTarget.style.backgroundColor = '#059669';
+                            }
+                          }}
+                          onMouseOut={(e) => {
+                            if (nuevoDetalle.producto_id && nuevoDetalle.cantidad > 0 && nuevoDetalle.precio_unitario > 0) {
+                              e.currentTarget.style.backgroundColor = '#10b981';
+                            }
+                          }}
+                        >
+                          ➕ Agregar
+                        </button>
+                      </div>
                     </div>
-                    
-                    <button
-                      type="button"
-                      onClick={addDetalle}
-                      style={{
-                        backgroundColor: '#10b981',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '14px'
-                      }}
-                    >
-                      Agregar
-                    </button>
                   </div>
 
                   {formData.detalles.length > 0 && (
