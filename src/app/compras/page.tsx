@@ -1005,8 +1005,10 @@ function ComprasContent() {
                     <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
                       ${(() => {
                         if (Number(selectedCompra.subtotal) === 0 && selectedCompra.detalles && selectedCompra.detalles.length > 0) {
+                          // Lógica: precio_real = precio_unitario - descuento, subtotal = precio_real * cantidad
                           return selectedCompra.detalles.reduce((sum: number, det: any) => {
-                            return sum + (Number(det.cantidad) * Number(det.precio_unitario) - Number(det.descuento || 0));
+                            const precioReal = Number(det.precio_unitario) - Number(det.descuento || 0);
+                            return sum + (precioReal * Number(det.cantidad));
                           }, 0).toFixed(2);
                         }
                         return Number(selectedCompra.subtotal).toFixed(2);
@@ -1020,7 +1022,8 @@ function ComprasContent() {
                     <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
                       ${(() => {
                         if (Number(selectedCompra.descuento) === 0 && selectedCompra.detalles && selectedCompra.detalles.length > 0) {
-                          return selectedCompra.detalles.reduce((sum: number, det: any) => sum + Number(det.descuento || 0), 0).toFixed(2);
+                          // Descuento total = suma de (descuento * cantidad) de cada detalle
+                          return selectedCompra.detalles.reduce((sum: number, det: any) => sum + (Number(det.descuento || 0) * Number(det.cantidad)), 0).toFixed(2);
                         }
                         return Number(selectedCompra.descuento).toFixed(2);
                       })()}
