@@ -1035,35 +1035,35 @@ function ComprasContent() {
                 {selectedCompra.detalles && selectedCompra.detalles.length > 0 ? (
                   <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead style={{ backgroundColor: '#f3f4f6' }}>
+                      <thead style={{ backgroundColor: '#ffffff !important' }}>
                         <tr>
-                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '700 !important', color: '#000000 !important', backgroundColor: '#ffffff !important', borderBottom: '2px solid #000000 !important' }}>
                             Producto
                           </th>
-                          <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
+                          <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '700 !important', color: '#000000 !important', backgroundColor: '#ffffff !important', borderBottom: '2px solid #000000 !important' }}>
                             Cantidad
                           </th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700 !important', color: '#000000 !important', backgroundColor: '#ffffff !important', borderBottom: '2px solid #000000 !important' }}>
                             Precio Unit.
                           </th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700 !important', color: '#000000 !important', backgroundColor: '#ffffff !important', borderBottom: '2px solid #000000 !important' }}>
                             Subtotal
                           </th>
                         </tr>
                       </thead>
                       <tbody>
                         {selectedCompra.detalles.map((detalle, index) => (
-                          <tr key={index} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
-                            <td style={{ padding: '12px', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
+                          <tr key={index} style={{ borderBottom: '1px solid #000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important' }}>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important', fontWeight: '600 !important' }}>
                               {getProductoNombre(detalle)}
                             </td>
-                            <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
+                            <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important', fontWeight: '500 !important' }}>
                               {detalle.cantidad}
                             </td>
-                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
+                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important', fontWeight: '500 !important' }}>
                               ${Number(detalle.precio_unitario).toFixed(2)}
                             </td>
-                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '700' }}>
+                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important', fontWeight: '700 !important' }}>
                               ${Number(detalle.subtotal || (detalle.cantidad * detalle.precio_unitario)).toFixed(2)}
                             </td>
                           </tr>
