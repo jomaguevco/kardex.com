@@ -14,5 +14,20 @@ export const authService = {
   async getProfile() {
     const response = await apiService.get('/auth/profile');
     return response;
+  },
+
+  async requestPasswordReset(email?: string, nombre_usuario?: string) {
+    const response = await apiService.post('/auth/forgot-password', { email, nombre_usuario });
+    return response;
+  },
+
+  async resetPassword(token: string, nueva_contrasena: string) {
+    const response = await apiService.post('/auth/reset-password', { token, nueva_contrasena });
+    return response;
+  },
+
+  async changePassword(contrasena_actual: string, nueva_contrasena: string) {
+    const response = await apiService.post('/auth/change-password', { contrasena_actual, nueva_contrasena });
+    return response;
   }
 };

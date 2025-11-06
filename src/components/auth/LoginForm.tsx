@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuthStore } from '@/store/authStore'
 import { Eye, EyeOff, Lock, User } from 'lucide-react'
+import Link from 'next/link'
 import toast from 'react-hot-toast'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
@@ -118,7 +119,13 @@ export default function LoginForm() {
         </button>
       </div>
 
-      <div className="text-center">
+      <div className="text-center space-y-2">
+        <Link
+          href="/forgot-password"
+          className="text-sm text-blue-600 hover:text-blue-500"
+        >
+          ¿Olvidaste tu contraseña?
+        </Link>
         <p className="text-sm text-gray-600">
           Usuario por defecto: <strong>admin</strong> / <strong>admin123</strong>
         </p>
