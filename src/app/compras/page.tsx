@@ -1081,10 +1081,16 @@ function ComprasContent() {
                             Cantidad
                           </th>
                           <th className="table-header-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: 700, color: '#000000', backgroundColor: '#ffffff', borderBottom: '2px solid #000000' }}>
-                            Precio Unit.
+                            Precio Compra
                           </th>
                           <th className="table-header-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: 700, color: '#000000', backgroundColor: '#ffffff', borderBottom: '2px solid #000000' }}>
-                            Subtotal
+                            Descuento
+                          </th>
+                          <th className="table-header-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: 700, color: '#000000', backgroundColor: '#ffffff', borderBottom: '2px solid #000000' }}>
+                            Precio Real
+                          </th>
+                          <th className="table-header-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: 700, color: '#000000', backgroundColor: '#ffffff', borderBottom: '2px solid #000000' }}>
+                            Precio Total
                           </th>
                         </tr>
                       </thead>
