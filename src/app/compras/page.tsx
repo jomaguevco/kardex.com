@@ -729,7 +729,7 @@ function ComprasContent() {
                           <option value={0} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '500' }}>Seleccionar producto</option>
                           {productos.map((producto) => (
                             <option key={producto.id} value={producto.id} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '500' }}>
-                              {producto.nombre} - ${Number(producto.precio_compra).toFixed(2)}
+                              {producto.nombre}
                             </option>
                           ))}
                         </select>
