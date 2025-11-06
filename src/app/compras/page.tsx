@@ -550,13 +550,14 @@ function ComprasContent() {
                       <td style={{ padding: '12px 16px', fontSize: '14px', color: '#000000', fontWeight: '700', textAlign: 'right' }}>
                         ${(() => {
                           // Calcular total basándose en detalles si el total es 0
+                          // Lógica: precio_real = precio_unitario - descuento, subtotal = precio_real * cantidad
                           if (Number(compra.total) === 0 && (compra as any).detalles && (compra as any).detalles.length > 0) {
                             const detalles = (compra as any).detalles;
                             const subtotalCalc = detalles.reduce((sum: number, det: any) => {
-                              return sum + (Number(det.cantidad) * Number(det.precio_unitario) - Number(det.descuento || 0));
+                              const precioReal = Number(det.precio_unitario) - Number(det.descuento || 0);
+                              return sum + (precioReal * Number(det.cantidad));
                             }, 0);
-                            const descuentoCalc = detalles.reduce((sum: number, det: any) => sum + Number(det.descuento || 0), 0);
-                            return (subtotalCalc - descuentoCalc + Number(compra.impuestos || 0)).toFixed(2);
+                            return (subtotalCalc + Number(compra.impuestos || 0)).toFixed(2);
                           }
                           return Number(compra.total).toFixed(2);
                         })()}
@@ -763,8 +764,8 @@ function ComprasContent() {
                       }}
                     />
                     
-                    <div style={{ display: 'flex', alignItems: 'center', fontSize: '14px', fontWeight: '500' }}>
-                      ${Number(nuevoDetalle.cantidad * nuevoDetalle.precio_unitario).toFixed(2)}
+                    <div style={{ display: 'flex', alignItems: 'center', fontSize: '14px', fontWeight: '500', color: '#000000' }}>
+                      ${((Number(nuevoDetalle.precio_unitario) - Number(nuevoDetalle.descuento || 0)) * Number(nuevoDetalle.cantidad)).toFixed(2)}
                     </div>
                     
                     <button
@@ -981,12 +982,13 @@ function ComprasContent() {
                     <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#111827' }}>
                       ${(() => {
                         // Calcular total basándose en detalles si el total es 0
+                        // Lógica: precio_real = precio_unitario - descuento, subtotal = precio_real * cantidad
                         if (Number(selectedCompra.total) === 0 && selectedCompra.detalles && selectedCompra.detalles.length > 0) {
                           const subtotalCalc = selectedCompra.detalles.reduce((sum: number, det: any) => {
-                            return sum + (Number(det.cantidad) * Number(det.precio_unitario) - Number(det.descuento || 0));
+                            const precioReal = Number(det.precio_unitario) - Number(det.descuento || 0);
+                            return sum + (precioReal * Number(det.cantidad));
                           }, 0);
-                          const descuentoCalc = selectedCompra.detalles.reduce((sum: number, det: any) => sum + Number(det.descuento || 0), 0);
-                          return (subtotalCalc - descuentoCalc + Number(selectedCompra.impuestos || 0)).toFixed(2);
+                          return (subtotalCalc + Number(selectedCompra.impuestos || 0)).toFixed(2);
                         }
                         return Number(selectedCompra.total).toFixed(2);
                       })()}
