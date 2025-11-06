@@ -1035,35 +1035,35 @@ function ComprasContent() {
                 {selectedCompra.detalles && selectedCompra.detalles.length > 0 ? (
                   <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead style={{ backgroundColor: '#ffffff !important' }}>
+                      <thead style={{ backgroundColor: '#ffffff' }}>
                         <tr>
-                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '700 !important', color: '#000000 !important', backgroundColor: '#ffffff !important', borderBottom: '2px solid #000000 !important' }}>
+                          <th className="table-header-visible" style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: 700, color: '#000000', backgroundColor: '#ffffff', borderBottom: '2px solid #000000' }}>
                             Producto
                           </th>
-                          <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '700 !important', color: '#000000 !important', backgroundColor: '#ffffff !important', borderBottom: '2px solid #000000 !important' }}>
+                          <th className="table-header-visible" style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: 700, color: '#000000', backgroundColor: '#ffffff', borderBottom: '2px solid #000000' }}>
                             Cantidad
                           </th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700 !important', color: '#000000 !important', backgroundColor: '#ffffff !important', borderBottom: '2px solid #000000 !important' }}>
+                          <th className="table-header-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: 700, color: '#000000', backgroundColor: '#ffffff', borderBottom: '2px solid #000000' }}>
                             Precio Unit.
                           </th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700 !important', color: '#000000 !important', backgroundColor: '#ffffff !important', borderBottom: '2px solid #000000 !important' }}>
+                          <th className="table-header-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: 700, color: '#000000', backgroundColor: '#ffffff', borderBottom: '2px solid #000000' }}>
                             Subtotal
                           </th>
                         </tr>
                       </thead>
                       <tbody>
                         {selectedCompra.detalles.map((detalle, index) => (
-                          <tr key={index} style={{ borderBottom: '1px solid #000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important' }}>
-                            <td style={{ padding: '12px', fontSize: '14px', color: '#000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important', fontWeight: '600 !important' }}>
+                          <tr key={index} className="table-row-visible" style={{ borderBottom: '1px solid #000000', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                            <td className="table-cell-visible" style={{ padding: '12px', fontSize: '14px', color: '#000000', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', fontWeight: 600 }}>
                               {getProductoNombre(detalle)}
                             </td>
-                            <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important', fontWeight: '500 !important' }}>
+                            <td className="table-cell-visible" style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#000000', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', fontWeight: 500 }}>
                               {detalle.cantidad}
                             </td>
-                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important', fontWeight: '500 !important' }}>
+                            <td className="table-cell-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', fontWeight: 500 }}>
                               ${Number(detalle.precio_unitario).toFixed(2)}
                             </td>
-                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000 !important', backgroundColor: index % 2 === 0 ? '#ffffff !important' : '#f9fafb !important', fontWeight: '700 !important' }}>
+                            <td className="table-cell-visible" style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb', fontWeight: 700 }}>
                               ${Number(detalle.subtotal || (detalle.cantidad * detalle.precio_unitario)).toFixed(2)}
                             </td>
                           </tr>

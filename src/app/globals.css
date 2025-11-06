@@ -141,22 +141,26 @@ select.select-visible:focus {
 }
 
 /* Forzar visibilidad en tablas de compras */
-table thead th {
+.table-header-visible {
   color: #000000 !important;
   background-color: #ffffff !important;
   font-weight: 700 !important;
 }
 
-table tbody td {
+.table-cell-visible {
   color: #000000 !important;
   font-weight: 500 !important;
 }
 
-table tbody tr {
+.table-row-visible {
   background-color: #ffffff !important;
 }
 
-table tbody tr:nth-child(even) {
+.table-row-visible:nth-child(even) {
+  background-color: #f9fafb !important;
+}
+
+.table-row-visible:nth-child(even) .table-cell-visible {
   background-color: #f9fafb !important;
 }
 
