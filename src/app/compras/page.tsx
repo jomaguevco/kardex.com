@@ -557,7 +557,7 @@ function ComprasContent() {
                               const precioReal = Number(det.precio_unitario) - Number(det.descuento || 0);
                               return sum + (precioReal * Number(det.cantidad));
                             }, 0);
-                            return (subtotalCalc + Number(compra.impuestos || 0)).toFixed(2);
+                            return subtotalCalc.toFixed(2);
                           }
                           return Number(compra.total).toFixed(2);
                         })()}
@@ -988,7 +988,7 @@ function ComprasContent() {
                             const precioReal = Number(det.precio_unitario) - Number(det.descuento || 0);
                             return sum + (precioReal * Number(det.cantidad));
                           }, 0);
-                          return (subtotalCalc + Number(selectedCompra.impuestos || 0)).toFixed(2);
+                          return subtotalCalc.toFixed(2);
                         }
                         return Number(selectedCompra.total).toFixed(2);
                       })()}
@@ -1028,12 +1028,6 @@ function ComprasContent() {
                         return Number(selectedCompra.descuento).toFixed(2);
                       })()}
                     </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', marginBottom: '4px', color: '#6b7280' }}>
-                      Impuestos
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>${Number(selectedCompra.impuestos || 0).toFixed(2)}</p>
                   </div>
                 </div>
                 
