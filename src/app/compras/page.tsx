@@ -27,7 +27,8 @@ function ComprasContent() {
   const [nuevoDetalle, setNuevoDetalle] = useState({
     producto_id: 0,
     cantidad: 1,
-    precio_unitario: 0
+    precio_unitario: 0,
+    descuento: 0
   });
 
   useEffect(() => {
@@ -98,7 +99,7 @@ function ComprasContent() {
         ...formData,
         detalles: [...formData.detalles, nuevoDetalle]
       });
-      setNuevoDetalle({ producto_id: 0, cantidad: 1, precio_unitario: 0 });
+      setNuevoDetalle({ producto_id: 0, cantidad: 1, precio_unitario: 0, descuento: 0 });
     }
   };
 
@@ -141,7 +142,12 @@ function ComprasContent() {
   };
 
   const calcularTotalCompra = (detalles: any[]) => {
-    return detalles.reduce((sum, detalle) => sum + (detalle.cantidad * detalle.precio_unitario), 0);
+    // Lógica del profesor: precio_real = precio_unitario - descuento, subtotal = precio_real * cantidad
+    return detalles.reduce((sum, detalle) => {
+      const precioReal = Number(detalle.precio_unitario) - Number(detalle.descuento || 0);
+      const subtotalDetalle = precioReal * Number(detalle.cantidad);
+      return sum + subtotalDetalle;
+    }, 0);
   };
 
   const handleViewDetails = (compra: Compra) => {
@@ -724,9 +730,26 @@ function ComprasContent() {
                     
                     <input
                       type="number"
-                      placeholder="Precio Unit."
+                      placeholder="Precio Compra"
                       value={nuevoDetalle.precio_unitario}
                       onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, precio_unitario: Number(e.target.value) })}
+                      min="0"
+                      step="0.01"
+                      style={{
+                        padding: '8px 12px',
+                        border: '2px solid #000000',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        backgroundColor: '#ffffff',
+                        color: '#000000',
+                        fontWeight: '500'
+                      }}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Descuento"
+                      value={nuevoDetalle.descuento}
+                      onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, descuento: Number(e.target.value) })}
                       min="0"
                       step="0.01"
                       style={{
@@ -773,10 +796,16 @@ function ComprasContent() {
                               Cantidad
                             </th>
                             <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
-                              Precio Unit.
+                              Precio Compra
                             </th>
                             <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
-                              Subtotal
+                              Descuento
+                            </th>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
+                              Precio Real
+                            </th>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
+                              Precio Total
                             </th>
                             <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#000000', borderBottom: '2px solid #e5e7eb' }}>
                               Acciones
@@ -795,8 +824,14 @@ function ComprasContent() {
                               <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
                                 ${Number(detalle.precio_unitario).toFixed(2)}
                               </td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '500' }}>
+                                ${Number(detalle.descuento || 0).toFixed(2)}
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '600' }}>
+                                ${(Number(detalle.precio_unitario) - Number(detalle.descuento || 0)).toFixed(2)}
+                              </td>
                               <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#000000', fontWeight: '700' }}>
-                                ${(Number(detalle.cantidad) * Number(detalle.precio_unitario)).toFixed(2)}
+                                ${((Number(detalle.precio_unitario) - Number(detalle.descuento || 0)) * Number(detalle.cantidad)).toFixed(2)}
                               </td>
                               <td style={{ padding: '12px', textAlign: 'center' }}>
                                 <button
