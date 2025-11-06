@@ -931,7 +931,19 @@ function ComprasContent() {
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
                       Total
                     </label>
-                    <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#111827' }}>${Number(selectedCompra.total).toFixed(2)}</p>
+                    <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#111827' }}>
+                      ${(() => {
+                        // Calcular total basándose en detalles si el total es 0
+                        if (Number(selectedCompra.total) === 0 && selectedCompra.detalles && selectedCompra.detalles.length > 0) {
+                          const subtotalCalc = selectedCompra.detalles.reduce((sum: number, det: any) => {
+                            return sum + (Number(det.cantidad) * Number(det.precio_unitario) - Number(det.descuento || 0));
+                          }, 0);
+                          const descuentoCalc = selectedCompra.detalles.reduce((sum: number, det: any) => sum + Number(det.descuento || 0), 0);
+                          return (subtotalCalc - descuentoCalc + Number(selectedCompra.impuestos || 0)).toFixed(2);
+                        }
+                        return Number(selectedCompra.total).toFixed(2);
+                      })()}
+                    </p>
                   </div>
                 </div>
                 
@@ -941,19 +953,35 @@ function ComprasContent() {
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', marginBottom: '4px', color: '#6b7280' }}>
                       Subtotal
                     </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>${Number(selectedCompra.subtotal).toFixed(2)}</p>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
+                      ${(() => {
+                        if (Number(selectedCompra.subtotal) === 0 && selectedCompra.detalles && selectedCompra.detalles.length > 0) {
+                          return selectedCompra.detalles.reduce((sum: number, det: any) => {
+                            return sum + (Number(det.cantidad) * Number(det.precio_unitario) - Number(det.descuento || 0));
+                          }, 0).toFixed(2);
+                        }
+                        return Number(selectedCompra.subtotal).toFixed(2);
+                      })()}
+                    </p>
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', marginBottom: '4px', color: '#6b7280' }}>
                       Descuento
                     </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>${Number(selectedCompra.descuento).toFixed(2)}</p>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
+                      ${(() => {
+                        if (Number(selectedCompra.descuento) === 0 && selectedCompra.detalles && selectedCompra.detalles.length > 0) {
+                          return selectedCompra.detalles.reduce((sum: number, det: any) => sum + Number(det.descuento || 0), 0).toFixed(2);
+                        }
+                        return Number(selectedCompra.descuento).toFixed(2);
+                      })()}
+                    </p>
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', marginBottom: '4px', color: '#6b7280' }}>
                       Impuestos
                     </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>${Number(selectedCompra.impuestos).toFixed(2)}</p>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>${Number(selectedCompra.impuestos || 0).toFixed(2)}</p>
                   </div>
                 </div>
                 
