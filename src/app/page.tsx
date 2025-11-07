@@ -53,7 +53,7 @@ export default function HomePage() {
             color: '#111827',
             margin: '0 0 8px 0'
           }}>
-            Sistema de Ventas KARDEX
+            Sistema de Ventas KARDEX · Demo en vivo
           </h2>
           <p style={{
             fontSize: '14px',
