@@ -1,0 +1,33 @@
+<svg width="640" height="560" viewBox="0 0 640 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="640" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F46E5" />
+      <stop offset="1" stop-color="#22C55E" />
+    </linearGradient>
+    <linearGradient id="bubble" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EEF2FF" />
+      <stop offset="1" stop-color="#E0F2FE" />
+    </linearGradient>
+    <linearGradient id="bubble2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F5F3FF" />
+      <stop offset="1" stop-color="#DBEAFE" />
+    </linearGradient>
+    <linearGradient id="bubble3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#DCFCE7" />
+      <stop offset="1" stop-color="#E0F2FE" />
+    </linearGradient>
+  </defs>
+  <rect x="40" y="40" width="560" height="400" rx="48" fill="url(#gradient)" opacity="0.12"/>
+  <rect x="80" y="100" width="480" height="320" rx="36" fill="white" opacity="0.9"/>
+  <rect x="120" y="140" width="400" height="80" rx="18" fill="url(#bubble)" opacity="0.9"/>
+  <rect x="120" y="240" width="260" height="60" rx="16" fill="url(#bubble2)" opacity="0.85"/>
+  <rect x="120" y="320" width="320" height="60" rx="16" fill="url(#bubble3)" opacity="0.85"/>
+  <circle cx="520" cy="120" r="32" fill="#C7D2FE" opacity="0.8"/>
+  <circle cx="160" cy="420" r="24" fill="#DCFCE7" opacity="0.9"/>
+  <circle cx="520" cy="360" r="18" fill="#BFDBFE" opacity="0.9"/>
+  <path d="M220 190C220 174.536 232.536 162 248 162H348C363.464 162 376 174.536 376 190C376 205.464 363.464 218 348 218H248C232.536 218 220 205.464 220 190Z" fill="url(#gradient)" opacity="0.25"/>
+  <path d="M220 286C220 270.536 232.536 258 248 258H300C315.464 258 328 270.536 328 286C328 301.464 315.464 314 300 314H248C232.536 314 220 301.464 220 286Z" fill="url(#gradient)" opacity="0.2"/>
+  <path d="M220 364C220 348.536 232.536 336 248 336H360C375.464 336 388 348.536 388 364C388 379.464 375.464 392 360 392H248C232.536 392 220 379.464 220 364Z" fill="url(#gradient)" opacity="0.2"/>
+  <circle cx="540" cy="420" r="64" fill="url(#gradient)" opacity="0.15"/>
+</svg>
+

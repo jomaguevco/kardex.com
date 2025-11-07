@@ -277,6 +277,20 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface MonitoreoTransaccion {
+  id: number;
+  modulo: string;
+  accion: string;
+  referencia?: string;
+  estado: 'EXITO' | 'ERROR';
+  mensaje?: string;
+  request_id?: string;
+  payload?: Record<string, unknown> | null;
+  iniciado_en: string;
+  completado_en?: string | null;
+  duracion_ms?: number | null;
+}
+
 export interface PaginatedResponse<T> {
   success: boolean;
   data: {

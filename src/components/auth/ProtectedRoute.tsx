@@ -46,14 +46,16 @@ export default function ProtectedRoute({ children, requiredRoles }: ProtectedRou
   // Mostrar loading mientras verifica autenticación
   if (isLoading || !hasCheckedAuth) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#f9fafb'
-      }}>
-        <div>Cargando...</div>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-indigo-50 to-emerald-50">
+        <div className="glass-card flex flex-col items-center rounded-3xl px-8 py-10 text-center shadow-xl">
+          <span className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-600">
+            ⏳
+          </span>
+          <p className="text-base font-medium text-slate-700">Verificando tu sesión...</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Estamos asegurándonos de que tengas acceso al módulo seleccionado.
+          </p>
+        </div>
       </div>
     )
   }

@@ -1,0 +1,29 @@
+<svg width="720" height="480" viewBox="0 0 720 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dashGradient" x1="80" y1="40" x2="640" y2="440" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB" />
+      <stop offset="1" stop-color="#7C3AED" />
+    </linearGradient>
+    <linearGradient id="dashGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EEF2FF" />
+      <stop offset="1" stop-color="#E0E7FF" />
+    </linearGradient>
+    <linearGradient id="dashCard" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#DBEAFE" />
+      <stop offset="1" stop-color="#C7D2FE" />
+    </linearGradient>
+  </defs>
+  <rect x="60" y="40" width="600" height="360" rx="48" fill="url(#dashGradient)" opacity="0.18"/>
+  <rect x="100" y="90" width="520" height="280" rx="36" fill="white" opacity="0.92"/>
+  <rect x="140" y="130" width="200" height="60" rx="18" fill="url(#dashGlow)" opacity="0.9"/>
+  <rect x="360" y="130" width="200" height="160" rx="24" fill="url(#dashCard)" opacity="0.85"/>
+  <path d="M180 240H320C333.255 240 344 250.745 344 264V320C344 333.255 333.255 344 320 344H180C166.745 344 156 333.255 156 320V264C156 250.745 166.745 240 180 240Z" fill="url(#dashGradient)" opacity="0.22"/>
+  <path d="M388 166C388 157.163 395.163 150 404 150H536C544.837 150 552 157.163 552 166V198C552 206.837 544.837 214 536 214H404C395.163 214 388 206.837 388 198V166Z" fill="white" opacity="0.65"/>
+  <path d="M404 230H520C530.493 230 539 238.507 539 249C539 259.493 530.493 268 520 268H404C393.507 268 385 259.493 385 249C385 238.507 393.507 230 404 230Z" fill="white" opacity="0.65"/>
+  <circle cx="520" cy="330" r="40" fill="#A855F7" opacity="0.4"/>
+  <circle cx="180" cy="180" r="28" fill="#22D3EE" opacity="0.45"/>
+  <circle cx="280" cy="200" r="18" fill="#F97316" opacity="0.65"/>
+  <circle cx="140" cy="330" r="22" fill="#34D399" opacity="0.6"/>
+  <circle cx="584" cy="120" r="36" fill="#60A5FA" opacity="0.4"/>
+</svg>
+
