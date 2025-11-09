@@ -72,11 +72,12 @@ function ComprasContent() {
   return (
     <div className="space-y-8 pb-12 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 px-6 py-10 text-white shadow-xl">
-        <div className="absolute -right-20 top-1/2 hidden h-72 w-72 -translate-y-1/2 rounded-full bg-white/20 blur-3xl lg:block" />
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <div className="absolute -right-12 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-3xl lg:block" />
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           <div className="space-y-6">
-            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
-              <Sparkles className="mr-2 h-3.5 w-3.5" /> Compras inteligentes
+            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+              Compras inteligentes
             </span>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
               Controla tus abastecimientos con una interfaz alineada al dashboard
