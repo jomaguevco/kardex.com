@@ -86,12 +86,13 @@ function KardexContent() {
   return (
     <div className="space-y-8 pb-12 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 px-6 py-10 text-white shadow-xl">
+        <div className="absolute -left-16 top-16 hidden h-60 w-60 rounded-full bg-white/20 blur-3xl lg:block" />
         <div className="absolute -right-20 top-1/2 hidden h-72 w-72 -translate-y-1/2 rounded-full bg-white/15 blur-3xl lg:block" />
+
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div className="space-y-6">
-            <span className="inline-flex items-center rounded-full bg-white/25 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
-              <Sparkles className="mr-2 h-3.5 w-3.5" />
-              Control de inventario en vivo
+            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" /> Control de inventario en vivo
             </span>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
               Consulta movimientos de inventario con la misma estética refinada del dashboard
@@ -99,8 +100,16 @@ function KardexContent() {
             <p className="max-w-xl text-sm text-white/80 sm:text-base">
               Filtra por producto, obtén resúmenes y visualiza el historial KARDEX para tomar decisiones rápidas sobre stock, compras y transferencias.
             </p>
-            <div className="inline-flex items-center rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white/90">
-              <PackageSearch className="mr-2 h-4 w-4" /> Integrado con reportes y el módulo de productos
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                onClick={() => router.push('/productos')}
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-purple-600 shadow-lg shadow-purple-900/20 transition hover:-translate-y-0.5 hover:shadow-xl"
+              >
+                <ArrowUpRight className="h-4 w-4" /> Administrar productos
+              </button>
+              <div className="inline-flex items-center rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white/90">
+                <PackageSearch className="mr-2 h-4 w-4" /> Integrado con reportes y productos
+              </div>
             </div>
           </div>
 

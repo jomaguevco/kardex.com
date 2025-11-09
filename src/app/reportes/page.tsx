@@ -141,7 +141,7 @@ function ReportesContent() {
         <div className="absolute -right-14 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/20 blur-3xl lg:block" />
         <div className="space-y-6 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
           <div className="space-y-6">
-            <span className="inline-flex items-center rounded-full bg-white/25 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
               <Sparkles className="mr-2 h-3.5 w-3.5" /> Inteligencia comercial
             </span>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">

@@ -82,11 +82,10 @@ function VentasContent() {
         <div className="absolute -left-16 top-16 hidden h-60 w-60 rounded-full bg-white/20 blur-3xl lg:block" />
         <div className="absolute -right-20 bottom-[-40px] hidden h-72 w-72 rounded-full bg-white/15 blur-3xl lg:block" />
 
-        <div className="space-y-6 lg:grid lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           <div className="space-y-6">
             <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
-              <Sparkles className="mr-2 h-3.5 w-3.5" />
-              Ventas dinámicas
+              <Sparkles className="mr-2 h-3.5 w-3.5" /> Ventas dinámicas
             </span>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
               Potencia tu ciclo comercial con una vista moderna y acciones rápidas

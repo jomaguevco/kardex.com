@@ -75,14 +75,13 @@ function ComprasContent() {
         <div className="absolute -right-20 top-1/2 hidden h-72 w-72 -translate-y-1/2 rounded-full bg-white/20 blur-3xl lg:block" />
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div className="space-y-6">
-            <span className="inline-flex items-center rounded-full bg-white/25 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
-              <Sparkles className="mr-2 h-3.5 w-3.5" />
-              Compras inteligentes
+            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" /> Compras inteligentes
             </span>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
               Controla tus abastecimientos con una interfaz alineada al dashboard
             </h1>
-            <p className="max-w-xl text-sm text-white/85 sm:text-base">
+            <p className="max-w-xl text-sm text-white/80 sm:text-base">
               Visualiza proveedores, estados y montos con la misma experiencia refinada del resto del sistema. Así mantienes inventarios saludables y decisiones rápidas.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

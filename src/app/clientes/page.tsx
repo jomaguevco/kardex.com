@@ -157,15 +157,14 @@ function ClientesContent() {
         <div className="absolute -right-16 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/20 blur-3xl lg:block" />
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div className="space-y-6">
-            <span className="inline-flex items-center rounded-full bg-white/25 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
-              <Sparkles className="mr-2 h-3.5 w-3.5" />
-              Gestión de clientes
+            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" /> Experiencia centrada en clientes
             </span>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
-              Construye relaciones sólidas con una vista moderna y consistente
+              Gestiona tu cartera de clientes con un diseño refinado y coherente
             </h1>
-            <p className="max-w-xl text-sm text-white/85 sm:text-base">
-              Centraliza tus clientes, controla documentos y contactos clave, y responde más rápido con una experiencia alineada al dashboard principal.
+            <p className="max-w-xl text-sm text-white/80 sm:text-base">
+              Registra datos, contactos y seguimientos en una interfaz alineada al dashboard. Simplifica tus operaciones comerciales y satisface a tus clientes con procesos claros.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <button
@@ -174,17 +173,27 @@ function ClientesContent() {
               >
                 <Plus className="mr-2 h-4 w-4" /> Nuevo cliente
               </button>
-              <div className="inline-flex items-center rounded-xl border border-white/45 px-5 py-3 text-sm font-semibold text-white/90">
+              <div className="inline-flex items-center rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white/90">
                 <Users className="mr-2 h-4 w-4" /> {resumenEstado.total} clientes registrados
               </div>
             </div>
           </div>
 
           <div className="rounded-3xl bg-white/15 p-6 backdrop-blur-md">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <ResumenCard titulo="Clientes activos" valor={resumenEstado.activos} color="text-emerald-100" />
-              <ResumenCard titulo="Juridicos" valor={resumenEstado.juridicos} color="text-sky-100" />
-              <ResumenCard titulo="Nuevos últimos 30d" valor={clientes.slice(-5).length} color="text-indigo-100" />
+            <div className="space-y-3 text-sm text-white/85">
+              <p className="font-semibold uppercase tracking-wide text-white">Resumen del directorio</p>
+              <div className="flex items-center justify-between rounded-2xl bg-white/10 p-3">
+                <span>Activos</span>
+                <span className="font-semibold">{resumenEstado.activos}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl bg-white/10 p-3">
+                <span>Personas jurídicas</span>
+                <span className="font-semibold">{resumenEstado.juridicos}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl bg-white/10 p-3">
+                <span>Última actualización</span>
+                <span className="font-semibold">Hace unos minutos</span>
+              </div>
             </div>
           </div>
         </div>
