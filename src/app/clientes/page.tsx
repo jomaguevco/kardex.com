@@ -1,1042 +1,550 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { clienteService, Cliente, CreateClienteData } from '@/services/clienteService';
-import ProtectedRoute from '../../components/auth/ProtectedRoute';
+import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
+import { Sparkles, Users, Plus, Search, Phone, Mail, Building2, MapPin, X } from 'lucide-react'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import Layout from '@/components/layout/Layout'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { clienteService, Cliente, CreateClienteData } from '@/services/clienteService'
+
+const initialFormState: CreateClienteData = {
+  nombre: '',
+  numero_documento: '',
+  tipo_documento: 'DNI',
+  direccion: '',
+  telefono: '',
+  email: '',
+  contacto: '',
+  tipo_cliente: 'NATURAL'
+}
+
+const tipoClienteOptions = [
+  { value: 'NATURAL', label: 'Persona natural' },
+  { value: 'JURIDICA', label: 'Persona jurídica' }
+] as const
+
+const tipoDocumentoOptions = [
+  { value: 'DNI', label: 'DNI' },
+  { value: 'RUC', label: 'RUC' },
+  { value: 'CE', label: 'Carné de extranjería' },
+  { value: 'PASAPORTE', label: 'Pasaporte' }
+] as const
 
 export default function ClientesPage() {
-  return <ClientesContent />;
+  return (
+    <ProtectedRoute>
+      <Layout>
+        <ClientesContent />
+      </Layout>
+    </ProtectedRoute>
+  )
 }
 
 function ClientesContent() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [formData, setFormData] = useState<CreateClienteData>({
-    nombre: '',
-    numero_documento: '',
-    tipo_documento: 'DNI',
-    direccion: '',
-    telefono: '',
-    email: '',
-    contacto: '',
-    tipo_cliente: 'NATURAL'
-  });
+  const queryClient = useQueryClient()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState<CreateClienteData>(initialFormState)
+  const [editingCliente, setEditingCliente] = useState<Cliente | null>(null)
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
 
-  useEffect(() => {
-    loadClientes();
-  }, []);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['clientes', searchTerm],
+    queryFn: () =>
+      clienteService.getClientes({
+        limit: 200,
+        search: searchTerm.trim() || undefined
+      })
+  })
 
-  const loadClientes = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await clienteService.getClientes({ limit: 100 });
-      setClientes(response.clientes || []);
-    } catch (err: any) {
-      console.error('Error al cargar clientes:', err);
-      setError(err.message || 'Error al cargar clientes');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const clientes = data?.clientes || []
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      setError(null);
+  const resumenEstado = useMemo(() => {
+    const total = clientes.length
+    const activos = clientes.filter((cliente) => cliente.activo).length
+    const juridicos = clientes.filter((cliente) => cliente.tipo_cliente === 'JURIDICA').length
+    return { total, activos, juridicos }
+  }, [clientes])
 
-      if (editingCliente) {
-        await clienteService.updateCliente(editingCliente.id, formData);
-      } else {
-        await clienteService.createCliente(formData);
-      }
+  const handleInputChange = (field: keyof CreateClienteData) => (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const value = event.target.value
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
 
-      setShowModal(false);
-      setEditingCliente(null);
-      resetForm();
-      loadClientes();
-    } catch (err: any) {
-      console.error('Error al guardar cliente:', err);
-      setError(err.message || 'Error al guardar cliente');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleCreateCliente = () => {
+    setEditingCliente(null)
+    setFormData(initialFormState)
+    setIsModalOpen(true)
+  }
 
-  const handleEdit = (cliente: Cliente) => {
-    setEditingCliente(cliente);
+  const handleEditCliente = (cliente: Cliente) => {
+    setEditingCliente(cliente)
     setFormData({
       nombre: cliente.nombre,
       numero_documento: cliente.numero_documento,
       tipo_documento: cliente.tipo_documento,
-      direccion: cliente.direccion || '',
-      telefono: cliente.telefono || '',
-      email: cliente.email || '',
-      contacto: cliente.contacto || '',
+      direccion: cliente.direccion ?? '',
+      telefono: cliente.telefono ?? '',
+      email: cliente.email ?? '',
+      contacto: cliente.contacto ?? '',
       tipo_cliente: cliente.tipo_cliente
-    });
-    setShowModal(true);
-  };
+    })
+    setIsModalOpen(true)
+  }
 
-  const handleDelete = async (id: number) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
-      try {
-        setLoading(true);
-        await clienteService.deleteCliente(id);
-        loadClientes();
-      } catch (err: any) {
-        console.error('Error al eliminar cliente:', err);
-        setError(err.message || 'Error al eliminar cliente');
-      } finally {
-        setLoading(false);
-      }
+  const handleViewCliente = (cliente: Cliente) => {
+    setSelectedCliente(cliente)
+    setIsDetailOpen(true)
+  }
+
+  const handleDeleteCliente = async (cliente: Cliente) => {
+    if (!window.confirm(`¿Deseas eliminar a ${cliente.nombre}?`)) return
+
+    try {
+      await clienteService.deleteCliente(cliente.id)
+      toast.success('Cliente eliminado correctamente')
+      queryClient.invalidateQueries({ queryKey: ['clientes'] })
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || 'No se pudo eliminar el cliente')
     }
-  };
+  }
 
-  const handleViewDetails = (cliente: Cliente) => {
-    setSelectedCliente(cliente);
-    setShowDetailsModal(true);
-  };
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
 
-  const resetForm = () => {
-    setFormData({
-      nombre: '',
-      numero_documento: '',
-      tipo_documento: 'DNI',
-      direccion: '',
-      telefono: '',
-      email: '',
-      contacto: '',
-      tipo_cliente: 'NATURAL'
-    });
-  };
+    if (!formData.nombre.trim() || !formData.numero_documento.trim()) {
+      toast.error('Completa nombre y número de documento')
+      return
+    }
 
-  const filteredClientes = clientes.filter(cliente =>
-    cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.numero_documento.includes(searchTerm) ||
-    cliente.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    try {
+      setIsSubmitting(true)
+      if (editingCliente) {
+        await clienteService.updateCliente(editingCliente.id, formData)
+        toast.success('Cliente actualizado correctamente')
+      } else {
+        await clienteService.createCliente(formData)
+        toast.success('Cliente creado correctamente')
+      }
+      setIsModalOpen(false)
+      setEditingCliente(null)
+      setFormData(initialFormState)
+      queryClient.invalidateQueries({ queryKey: ['clientes'] })
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || 'No se pudo guardar el cliente')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-  const getTipoClienteColor = (tipo: string) => {
-    return tipo === 'JURIDICA' ? '#3b82f6' : '#10b981';
-  };
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setEditingCliente(null)
+    setFormData(initialFormState)
+  }
 
-  const getTipoClienteBg = (tipo: string) => {
-    return tipo === 'JURIDICA' ? '#dbeafe' : '#dcfce7';
-  };
+  const filteredClientes = clientes
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#f9fafb',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      {/* Header */}
-      <div style={{
-        backgroundColor: 'white',
-        padding: '16px',
-        borderBottom: '1px solid #e5e7eb',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        marginLeft: '256px'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
-          <h1 style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>
-            Sistema de Ventas KARDEX
-          </h1>
-          <div style={{ fontSize: '14px' }}>
-            <p style={{ fontWeight: '500', color: '#111827', margin: '0' }}>
-              Administrador del Sistema
-            </p>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0' }}>
-              ADMINISTRADOR
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Sidebar Fixed */}
-      <div style={{
-        width: '256px',
-        backgroundColor: 'white',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        minHeight: '100vh',
-        padding: '16px 0',
-        position: 'fixed',
-        left: '0',
-        top: '0',
-        zIndex: '50'
-      }}>
-        <div style={{ padding: '0 16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: '0' }}>
-            Sistema KARDEX
-          </h2>
-        </div>
-        
-        <nav style={{ marginTop: '16px', padding: '0 8px' }}>
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/dashboard'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📊</span>
-              Dashboard
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/productos'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📦</span>
-              Productos
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/ventas'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🛒</span>
-              Ventas
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/compras'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🛍️</span>
-              Compras
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/kardex'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📈</span>
-              KARDEX
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                backgroundColor: '#dbeafe',
-                color: '#1d4ed8',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <span style={{ marginRight: '12px' }}>👥</span>
-              Clientes
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/proveedores'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🏢</span>
-              Proveedores
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/reportes'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📄</span>
-              Reportes
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/configuracion'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>⚙️</span>
-              Configuración
-            </button>
-          </div>
-        </nav>
-        
-        <div style={{ padding: '0 16px', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
-          <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
-            Sistema de Ventas KARDEX v1.0
-          </p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ marginLeft: '256px', padding: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', margin: 0 }}>
-              Gestión de Clientes
+    <div className="space-y-8 animate-fade-in">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 via-sky-500 to-blue-600 px-6 py-10 text-white shadow-xl">
+        <div className="absolute -right-12 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-3xl lg:block" />
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <div className="space-y-6">
+            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+              Experiencia centrada en clientes
+            </span>
+            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+              Gestiona tu cartera de clientes con un diseño refinado y coherente
             </h1>
-            <p style={{ fontSize: '14px', color: '#6b7280', margin: '4px 0 0 0' }}>
-              Administra los clientes del sistema
+            <p className="max-w-xl text-sm text-white/80 sm:text-base">
+              Registra datos, contactos y seguimientos en una interfaz alineada al dashboard. Simplifica tus operaciones comerciales y satisface a tus clientes con procesos claros.
             </p>
-          </div>
-          <button
-            onClick={() => {
-              resetForm();
-              setEditingCliente(null);
-              setShowModal(true);
-            }}
-            style={{
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              padding: '10px 16px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}
-            onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#2563eb'}
-            onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = '#3b82f6'}
-          >
-            + Nuevo Cliente
-          </button>
-        </div>
-
-        {error && (
-          <div style={{
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            color: '#dc2626',
-            padding: '12px',
-            borderRadius: '6px',
-            marginBottom: '20px'
-          }}>
-            {error}
-          </div>
-        )}
-
-        {/* Search Bar */}
-        <div style={{ marginBottom: '20px' }}>
-          <input
-            type="text"
-            placeholder="Buscar clientes por nombre, documento o email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '14px',
-              backgroundColor: 'white'
-            }}
-          />
-        </div>
-
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px' }}>
-            <div style={{ fontSize: '16px', color: '#6b7280' }}>Cargando clientes...</div>
-          </div>
-        ) : (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div>
-                <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: 0 }}>
-                  Lista de Clientes
-                </h2>
-                <p style={{ fontSize: '14px', color: '#6b7280', margin: '4px 0 0 0' }}>
-                  {filteredClientes.length} clientes registrados
-                </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                onClick={handleCreateCliente}
+                className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-emerald-600 shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:shadow-xl"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Nuevo cliente
+              </button>
+              <div className="inline-flex items-center rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white/90">
+                <Users className="mr-2 h-4 w-4" /> {resumenEstado.total} clientes registrados
               </div>
             </div>
-            
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              overflow: 'hidden'
-            }}>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead style={{ backgroundColor: '#f9fafb' }}>
+          </div>
+
+          <div className="rounded-3xl bg-white/15 p-6 backdrop-blur-md">
+            <div className="space-y-3 text-sm text-white/85">
+              <p className="font-semibold uppercase tracking-wide text-white">Resumen del directorio</p>
+              <div className="flex items-center justify-between rounded-2xl bg-white/10 p-3">
+                <span>Activos</span>
+                <span className="font-semibold">{resumenEstado.activos}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl bg-white/10 p-3">
+                <span>Personas jurídicas</span>
+                <span className="font-semibold">{resumenEstado.juridicos}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl bg-white/10 p-3">
+                <span>Última actualización</span>
+                <span className="font-semibold">Hace unos minutos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        <aside className="space-y-4">
+          <div className="glass-card p-5">
+            <label className="mb-3 block text-sm font-semibold text-slate-700">Buscar cliente</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Nombre o documento..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-xl border border-slate-200/70 bg-white/90 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
+              />
+            </div>
+          </div>
+
+          <div className="glass-card p-5">
+            <h3 className="mb-3 text-sm font-semibold text-slate-700">Acciones rápidas</h3>
+            <div className="space-y-2">
+              <button
+                onClick={handleCreateCliente}
+                className="btn-primary w-full justify-center text-sm"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Nuevo cliente
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <div className="glass-card overflow-hidden">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <LoadingSpinner />
+            </div>
+          ) : error ? (
+            <div className="p-8 text-center">
+              <p className="text-sm text-red-600">Error al cargar clientes</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-slate-200/70 bg-slate-50/80">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      Cliente
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      Documento
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      Contacto
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      Tipo
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200/70 bg-white/60">
+                  {filteredClientes.length === 0 ? (
                     <tr>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                        Cliente
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                        Documento
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                        Contacto
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                        Tipo
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                        Estado
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                        Acciones
-                      </th>
+                      <td colSpan={5} className="px-6 py-12 text-center">
+                        <Users className="mx-auto mb-3 h-12 w-12 text-slate-300" />
+                        <p className="text-sm font-medium text-slate-600">No hay clientes registrados</p>
+                        <p className="mt-1 text-xs text-slate-400">Crea tu primer cliente para comenzar</p>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filteredClientes.map((cliente) => (
-                      <tr key={cliente.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                          <div>
-                            <div style={{ fontWeight: '500', marginBottom: '2px' }}>
-                              {cliente.nombre}
+                  ) : (
+                    filteredClientes.map((cliente) => (
+                      <tr key={cliente.id} className="transition hover:bg-slate-50/60">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 text-sm font-semibold text-white shadow-sm">
+                              {cliente.nombre.charAt(0).toUpperCase()}
                             </div>
-                            {cliente.codigo && (
-                              <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                                Código: {cliente.codigo}
-                              </div>
-                            )}
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">{cliente.nombre}</p>
+                              {cliente.email && (
+                                <p className="text-xs text-slate-500">{cliente.email}</p>
+                              )}
+                            </div>
                           </div>
                         </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
+                        <td className="px-6 py-4">
                           <div>
-                            <div style={{ fontWeight: '500' }}>
-                              {cliente.tipo_documento}: {cliente.numero_documento}
-                            </div>
-                            {cliente.direccion && (
-                              <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
-                                {cliente.direccion}
-                              </div>
-                            )}
+                            <p className="text-sm font-medium text-slate-900">{cliente.numero_documento}</p>
+                            <p className="text-xs text-slate-500">{cliente.tipo_documento}</p>
                           </div>
                         </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                          <div>
+                        <td className="px-6 py-4">
+                          <div className="space-y-1">
                             {cliente.telefono && (
-                              <div style={{ marginBottom: '2px' }}>
-                                📞 {cliente.telefono}
+                              <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                                <Phone className="h-3 w-3" />
+                                {cliente.telefono}
                               </div>
                             )}
-                            {cliente.email && (
-                              <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                                ✉️ {cliente.email}
-                              </div>
-                            )}
-                            {cliente.contacto && (
-                              <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
-                                Contacto: {cliente.contacto}
+                            {cliente.direccion && (
+                              <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                                <MapPin className="h-3 w-3" />
+                                {cliente.direccion.substring(0, 30)}...
                               </div>
                             )}
                           </div>
                         </td>
-                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                          <span style={{
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontWeight: '500',
-                            backgroundColor: getTipoClienteBg(cliente.tipo_cliente),
-                            color: getTipoClienteColor(cliente.tipo_cliente)
-                          }}>
-                            {cliente.tipo_cliente === 'JURIDICA' ? '🏢 Jurídica' : '👤 Natural'}
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                            cliente.tipo_cliente === 'JURIDICA'
+                              ? 'bg-purple-100 text-purple-700'
+                              : 'bg-blue-100 text-blue-700'
+                          }`}>
+                            {cliente.tipo_cliente === 'JURIDICA' ? (
+                              <>
+                                <Building2 className="mr-1 h-3 w-3" />
+                                Jurídica
+                              </>
+                            ) : (
+                              <>
+                                <Users className="mr-1 h-3 w-3" />
+                                Natural
+                              </>
+                            )}
                           </span>
                         </td>
-                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                          <span style={{
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontWeight: '500',
-                            backgroundColor: cliente.activo ? '#dcfce7' : '#fef2f2',
-                            color: cliente.activo ? '#16a34a' : '#dc2626'
-                          }}>
-                            {cliente.activo ? 'Activo' : 'Inactivo'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => handleViewDetails(cliente)}
-                              style={{
-                                backgroundColor: '#3b82f6',
-                                color: 'white',
-                                border: 'none',
-                                padding: '6px 12px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                fontWeight: '500'
-                              }}
-                              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#2563eb'}
-                              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = '#3b82f6'}
+                              onClick={() => handleViewCliente(cliente)}
+                              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
                             >
                               Ver
                             </button>
                             <button
-                              onClick={() => handleEdit(cliente)}
-                              style={{
-                                backgroundColor: '#f3f4f6',
-                                color: '#374151',
-                                border: 'none',
-                                padding: '6px 12px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                fontWeight: '500'
-                              }}
-                              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#e5e7eb'}
-                              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
+                              onClick={() => handleEditCliente(cliente)}
+                              className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 shadow-sm transition hover:bg-emerald-100"
                             >
                               Editar
                             </button>
                             <button
-                              onClick={() => handleDelete(cliente.id)}
-                              style={{
-                                backgroundColor: '#ef4444',
-                                color: 'white',
-                                border: 'none',
-                                padding: '6px 12px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                fontWeight: '500'
-                              }}
-                              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#dc2626'}
-                              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = '#ef4444'}
+                              onClick={() => handleDeleteCliente(cliente)}
+                              className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm transition hover:bg-red-100"
                             >
                               Eliminar
                             </button>
                           </div>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      </div>
 
-        {/* Modal Crear/Editar Cliente */}
-        {showModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '24px',
-              maxWidth: '600px',
-              width: '90%',
-              maxHeight: '90vh',
-              overflow: 'auto'
-            }}>
-              <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: '600', color: '#111827' }}>
-                {editingCliente ? 'Editar Cliente' : 'Nuevo Cliente'}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="glass-card relative w-full max-w-2xl animate-fade-in">
+            <div className="border-b border-slate-200/70 px-6 py-4">
+              <h2 className="text-lg font-semibold text-slate-900">
+                {editingCliente ? 'Editar cliente' : 'Nuevo cliente'}
               </h2>
-              
-              <form onSubmit={handleSubmit}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Nombre *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.nombre}
-                      onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                      required
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Tipo de Cliente *
-                    </label>
-                    <select
-                      value={formData.tipo_cliente}
-                      onChange={(e) => setFormData({ ...formData, tipo_cliente: e.target.value as 'NATURAL' | 'JURIDICA' })}
-                      required
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    >
-                      <option value="NATURAL">Persona Natural</option>
-                      <option value="JURIDICA">Persona Jurídica</option>
-                    </select>
-                  </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Nombre completo *</label>
+                  <input
+                    type="text"
+                    value={formData.nombre}
+                    onChange={handleInputChange('nombre')}
+                    className="input-field"
+                    required
+                  />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Tipo de Documento *
-                    </label>
-                    <select
-                      value={formData.tipo_documento}
-                      onChange={(e) => setFormData({ ...formData, tipo_documento: e.target.value as 'RUC' | 'DNI' | 'CE' | 'PASAPORTE' })}
-                      required
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    >
-                      <option value="DNI">DNI</option>
-                      <option value="RUC">RUC</option>
-                      <option value="CE">Carné de Extranjería</option>
-                      <option value="PASAPORTE">Pasaporte</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Número de Documento *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.numero_documento}
-                      onChange={(e) => setFormData({ ...formData, numero_documento: e.target.value })}
-                      required
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                  </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Tipo de documento *</label>
+                  <select
+                    value={formData.tipo_documento}
+                    onChange={handleInputChange('tipo_documento')}
+                    className="input-field"
+                  >
+                    {tipoDocumentoOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                    Dirección
-                  </label>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Número de documento *</label>
+                  <input
+                    type="text"
+                    value={formData.numero_documento}
+                    onChange={handleInputChange('numero_documento')}
+                    className="input-field"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Tipo de cliente</label>
+                  <select
+                    value={formData.tipo_cliente}
+                    onChange={handleInputChange('tipo_cliente')}
+                    className="input-field"
+                  >
+                    {tipoClienteOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Teléfono</label>
+                  <input
+                    type="text"
+                    value={formData.telefono}
+                    onChange={handleInputChange('telefono')}
+                    className="input-field"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Email</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange('email')}
+                    className="input-field"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Dirección</label>
                   <input
                     type="text"
                     value={formData.direccion}
-                    onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
-                    }}
+                    onChange={handleInputChange('direccion')}
+                    className="input-field"
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Teléfono
-                    </label>
-                    <input
-                      type="tel"
-                      value={formData.telefono}
-                      onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                    Contacto
-                  </label>
+                <div className="sm:col-span-2">
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Persona de contacto</label>
                   <input
                     type="text"
                     value={formData.contacto}
-                    onChange={(e) => setFormData({ ...formData, contacto: e.target.value })}
-                    placeholder="Nombre de la persona de contacto"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
-                    }}
+                    onChange={handleInputChange('contacto')}
+                    className="input-field"
                   />
-                </div>
-
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    style={{
-                      backgroundColor: '#f3f4f6',
-                      color: '#374151',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                      backgroundColor: loading ? '#9ca3af' : '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    {loading ? 'Guardando...' : (editingCliente ? 'Actualizar' : 'Crear')}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Modal de Detalles de Cliente */}
-        {showDetailsModal && selectedCliente && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '24px',
-              maxWidth: '600px',
-              width: '90%',
-              maxHeight: '90vh',
-              overflow: 'auto'
-            }}>
-              <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: '600', color: '#111827' }}>
-                Detalle del Cliente
-              </h2>
-              
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Nombre
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827', fontWeight: '500' }}>
-                      {selectedCliente.nombre}
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Código
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {selectedCliente.codigo || 'No asignado'}
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Tipo de Cliente
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {selectedCliente.tipo_cliente === 'JURIDICA' ? '🏢 Persona Jurídica' : '👤 Persona Natural'}
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Estado
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        backgroundColor: selectedCliente.activo ? '#dcfce7' : '#fef2f2',
-                        color: selectedCliente.activo ? '#16a34a' : '#dc2626'
-                      }}>
-                        {selectedCliente.activo ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Documento
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {selectedCliente.tipo_documento}: {selectedCliente.numero_documento}
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Teléfono
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {selectedCliente.telefono || 'No especificado'}
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Email
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {selectedCliente.email || 'No especificado'}
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Contacto
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {selectedCliente.contacto || 'No especificado'}
-                    </p>
-                  </div>
-                </div>
-                
-                {selectedCliente.direccion && (
-                  <div style={{ marginTop: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Dirección
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {selectedCliente.direccion}
-                    </p>
-                  </div>
-                )}
-
-                <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', fontSize: '12px', color: '#6b7280' }}>
-                    <div>
-                      <label style={{ display: 'block', fontWeight: '500', marginBottom: '4px' }}>
-                        Fecha de Creación
-                      </label>
-                      <p style={{ margin: 0 }}>
-                        {new Date(selectedCliente.fecha_creacion).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontWeight: '500', marginBottom: '4px' }}>
-                        Última Actualización
-                      </label>
-                      <p style={{ margin: 0 }}>
-                        {new Date(selectedCliente.fecha_actualizacion).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setShowDetailsModal(false)}
-                  style={{
-                    backgroundColor: '#f3f4f6',
-                    color: '#374151',
-                    border: 'none',
-                    padding: '10px 16px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
+                  onClick={closeModal}
+                  className="btn-outline"
+                  disabled={isSubmitting}
                 >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Guardando...' : editingCliente ? 'Actualizar' : 'Crear cliente'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isDetailOpen && selectedCliente && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="glass-card relative w-full max-w-2xl animate-fade-in">
+            <div className="border-b border-slate-200/70 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900">Detalles del cliente</h2>
+                <button
+                  onClick={() => setIsDetailOpen(false)}
+                  className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-6 flex items-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 text-2xl font-bold text-white shadow-lg">
+                  {selectedCliente.nombre.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-900">{selectedCliente.nombre}</h3>
+                  <p className="text-sm text-slate-500">
+                    {selectedCliente.tipo_cliente === 'JURIDICA' ? 'Persona jurídica' : 'Persona natural'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <DetalleItem label="Tipo de documento" value={selectedCliente.tipo_documento} />
+                <DetalleItem label="Número de documento" value={selectedCliente.numero_documento} />
+                <DetalleItem label="Teléfono" value={selectedCliente.telefono || 'No especificado'} />
+                <DetalleItem label="Email" value={selectedCliente.email || 'No especificado'} />
+                <DetalleItem
+                  label="Dirección"
+                  value={selectedCliente.direccion || 'No especificada'}
+                />
+                <DetalleItem
+                  label="Persona de contacto"
+                  value={selectedCliente.contacto || 'No especificado'}
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button onClick={() => setIsDetailOpen(false)} className="btn-outline">
                   Cerrar
                 </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
-  );
+  )
+}
+
+function DetalleItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200/70 bg-white/75 p-4 shadow-inner">
+      <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-900 break-words">{value}</p>
+    </div>
+  )
 }
