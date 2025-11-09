@@ -71,7 +71,7 @@ function ComprasContent() {
 
   return (
     <div className="space-y-10 animate-fade-in">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 px-6 py-10 text-white shadow-xl">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 px-6 py-8 text-white shadow-xl">
         <div className="absolute -right-12 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-3xl lg:block" />
         <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           <div className="space-y-6">
@@ -193,11 +193,11 @@ function ComprasContent() {
 
             <div className="mt-6 overflow-hidden rounded-2xl border border-slate-100">
               {detallesLoading ? (
-                <div className="flex items-center justify-center gap-2 px-6 py-10 text-sm text-slate-500">
+                <div className="flex items-center justify-center gap-2 px-6 py-8 text-sm text-slate-500">
                   <LoadingSpinner size="sm" /> Cargando detalles...
                 </div>
               ) : (selectedCompra.detalles || []).length === 0 ? (
-                <div className="px-6 py-10 text-center text-sm text-slate-500">
+                <div className="px-6 py-8 text-center text-sm text-slate-500">
                   Esta compra no tiene productos asociados.
                 </div>
               ) : (
