@@ -16,7 +16,7 @@ import toast from 'react-hot-toast'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import reporteService from '@/services/reporteService'
+import { reporteService } from '@/services/reporteService'
 
  type ReporteTab = 'ventas' | 'compras' | 'inventario' | 'rentabilidad' | 'movimientos'
 
