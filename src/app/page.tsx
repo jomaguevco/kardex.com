@@ -2,9 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
+import apiService from '@/services/api'
 import { Loader2 } from 'lucide-react'
 
 const highlights = [
@@ -12,6 +13,15 @@ const highlights = [
   'Control total de inventario y KARDEX autom&#225;tico',
   'Reportes listos para compartir con tu equipo'
 ]
+
+type HealthResponse = {
+  success: boolean
+  message: string
+  timestamp: string
+  backendVersion?: string
+  deploymentSignature?: string
+  environment?: string
+}
 
 export default function HomePage() {
   const router = useRouter()
@@ -23,6 +33,7 @@ export default function HomePage() {
   })
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [healthStatus, setHealthStatus] = useState<HealthResponse | null>(null)
 
   const handleChange = (field: 'username' | 'password') => (event: React.ChangeEvent<HTMLInputElement>) => {
     setCredentials((prev) => ({
@@ -50,6 +61,33 @@ export default function HomePage() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchHealthStatus = async () => {
+      try {
+        const response = await apiService.get<HealthResponse>('/health')
+        if (isMounted) {
+          setHealthStatus(response as HealthResponse)
+        }
+      } catch (err) {
+        if (isMounted) {
+          setHealthStatus({
+            success: false,
+            message: 'No se pudo conectar con el backend',
+            timestamp: new Date().toISOString()
+          })
+        }
+      }
+    }
+
+    fetchHealthStatus()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -166,6 +204,28 @@ export default function HomePage() {
             <div className="mt-8 rounded-2xl bg-slate-50 px-4 py-3 text-center text-sm text-slate-500">
               Usuario demo: <span className="font-semibold text-slate-700">admin</span> /{' '}
               <span className="font-semibold text-slate-700">admin123</span>
+            </div>
+
+            <div className="mt-4 rounded-2xl bg-white/70 px-4 py-3 text-center text-xs text-slate-500 shadow-inner">
+              {healthStatus ? (
+                healthStatus.success ? (
+                  <>
+                    Estado del backend:{' '}
+                    <span className="font-semibold text-slate-700">
+                      {healthStatus.deploymentSignature ?? 'sin firma'}
+                    </span>{' '}
+                    &middot; versi&#243;n{' '}
+                    <span className="font-semibold text-slate-700">
+                      {healthStatus.backendVersion ?? 'desconocida'}
+                    </span>{' '}
+                    ({healthStatus.environment ?? 'entorno no especificado'})
+                  </>
+                ) : (
+                  <span className="text-red-600">No se pudo verificar el estado del backend.</span>
+                )
+              ) : (
+                'Verificando estado del backend...'
+              )}
             </div>
           </div>
         </div>

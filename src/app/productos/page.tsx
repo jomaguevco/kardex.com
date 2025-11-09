@@ -1,745 +1,692 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { productoService, Producto, CreateProductoData } from '@/services/productoService';
-import ProtectedRoute from '../../components/auth/ProtectedRoute';
+import { useState, ChangeEvent, FormEvent } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useQueryClient } from '@tanstack/react-query'
+import { Plus, Sparkles, Package, X } from 'lucide-react'
+import toast from 'react-hot-toast'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import Layout from '@/components/layout/Layout'
+import ProductosFilters from '@/components/productos/ProductosFilters'
+import ProductosTable from '@/components/productos/ProductosTable'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { productoService, CreateProductoData } from '@/services/productoService'
+import { Producto, ProductoFilters } from '@/types'
+
+const DEFAULT_LIMIT = 10
+
+type ProductoFormState = {
+  codigo_interno: string
+  nombre: string
+  descripcion: string
+  codigo_barras: string
+  precio_venta: string
+  precio_compra: string
+  costo_promedio: string
+  stock_actual: string
+  stock_minimo: string
+  stock_maximo: string
+  punto_reorden: string
+}
+
+const initialFormState: ProductoFormState = {
+  codigo_interno: '',
+  nombre: '',
+  descripcion: '',
+  codigo_barras: '',
+  precio_venta: '',
+  precio_compra: '',
+  costo_promedio: '',
+  stock_actual: '',
+  stock_minimo: '',
+  stock_maximo: '',
+  punto_reorden: ''
+}
+
+const DEFAULT_FILTERS: ProductoFilters = {
+  page: 1,
+  limit: DEFAULT_LIMIT
+}
 
 export default function ProductosPage() {
-  return <ProductosContent />;
+  return (
+    <ProtectedRoute>
+      <Layout>
+        <ProductosContent />
+      </Layout>
+    </ProtectedRoute>
+  )
 }
 
 function ProductosContent() {
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
-  const [formData, setFormData] = useState<CreateProductoData>({
-    codigo_interno: '',
-    nombre: '',
-    descripcion: '',
-    precio_venta: 0,
-    costo_promedio: 0,
-    precio_compra: 0,
-    stock_minimo: 0,
-    stock_maximo: 0,
-    punto_reorden: 0,
-    stock_actual: 0
-  });
+  const queryClient = useQueryClient()
+  const [filters, setFilters] = useState<ProductoFilters>(DEFAULT_FILTERS)
+  const [formData, setFormData] = useState<ProductoFormState>(initialFormState)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isViewOpen, setIsViewOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Producto | null>(null)
+  const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
 
-  useEffect(() => {
-    loadProductos();
-  }, []);
+  const handleFiltersChange = (nextFilters: ProductoFilters) => {
+    setFilters(prev => {
+      const merged = { ...prev, ...nextFilters }
+      const sanitized: ProductoFilters = {
+        page: merged.page ?? 1,
+        limit: merged.limit ?? DEFAULT_LIMIT
+      }
 
-  const loadProductos = async () => {
-    try {
-      setLoading(true);
-      const response = await productoService.getProductos({ limit: 50 });
-      setProductos(response.productos);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar productos');
-    } finally {
-      setLoading(false);
+      if (merged.search && merged.search.trim() !== '') {
+        sanitized.search = merged.search.trim()
+      }
+
+      if (merged.categoria_id) {
+        sanitized.categoria_id = merged.categoria_id
+      }
+
+      if (merged.marca_id) {
+        sanitized.marca_id = merged.marca_id
+      }
+
+      return sanitized
+    })
+  }
+
+  const handleInputChange = (field: keyof ProductoFormState) => (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const value = event.target.value
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const mapProductToForm = (producto: Producto): ProductoFormState => ({
+    codigo_interno: producto.codigo_interno ?? '',
+    nombre: producto.nombre ?? '',
+    descripcion: producto.descripcion ?? '',
+    codigo_barras: producto.codigo_barras ?? '',
+    precio_venta:
+      producto.precio_venta !== undefined ? String(producto.precio_venta) : '',
+    precio_compra:
+      producto.precio_compra !== undefined ? String(producto.precio_compra) : '',
+    costo_promedio:
+      producto.costo_promedio !== undefined ? String(producto.costo_promedio) : '',
+    stock_actual:
+      producto.stock_actual !== undefined ? String(producto.stock_actual) : '',
+    stock_minimo:
+      producto.stock_minimo !== undefined ? String(producto.stock_minimo) : '',
+    stock_maximo:
+      producto.stock_maximo !== undefined ? String(producto.stock_maximo) : '',
+    punto_reorden:
+      producto.punto_reorden !== undefined ? String(producto.punto_reorden) : ''
+  })
+
+  const openCreateModal = () => {
+    setEditingProduct(null)
+    setFormData(initialFormState)
+    setIsModalOpen(true)
+  }
+
+  const openEditModal = (producto: Producto) => {
+    setEditingProduct(producto)
+    setFormData(mapProductToForm(producto))
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setEditingProduct(null)
+    setFormData(initialFormState)
+  }
+
+  const openViewModal = (producto: Producto) => {
+    setSelectedProduct(producto)
+    setIsViewOpen(true)
+  }
+
+  const closeViewModal = () => {
+    setSelectedProduct(null)
+    setIsViewOpen(false)
+  }
+
+  const parseDecimal = (value: string) => (value.trim() === '' ? undefined : Number(value))
+  const parseInteger = (value: string) => (value.trim() === '' ? undefined : parseInt(value, 10))
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!formData.codigo_interno.trim() || !formData.nombre.trim()) {
+      toast.error('Completa los campos obligatorios marcados con *')
+      return
     }
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    const precioVenta = parseDecimal(formData.precio_venta)
+    if (precioVenta === undefined || Number.isNaN(precioVenta) || precioVenta <= 0) {
+      toast.error('Ingresa un precio de venta válido')
+      return
+    }
+
+    const payload: CreateProductoData = {
+      codigo_interno: formData.codigo_interno.trim(),
+      nombre: formData.nombre.trim(),
+      descripcion: formData.descripcion.trim() || undefined,
+      codigo_barras: formData.codigo_barras.trim() || undefined,
+      precio_venta: precioVenta
+    }
+
+    const precioCompra = parseDecimal(formData.precio_compra)
+    if (precioCompra !== undefined) {
+      if (Number.isNaN(precioCompra) || precioCompra < 0) {
+        toast.error('Ingresa un precio de compra válido')
+        return
+      }
+      payload.precio_compra = precioCompra
+    }
+
+    const costoPromedio = parseDecimal(formData.costo_promedio)
+    if (costoPromedio !== undefined) {
+      if (Number.isNaN(costoPromedio) || costoPromedio < 0) {
+        toast.error('Ingresa un costo promedio válido')
+        return
+      }
+      payload.costo_promedio = costoPromedio
+    }
+
+    const stockActual = parseInteger(formData.stock_actual)
+    if (stockActual !== undefined) {
+      if (Number.isNaN(stockActual) || stockActual < 0) {
+        toast.error('Ingresa un stock actual válido')
+        return
+      }
+      payload.stock_actual = stockActual
+    }
+
+    const stockMinimo = parseInteger(formData.stock_minimo)
+    if (stockMinimo !== undefined) {
+      if (Number.isNaN(stockMinimo) || stockMinimo < 0) {
+        toast.error('Ingresa un stock mínimo válido')
+        return
+      }
+      payload.stock_minimo = stockMinimo
+    }
+
+    const stockMaximo = parseInteger(formData.stock_maximo)
+    if (stockMaximo !== undefined) {
+      if (Number.isNaN(stockMaximo) || stockMaximo < 0) {
+        toast.error('Ingresa un stock máximo válido')
+        return
+      }
+      payload.stock_maximo = stockMaximo
+    }
+
+    if (stockMinimo !== undefined && stockMaximo !== undefined && stockMaximo < stockMinimo) {
+      toast.error('El stock máximo debe ser mayor o igual al stock mínimo')
+      return
+    }
+
+    const puntoReorden = parseInteger(formData.punto_reorden)
+    if (puntoReorden !== undefined) {
+      if (Number.isNaN(puntoReorden) || puntoReorden < 0) {
+        toast.error('Ingresa un punto de reorden válido')
+        return
+      }
+      payload.punto_reorden = puntoReorden
+    }
+
     try {
-      if (editingProducto) {
-        await productoService.updateProducto(editingProducto.id, formData);
+      setIsSubmitting(true)
+
+      if (editingProduct) {
+        await productoService.updateProducto(editingProduct.id, payload)
+        toast.success('Producto actualizado correctamente')
       } else {
-        await productoService.createProducto(formData);
+        await productoService.createProducto(payload)
+        toast.success('Producto creado correctamente')
       }
-      setShowModal(false);
-      setEditingProducto(null);
-      setFormData({
-        codigo_interno: '',
-        nombre: '',
-        descripcion: '',
-        precio_venta: 0,
-        costo_promedio: 0,
-        precio_compra: 0,
-        stock_minimo: 0,
-        stock_maximo: 0,
-        punto_reorden: 0,
-        stock_actual: 0
-      });
-      loadProductos();
-    } catch (err: any) {
-      setError(err.message || 'Error al guardar producto');
+
+      await queryClient.invalidateQueries({ queryKey: ['productos'] })
+      setFilters(prev => ({ ...prev, page: 1 }))
+      closeModal()
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || error?.message || 'No se pudo guardar el producto'
+      toast.error(message)
+    } finally {
+      setIsSubmitting(false)
     }
-  };
+  }
 
-  const handleEdit = (producto: Producto) => {
-    setEditingProducto(producto);
-    setFormData({
-      codigo_interno: producto.codigo_interno,
-      nombre: producto.nombre,
-      descripcion: producto.descripcion || '',
-      precio_venta: Number(producto.precio_venta),
-      costo_promedio: Number(producto.costo_promedio),
-      precio_compra: Number(producto.precio_compra),
-      stock_minimo: Number(producto.stock_minimo),
-      stock_maximo: Number(producto.stock_maximo),
-      punto_reorden: Number(producto.punto_reorden),
-      stock_actual: Number(producto.stock_actual)
-    });
-    setShowModal(true);
-  };
+  const handleDeleteProduct = async (producto: Producto) => {
+    const confirmDelete = window.confirm(
+      `¿Deseas eliminar el producto "${producto.nombre}"?`
+    )
 
-  const handleDelete = async (id: number) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-      try {
-        await productoService.deleteProducto(id);
-        loadProductos();
-      } catch (err: any) {
-        setError(err.message || 'Error al eliminar producto');
+    if (!confirmDelete) return
+
+    try {
+      await productoService.deleteProducto(producto.id)
+      toast.success('Producto eliminado correctamente')
+      await queryClient.invalidateQueries({ queryKey: ['productos'] })
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || error?.message || 'No se pudo eliminar el producto'
+      toast.error(message)
+    }
+  }
+
+  const getStockState = (producto: Producto) => {
+    const stockActual = Number(producto.stock_actual ?? 0)
+    const stockMinimo = Number(producto.stock_minimo ?? 0)
+    const stockMaximo = Number(producto.stock_maximo ?? 0)
+
+    if (stockMinimo && stockActual <= stockMinimo) {
+      return {
+        label: 'Stock bajo',
+        badgeClass: 'bg-rose-100 text-rose-600'
       }
     }
-  };
 
-  const getStockStatus = (producto: Producto) => {
-    const stockActual = Number(producto.stock_actual);
-    const stockMinimo = Number(producto.stock_minimo);
-    const stockMaximo = Number(producto.stock_maximo);
-    
-    if (stockActual <= stockMinimo) {
-      return { text: 'Stock Bajo', color: '#dc2626', bg: '#fef2f2' };
-    } else if (stockActual >= stockMaximo) {
-      return { text: 'Stock Alto', color: '#16a34a', bg: '#f0fdf4' };
+    if (stockMaximo && stockActual >= stockMaximo) {
+      return {
+        label: 'Stock por encima del máximo',
+        badgeClass: 'bg-amber-100 text-amber-700'
+      }
     }
-    return { text: 'Normal', color: '#6b7280', bg: '#f9fafb' };
-  };
+
+    return {
+      label: 'Stock saludable',
+      badgeClass: 'bg-emerald-100 text-emerald-600'
+    }
+  }
+
+  const stockState = selectedProduct ? getStockState(selectedProduct) : null
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#f9fafb',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      {/* Header */}
-      <div style={{
-        backgroundColor: 'white',
-        padding: '16px',
-        borderBottom: '1px solid #e5e7eb',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        marginLeft: '256px'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
-          <h1 style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>
-            Sistema de Ventas KARDEX
-          </h1>
-          <div style={{ fontSize: '14px' }}>
-            <p style={{ fontWeight: '500', color: '#111827', margin: '0' }}>
-              Administrador del Sistema
+    <div className="space-y-8 pb-12 animate-fade-in">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-emerald-500 px-6 py-10 text-white shadow-xl">
+        <div className="absolute -right-12 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/15 blur-3xl lg:block" />
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <div className="space-y-6">
+            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+              Gestión de inventario
+            </span>
+            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+              Controla tu catálogo con un diseño refinado y consistente
+            </h1>
+            <p className="max-w-xl text-sm text-white/80 sm:text-base">
+              Alinea todos los módulos al estilo del dashboard, mantén stocks saludables y prepara tu operación para un lanzamiento comercial.
             </p>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0' }}>
-              ADMINISTRADOR
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Sidebar Fixed */}
-      <div style={{
-        width: '256px',
-        backgroundColor: 'white',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        minHeight: '100vh',
-        padding: '16px 0',
-        position: 'fixed',
-        left: '0',
-        top: '0',
-        zIndex: '50'
-      }}>
-        <div style={{ padding: '0 16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: '0' }}>
-            Sistema KARDEX
-          </h2>
-        </div>
-        
-        <nav style={{ marginTop: '16px', padding: '0 8px' }}>
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/dashboard'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📊</span>
-              Dashboard
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => alert('Productos clickeado!')}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                backgroundColor: '#dbeafe',
-                color: '#1d4ed8',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <span style={{ marginRight: '12px' }}>📦</span>
-              Productos
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/ventas'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🛒</span>
-              Ventas
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/compras'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🛍️</span>
-              Compras
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/kardex'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📈</span>
-              KARDEX
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/clientes'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>👥</span>
-              Clientes
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/proveedores'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🏢</span>
-              Proveedores
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/reportes'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📄</span>
-              Reportes
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/configuracion'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>⚙️</span>
-              Configuración
-            </button>
-          </div>
-        </nav>
-        
-        <div style={{
-          position: 'absolute',
-          bottom: '0',
-          left: '0',
-          right: '0',
-          padding: '16px',
-          borderTop: '1px solid #e5e7eb',
-          backgroundColor: 'white'
-        }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>
-            Sistema de Ventas KARDEX v1.0
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ marginLeft: '256px', padding: '24px' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', margin: '0 0 8px 0' }}>
-            Gestión de Productos
-          </h1>
-          <p style={{ color: '#6b7280', margin: '0' }}>
-            Administra el inventario de productos
-          </p>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div style={{
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            color: '#dc2626',
-            padding: '12px 16px',
-            borderRadius: '6px',
-            marginBottom: '16px'
-          }}>
-            {error}
-          </div>
-        )}
-
-        {/* Actions */}
-        <div style={{
-          backgroundColor: 'white',
-          padding: '16px',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          marginBottom: '24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0' }}>
-              Lista de Productos
-            </h3>
-            <p style={{ fontSize: '14px', color: '#6b7280', margin: '4px 0 0 0' }}>
-              {productos.length} productos registrados
-            </p>
-          </div>
-          <button
-            onClick={() => {
-              setEditingProducto(null);
-              setFormData({
-                codigo_interno: '',
-                nombre: '',
-                descripcion: '',
-                precio_venta: 0,
-                costo_promedio: 0,
-                precio_compra: 0,
-                stock_minimo: 0,
-                stock_maximo: 0,
-                punto_reorden: 0,
-                stock_actual: 0
-              });
-              setShowModal(true);
-            }}
-            style={{
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              padding: '10px 16px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}
-          >
-            + Nuevo Producto
-          </button>
-        </div>
-
-        {/* Products Table */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          overflow: 'hidden'
-        }}>
-          {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center' }}>
-              <div style={{ fontSize: '16px', color: '#6b7280' }}>Cargando productos...</div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                onClick={openCreateModal}
+                className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-blue-700 shadow-lg shadow-blue-900/25 transition hover:-translate-y-0.5 hover:shadow-xl"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Nuevo producto
+              </button>
+              <Link
+                href="/kardex"
+                className="inline-flex items-center justify-center rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/15"
+              >
+                Ver movimientos KARDEX
+              </Link>
             </div>
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Código
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Nombre
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Precio Venta
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Stock
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Estado
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {productos.map((producto) => {
-                  const stockStatus = getStockStatus(producto);
-                  return (
-                    <tr key={producto.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                        {producto.codigo_interno}
-                      </td>
-                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                        <div>
-                          <div style={{ fontWeight: '500' }}>{producto.nombre}</div>
-                          {producto.descripcion && (
-                            <div style={{ fontSize: '12px', color: '#6b7280' }}>{producto.descripcion}</div>
-                          )}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                        ${Number(producto.precio_venta).toFixed(2)}
-                      </td>
-                      <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                        {producto.stock_actual}
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                        <span style={{
-                          backgroundColor: stockStatus.bg,
-                          color: stockStatus.color,
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: '500'
-                        }}>
-                          {stockStatus.text}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                          <button
-                            onClick={() => handleEdit(producto)}
-                            style={{
-                              backgroundColor: '#f3f4f6',
-                              color: '#374151',
-                              border: 'none',
-                              padding: '6px 12px',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => handleDelete(producto.id)}
-                            style={{
-                              backgroundColor: '#fef2f2',
-                              color: '#dc2626',
-                              border: 'none',
-                              padding: '6px 12px',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+          </div>
+
+          <div className="hidden justify-end lg:flex">
+            <div className="glass-card floating rounded-3xl p-6">
+              <Image
+                src="/illustrations/dashboard-hero.svg"
+                alt="Gestión de inventario"
+                width={360}
+                height={280}
+                priority
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        <div className="space-y-6">
+          <ProductosFilters filters={filters} onFiltersChange={handleFiltersChange} />
+
+          <div className="card border border-indigo-100/60 bg-white/90 p-4 text-sm text-slate-600 shadow-lg shadow-indigo-500/5">
+            <p className="font-medium text-slate-800">Consejo</p>
+            <p className="mt-2">
+              Mantén sincronizados los precios y los puntos de reorden: el dashboard mostrará alertas de stock bajo automáticamente.
+            </p>
+          </div>
         </div>
 
-        {/* Modal */}
-        {showModal && (
-          <div style={{
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            right: '0',
-            bottom: '0',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: '1000'
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '24px',
-              width: '500px',
-              maxHeight: '80vh',
-              overflow: 'auto'
-            }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 16px 0' }}>
-                {editingProducto ? 'Editar Producto' : 'Nuevo Producto'}
-              </h2>
-              
-              <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Código Interno *
+        <div className="space-y-6">
+          <div className="card flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-lg shadow-slate-900/5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Catálogo de productos</h2>
+              <p className="text-sm text-slate-500">
+                Gestiona códigos internos, variaciones y existencias en una sola vista.
+              </p>
+            </div>
+
+            <button
+              onClick={openCreateModal}
+              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo producto
+            </button>
+          </div>
+
+          <ProductosTable
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            onView={openViewModal}
+            onEdit={openEditModal}
+            onDelete={handleDeleteProduct}
+          />
+        </div>
+      </div>
+
+      {isViewOpen && selectedProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 px-4 py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-2xl rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                  <Package className="mr-1.5 h-3.5 w-3.5" />
+                  {selectedProduct.codigo_interno || 'Sin código'}
+                </span>
+                <h2 className="mt-3 text-2xl font-semibold text-slate-900">
+                  {selectedProduct.nombre}
+                </h2>
+                <p className="text-sm text-slate-500">
+                  {selectedProduct.descripcion || 'Sin descripción registrada'}
+                </p>
+              </div>
+
+              <button
+                onClick={closeViewModal}
+                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
+                <p className="text-xs uppercase tracking-wide text-slate-400">Precio de venta</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">
+                  S/. {Number(selectedProduct.precio_venta ?? 0).toFixed(2)}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
+                <p className="text-xs uppercase tracking-wide text-slate-400">Stock actual</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">
+                  {selectedProduct.stock_actual ?? 0} unidades
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
+                <p className="text-xs uppercase tracking-wide text-slate-400">Stock mínimo</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">
+                  {selectedProduct.stock_minimo ?? 0}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
+                <p className="text-xs uppercase tracking-wide text-slate-400">Stock máximo</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">
+                  {selectedProduct.stock_maximo ?? 0}
+                </p>
+              </div>
+              {selectedProduct.codigo_barras && (
+                <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Código de barras</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-900">
+                    {selectedProduct.codigo_barras}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              {stockState && (
+                <span
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${stockState.badgeClass}`}
+                >
+                  {stockState.label}
+                </span>
+              )}
+              <span
+                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                  selectedProduct.activo
+                    ? 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30'
+                    : 'bg-rose-500/15 text-rose-600 border border-rose-500/30'
+                }`}
+              >
+                {selectedProduct.activo ? 'Activo' : 'Inactivo'}
+              </span>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button onClick={closeViewModal} className="btn-outline">
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 px-4 py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-3xl rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  {editingProduct ? 'Editar producto' : 'Nuevo producto'}
+                </span>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                  {editingProduct
+                    ? 'Actualiza la información del producto'
+                    : 'Registra un nuevo producto'}
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Completa la información básica para sincronizar el inventario con el dashboard.
+                </p>
+              </div>
+
+              <button
+                onClick={closeModal}
+                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Código interno *
                   </label>
                   <input
                     type="text"
                     value={formData.codigo_interno}
-                    onChange={(e) => setFormData({ ...formData, codigo_interno: e.target.value })}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
-                    }}
+                    onChange={handleInputChange('codigo_interno')}
+                    className="input-field"
+                    placeholder="SKU interno"
+                    autoFocus={!editingProduct}
                   />
                 </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Nombre *
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Código de barras
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.codigo_barras}
+                    onChange={handleInputChange('codigo_barras')}
+                    className="input-field"
+                    placeholder="EAN / UPC"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Nombre del producto *
                   </label>
                   <input
                     type="text"
                     value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
-                    }}
+                    onChange={handleInputChange('nombre')}
+                    className="input-field"
+                    placeholder="Nombre comercial"
                   />
                 </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700">
                     Descripción
                   </label>
                   <textarea
                     value={formData.descripcion}
-                    onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                    rows={3}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      resize: 'vertical'
-                    }}
+                    onChange={handleInputChange('descripcion')}
+                    className="input-field min-h-[96px]"
+                    placeholder="Comparte características relevantes, presentaciones o notas internas"
                   />
                 </div>
+              </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                      Precio Venta
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.precio_venta}
-                      onChange={(e) => setFormData({ ...formData, precio_venta: Number(e.target.value) })}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                      Stock Actual
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.stock_actual}
-                      onChange={(e) => setFormData({ ...formData, stock_actual: Number(e.target.value) })}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                  </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Precio de venta *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.precio_venta}
+                    onChange={handleInputChange('precio_venta')}
+                    className="input-field"
+                    placeholder="0.00"
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Precio de compra
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.precio_compra}
+                    onChange={handleInputChange('precio_compra')}
+                    className="input-field"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Costo promedio
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.costo_promedio}
+                    onChange={handleInputChange('costo_promedio')}
+                    className="input-field"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
 
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    style={{
-                      backgroundColor: '#f3f4f6',
-                      color: '#374151',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    style={{
-                      backgroundColor: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    {editingProducto ? 'Actualizar' : 'Crear'}
-                  </button>
+              <div className="grid gap-4 sm:grid-cols-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Stock actual
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.stock_actual}
+                    onChange={handleInputChange('stock_actual')}
+                    className="input-field"
+                    placeholder="0"
+                  />
                 </div>
-              </form>
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Stock mínimo
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.stock_minimo}
+                    onChange={handleInputChange('stock_minimo')}
+                    className="input-field"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Stock máximo
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.stock_maximo}
+                    onChange={handleInputChange('stock_maximo')}
+                    className="input-field"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Punto de reorden
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.punto_reorden}
+                    onChange={handleInputChange('punto_reorden')}
+                    className="input-field"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="btn-outline sm:min-w-[160px]"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn-primary inline-flex items-center justify-center sm:min-w-[200px] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <LoadingSpinner size="sm" className="mr-2" />
+                      Guardando...
+                    </>
+                  ) : editingProduct ? (
+                    'Actualizar producto'
+                  ) : (
+                    'Crear producto'
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
-  );
+  )
 }
