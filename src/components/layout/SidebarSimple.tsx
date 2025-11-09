@@ -45,7 +45,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="relative flex items-center justify-between border-b border-white/20 px-5 py-4">
+        <div className="relative flex items-center justify-between border-b border-white/20 px-5 py-[18px]">
           <div className="space-y-0.5">
             <span className="text-xs font-semibold uppercase tracking-wide text-white/60">Sistema Kardex</span>
             <p className="text-sm font-semibold text-white">Panel simplificado</p>
