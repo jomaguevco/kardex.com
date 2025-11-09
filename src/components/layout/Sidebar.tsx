@@ -18,6 +18,7 @@ import { cn } from '@/utils/cn'
 interface SidebarProps {
   isOpen: boolean
   onToggle: () => void
+  topOffset?: number
 }
 
 const menuItems = [
@@ -32,7 +33,7 @@ const menuItems = [
   { title: 'Configuración', href: '/configuracion', icon: Settings }
 ]
 
-export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
+export default function Sidebar({ isOpen, onToggle, topOffset = 32 }: SidebarProps) {
   const pathname = usePathname()
 
   return (
@@ -55,7 +56,10 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 pt-14 pb-4">
+        <nav
+          className="flex-1 space-y-1 overflow-y-auto px-3 pb-4"
+          style={{ paddingTop: topOffset }}
+        >
           {menuItems.map((item) => {
             const isActive = pathname === item.href
             const Icon = item.icon
