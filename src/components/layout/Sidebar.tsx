@@ -83,7 +83,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 </span>
                 {item.title}
               </Link>
-            )}
+            )
           })}
         </nav>
 
