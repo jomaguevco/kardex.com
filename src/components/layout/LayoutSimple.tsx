@@ -19,7 +19,7 @@ export default function Layout({ children }: LayoutProps) {
       <SidebarSimple isOpen={sidebarOpen} onToggle={() => setSidebarOpen((prev) => !prev)} />
       <div className="relative transition-all duration-500 lg:pl-64">
         <Header onMenuToggle={() => setSidebarOpen((prev) => !prev)} />
-        <main className="relative z-10 px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+        <main className="relative z-10 px-4 pb-12 pt-8 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-5xl space-y-8">{children}</div>
         </main>
       </div>
