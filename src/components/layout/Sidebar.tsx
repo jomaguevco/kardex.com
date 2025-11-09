@@ -33,7 +33,7 @@ const menuItems = [
   { title: 'Configuración', href: '/configuracion', icon: Settings }
 ]
 
-export default function Sidebar({ isOpen, onToggle, topOffset = 32 }: SidebarProps) {
+export default function Sidebar({ isOpen, onToggle, topOffset = 0 }: SidebarProps) {
   const pathname = usePathname()
 
   return (

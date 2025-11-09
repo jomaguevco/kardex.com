@@ -8,22 +8,20 @@ type LayoutProps = {
   children: React.ReactNode
 }
 
+const HEADER_CLEARANCE = 0
+
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const CONTENT_TOP_OFFSET = 32
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
 
   return (
     <div className="relative min-h-screen bg-slate-950/95">
       <BackgroundDecorations />
-      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={CONTENT_TOP_OFFSET} />
+      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={HEADER_CLEARANCE} />
       <div className="relative transition-all duration-500 lg:pl-64">
         <Header onMenuToggle={toggleSidebar} />
-        <main
-          className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8"
-          style={{ paddingTop: CONTENT_TOP_OFFSET }}
-        >
+        <main className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
       </div>
