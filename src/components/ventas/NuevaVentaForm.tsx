@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,8 +8,8 @@ import { Plus, Trash2, Search, Calculator } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { productoService } from '@/services/productoService'
 import { ventaService } from '@/services/ventaService'
-import { VentaForm } from '@/types'
-import { Producto } from '@/types'
+import { clienteService } from '@/services/clienteService'
+import { VentaForm, Producto, Cliente } from '@/types'
 import toast from 'react-hot-toast'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { cn } from '@/utils/cn'
@@ -42,7 +42,7 @@ interface NuevaVentaFormProps {
 }
 
 export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormProps) {
-  const [productos, setProductos] = useState<Producto[]>([])
+  const [productosCache, setProductosCache] = useState<Record<number, Producto>>({})
   const [busquedaProducto, setBusquedaProducto] = useState('')
   const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null)
 
@@ -52,22 +52,39 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
     enabled: busquedaProducto.length > 2
   })
 
+  const { data: clientesData, isLoading: loadingClientes, error: clientesError } = useQuery({
+    queryKey: ['clientes', 'selector'],
+    queryFn: () => clienteService.getClientes({ limit: 200 })
+  })
+
+  const clientes: Cliente[] = clientesData?.clientes ?? []
+
+  useEffect(() => {
+    if (clientesError) {
+      const message = (clientesError as any)?.message || 'No se pudieron cargar los clientes'
+      toast.error(message)
+    }
+  }, [clientesError])
+
   const {
     register,
     handleSubmit,
     control,
     watch,
     setValue,
+    reset,
     formState: { errors, isSubmitting }
   } = useForm<VentaFormData>({
     resolver: zodResolver(ventaSchema),
     defaultValues: {
       numero_factura: `FAC-${Date.now()}`,
+      cliente_id: 0,
       fecha: new Date().toISOString().slice(0, 16),
       subtotal: 0,
       descuento: 0,
       impuesto: 0,
       total: 0,
+      observaciones: '',
       detalles: []
     }
   })
@@ -79,19 +96,34 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
 
   const watchedDetalles = watch('detalles')
   const watchedSubtotal = watch('subtotal')
-  const watchedDescuento = watch('descuento')
-  const watchedImpuesto = watch('impuesto')
+  const watchedDescuento = watch('descuento') || 0
+  const watchedImpuesto = watch('impuesto') || 0
 
   // Calcular totales automáticamente
   useEffect(() => {
-    const subtotal = watchedDetalles.reduce((sum, detalle) => sum + detalle.subtotal, 0)
-    const descuento = watchedDescuento || 0
-    const impuesto = watchedImpuesto || 0
-    const total = subtotal - descuento + impuesto
-
+    const subtotal = watchedDetalles.reduce((sum, detalle) => sum + (detalle.subtotal || 0), 0)
+    const total = subtotal - watchedDescuento + watchedImpuesto
     setValue('subtotal', subtotal)
     setValue('total', total)
   }, [watchedDetalles, watchedDescuento, watchedImpuesto, setValue])
+
+  useEffect(() => {
+    if (productosData?.productos) {
+      setProductosCache((prev) => {
+        const next = { ...prev }
+        productosData.productos.forEach((producto: Producto) => {
+          next[producto.id] = producto
+        })
+        return next
+      })
+    }
+  }, [productosData])
+
+  useEffect(() => {
+    if (productoSeleccionado) {
+      setProductosCache((prev) => ({ ...prev, [productoSeleccionado.id]: productoSeleccionado }))
+    }
+  }, [productoSeleccionado])
 
   const agregarProducto = () => {
     if (!productoSeleccionado) return
@@ -113,22 +145,26 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       subtotal: productoSeleccionado.precio_venta
     })
 
+    setProductosCache((prev) => ({ ...prev, [productoSeleccionado.id]: productoSeleccionado }))
     setProductoSeleccionado(null)
     setBusquedaProducto('')
   }
 
-  const actualizarDetalle = (index: number, campo: string, valor: any) => {
+  const actualizarDetalle = (index: number, campo: 'cantidad' | 'precio_unitario' | 'descuento', valor: number) => {
     const detalle = watchedDetalles[index]
-    if (campo === 'cantidad' || campo === 'precio_unitario') {
-      const cantidad = campo === 'cantidad' ? valor : detalle.cantidad
-      const precio = campo === 'precio_unitario' ? valor : detalle.precio_unitario
-      const subtotal = cantidad * precio - (detalle.descuento || 0)
-      
-      setValue(`detalles.${index}.${campo}`, valor)
-      setValue(`detalles.${index}.subtotal`, subtotal)
+    const cantidad = campo === 'cantidad' ? Math.max(1, valor) : detalle.cantidad
+    const precio = campo === 'precio_unitario' ? Math.max(0, valor) : detalle.precio_unitario
+    const descuento = campo === 'descuento' ? Math.max(0, valor) : detalle.descuento || 0
+    const subtotal = Math.max(0, cantidad * precio - descuento)
+
+    if (campo === 'cantidad') {
+      setValue(`detalles.${index}.cantidad`, cantidad)
+    } else if (campo === 'precio_unitario') {
+      setValue(`detalles.${index}.precio_unitario`, precio)
     } else {
-      setValue(`detalles.${index}.${campo}` as any, valor)
+      setValue(`detalles.${index}.descuento`, descuento)
     }
+    setValue(`detalles.${index}.subtotal`, subtotal)
   }
 
   const onSubmit = async (data: VentaFormData) => {
@@ -152,6 +188,19 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       }
       await ventaService.createVenta(ventaData)
       toast.success('Venta creada exitosamente')
+      reset({
+        numero_factura: `FAC-${Date.now()}`,
+        cliente_id: 0,
+        fecha: new Date().toISOString().slice(0, 16),
+        subtotal: 0,
+        descuento: 0,
+        impuesto: 0,
+        total: 0,
+        observaciones: '',
+        detalles: []
+      })
+      setProductoSeleccionado(null)
+      setBusquedaProducto('')
       onSuccess?.()
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error al crear la venta')
@@ -161,7 +210,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Información básica */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Número de Factura
@@ -187,6 +236,27 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
           />
           {errors.fecha && (
             <p className="text-sm text-red-600 mt-1">{errors.fecha.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Cliente
+          </label>
+          <select
+            {...register('cliente_id', { valueAsNumber: true })}
+            className="input-field"
+            disabled={loadingClientes}
+          >
+            <option value={0}>Selecciona un cliente</option>
+            {clientes.map((cliente) => (
+              <option key={cliente.id} value={cliente.id}>
+                {cliente.nombre}
+              </option>
+            ))}
+          </select>
+          {errors.cliente_id && (
+            <p className="text-sm text-red-600 mt-1">{errors.cliente_id.message}</p>
           )}
         </div>
       </div>
@@ -266,10 +336,10 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         ) : (
           <div className="space-y-3">
             {fields.map((field, index) => {
-              const producto = productos.find(p => p.id === watchedDetalles[index]?.producto_id)
+              const producto = productosCache[watchedDetalles[index]?.producto_id]
               return (
                 <div key={field.id} className="card p-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-4 items-center">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2 sm:gap-4 items-center">
                     <div className="md:col-span-2">
                       <p className="font-medium text-gray-900">{producto?.nombre}</p>
                       <p className="text-sm text-gray-500">{producto?.codigo_interno}</p>
@@ -302,6 +372,20 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                       />
                     </div>
                     
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                        Descuento
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={watchedDetalles[index]?.descuento || 0}
+                        onChange={(e) => actualizarDetalle(index, 'descuento', parseFloat(e.target.value))}
+                        className="input-field text-sm"
+                      />
+                    </div>
+
                     <div>
                       <label className="block text-xs font-medium text-gray-500 mb-1">
                         Subtotal
@@ -344,7 +428,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
           <div className="flex justify-between">
             <span className="text-gray-600">Descuento:</span>
             <input
-              {...register('descuento')}
+              {...register('descuento', { valueAsNumber: true })}
               type="number"
               step="0.01"
               min="0"
@@ -355,7 +439,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
           <div className="flex justify-between">
             <span className="text-gray-600">Impuesto:</span>
             <input
-              {...register('impuesto')}
+              {...register('impuesto', { valueAsNumber: true })}
               type="number"
               step="0.01"
               min="0"

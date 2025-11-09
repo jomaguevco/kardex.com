@@ -1,325 +1,99 @@
 'use client'
 
+import { Sparkles, Settings2, ShieldCheck, Palette, Database, Bell } from 'lucide-react'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import Layout from '@/components/layout/Layout'
+
+const ajustesRapidos = [
+  {
+    titulo: 'Identidad visual',
+    descripcion: 'Colores, logotipo y tipografía coherentes con tu marca.',
+    icono: <Palette className="h-4 w-4" />,
+    estado: 'Listo para personalizar'
+  },
+  {
+    titulo: 'Notificaciones',
+    descripcion: 'Configura alertas de stock bajo, ventas y compras pendientes.',
+    icono: <Bell className="h-4 w-4" />,
+    estado: 'Próximamente'
+  },
+  {
+    titulo: 'Seguridad y usuarios',
+    descripcion: 'Roles, permisos y autenticación reforzada para tu equipo.',
+    icono: <ShieldCheck className="h-4 w-4" />,
+    estado: 'Integrado con auth store'
+  },
+  {
+    titulo: 'Integraciones externas',
+    descripcion: 'Sincronización con ERP, contabilidad y pasarelas de pago.',
+    icono: <Database className="h-4 w-4" />,
+    estado: 'En roadmap'
+  }
+]
+
 export default function ConfiguracionPage() {
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#f9fafb',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '16px',
-        borderBottom: '1px solid #e5e7eb',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        marginLeft: '256px'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
-          <h1 style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>
-            Sistema de Ventas KARDEX
-          </h1>
-          <div style={{ fontSize: '14px' }}>
-            <p style={{ fontWeight: '500', color: '#111827', margin: '0' }}>
-              Administrador del Sistema
-            </p>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0' }}>
-              ADMINISTRADOR
-            </p>
-          </div>
-        </div>
-      </div>
+    <ProtectedRoute>
+      <Layout>
+        <div className="space-y-8 pb-12 animate-fade-in">
+          <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 px-6 py-10 text-white shadow-xl">
+            <div className="absolute -left-16 top-20 hidden h-60 w-60 rounded-full bg-white/15 blur-3xl lg:block" />
+            <div className="space-y-6 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
+              <div className="space-y-6">
+                <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+                  <Sparkles className="mr-2 h-3.5 w-3.5" /> Centro de configuración
+                </span>
+                <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+                  Personaliza la experiencia y mantiene el sistema listo para producción
+                </h1>
+                <p className="max-w-xl text-sm text-white/80 sm:text-base">
+                  Ajusta elementos visuales, prepara integraciones y valida la seguridad desde un único panel coherente con el resto del proyecto.
+                </p>
+                <div className="inline-flex items-center rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white/90">
+                  <Settings2 className="mr-2 h-4 w-4" /> Cambios en tiempo real sobre la interfaz
+                </div>
+              </div>
 
-      <div style={{ display: 'flex', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{
-          width: '256px',
-          backgroundColor: 'white',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          minHeight: '100vh',
-          padding: '16px 0',
-          position: 'fixed',
-          left: '0',
-          top: '0',
-          zIndex: '50'
-        }}>
-          <div style={{ padding: '0 16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: '0' }}>
-              Sistema KARDEX
-            </h2>
-          </div>
-          
-          <nav style={{ marginTop: '16px', padding: '0 8px' }}>
-            <div style={{ marginBottom: '4px' }}>
-              <button
-                onClick={() => window.location.href = '/dashboard'}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  color: '#6b7280',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-              >
-                <span style={{ marginRight: '12px' }}>📊</span>
-                Dashboard
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '4px' }}>
-              <button
-                onClick={() => window.location.href = '/productos'}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  color: '#6b7280',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-              >
-                <span style={{ marginRight: '12px' }}>📦</span>
-                Productos
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '4px' }}>
-              <button
-                onClick={() => window.location.href = '/ventas'}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  color: '#6b7280',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-              >
-                <span style={{ marginRight: '12px' }}>🛒</span>
-                Ventas
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '4px' }}>
-              <button
-                onClick={() => window.location.href = '/compras'}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  color: '#6b7280',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-              >
-                <span style={{ marginRight: '12px' }}>🛍️</span>
-                Compras
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '4px' }}>
-              <button
-                onClick={() => window.location.href = '/kardex'}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  color: '#6b7280',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-              >
-                <span style={{ marginRight: '12px' }}>📈</span>
-                KARDEX
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '4px' }}>
-              <button
-                onClick={() => window.location.href = '/clientes'}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  color: '#6b7280',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-              >
-                <span style={{ marginRight: '12px' }}>👥</span>
-                Clientes
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '4px' }}>
-              <button
-                onClick={() => window.location.href = '/proveedores'}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  color: '#6b7280',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-              >
-                <span style={{ marginRight: '12px' }}>🏢</span>
-                Proveedores
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '4px' }}>
-              <button
-                onClick={() => window.location.href = '/reportes'}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  color: '#6b7280',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-                onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-              >
-                <span style={{ marginRight: '12px' }}>📄</span>
-                Reportes
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '4px' }}>
-              <button
-                onClick={() => alert('Configuración clickeado!')}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  borderRadius: '6px',
-                  backgroundColor: '#dbeafe',
-                  color: '#1d4ed8',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <span style={{ marginRight: '12px' }}>⚙️</span>
-                Configuración
-              </button>
-            </div>
-          </nav>
-          
-          <div style={{
-            position: 'absolute',
-            bottom: '0',
-            left: '0',
-            right: '0',
-            padding: '16px',
-            borderTop: '1px solid #e5e7eb',
-            backgroundColor: 'white'
-          }}>
-            <div style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>
-              Sistema de Ventas KARDEX v1.0
-            </div>
-          </div>
-        </div>
-
-        <div style={{ marginLeft: '256px', padding: '24px' }}>
-          <div style={{ marginBottom: '24px' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', margin: '0 0 8px 0' }}>
-              Configuración
-            </h1>
-            <p style={{ color: '#6b7280', margin: '0' }}>
-              Ajustes y configuración del sistema
-            </p>
-          </div>
-
-          <div style={{
-            backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: '500', color: '#111827', margin: '0 0 16px 0' }}>
-                Módulo de Configuración
-              </h3>
-              <p style={{ color: '#6b7280', margin: '0 0 16px 0' }}>
-                Esta sección está funcionando correctamente
-              </p>
-              <div style={{
-                backgroundColor: '#dcfce7',
-                border: '1px solid #16a34a',
-                color: '#15803d',
-                padding: '12px 16px',
-                borderRadius: '6px'
-              }}>
-                ✅ Configuración funcionando - Navegación activa
+              <div className="rounded-3xl bg-white/10 p-6 backdrop-blur-md">
+                <p className="text-xs font-semibold uppercase tracking-wide text-white/70">Recordatorio</p>
+                <p className="mt-3 text-sm text-white/80">
+                  Esta sección controla parámetros globales. Se recomienda registrar los ajustes finales antes del despliegue comercial para asegurar coherencia visual y funcional.
+                </p>
               </div>
             </div>
-          </div>
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
+            <div className="card space-y-6 p-6">
+              <h2 className="text-lg font-semibold text-slate-900">Ajustes rápidos</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {ajustesRapidos.map((ajuste) => (
+                  <div key={ajuste.titulo} className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm">
+                        {ajuste.icono}
+                        {ajuste.estado}
+                      </div>
+                    </div>
+                    <h3 className="mt-4 text-base font-semibold text-slate-900">{ajuste.titulo}</h3>
+                    <p className="mt-2 text-sm text-slate-600">{ajuste.descripcion}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card space-y-4 p-6">
+              <h2 className="text-lg font-semibold text-slate-900">Hoja de ruta</h2>
+              <div className="space-y-3 text-sm text-slate-600">
+                <p>• Panel de auditoría y bitácora de cambios.</p>
+                <p>• Webhooks para integraciones contables.</p>
+                <p>• Parámetros avanzados de facturación electrónica.</p>
+                <p>• Preferencias de notificación por usuario.</p>
+              </div>
+            </div>
+          </section>
         </div>
-      </div>
-    </div>
+      </Layout>
+    </ProtectedRoute>
   )
 }

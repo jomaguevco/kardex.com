@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Menu, Bell, User, LogOut, Settings, Sparkles } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
-import { Menu, Bell, User, LogOut, Settings } from 'lucide-react'
-import { cn } from '@/utils/cn'
 
 interface HeaderProps {
   onMenuToggle: () => void
@@ -19,66 +18,57 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/60 bg-white/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-white/30 bg-white/60 shadow-sm shadow-slate-950/10 backdrop-blur-xl">
       <div className="flex items-center justify-between px-4 py-3 lg:px-6">
-        {/* Botón de menú y título */}
         <div className="flex items-center">
           <button
             onClick={onMenuToggle}
-            className="p-2 rounded-md hover:bg-gray-100 lg:hidden"
+            className="rounded-xl border border-white/40 bg-white/70 p-2 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/70 hover:shadow-lg lg:hidden"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5 text-slate-600" />
           </button>
-          <h2 className="ml-2 text-lg font-semibold text-gray-900 lg:ml-0">
-            Sistema de Ventas KARDEX
-          </h2>
+          <div className="ml-3 flex items-center gap-2 rounded-xl border border-white/30 bg-white/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+            <Sparkles className="h-3.5 w-3.5 text-indigo-500" /> Sistema de ventas KARDEX
+          </div>
         </div>
 
-        {/* Acciones del header */}
-        <div className="flex items-center space-x-2 md:space-x-4">
-          {/* Notificaciones */}
-          <button className="p-2 rounded-md hover:bg-gray-100 relative">
-            <Bell className="h-5 w-5 text-gray-600" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+        <div className="flex items-center gap-2 md:gap-3">
+          <button className="relative rounded-xl border border-white/30 bg-white/70 p-2 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/60 hover:shadow-lg">
+            <Bell className="h-5 w-5 text-slate-600" />
+            <span className="absolute -top-1 right-1 h-2 w-2 rounded-full bg-rose-500" />
           </button>
 
-          {/* Menú de usuario */}
           <div className="relative">
             <button
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100"
+              onClick={() => setShowUserMenu((prev) => !prev)}
+              className="flex items-center gap-3 rounded-xl border border-white/30 bg-white/70 px-2 py-1.5 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/60 hover:shadow-lg"
             >
-              <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500 text-white shadow-lg shadow-indigo-500/40">
+                <User className="h-5 w-5" />
               </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-gray-900">{user?.nombre_completo}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.rol}</p>
+              <div className="hidden text-left sm:block">
+                <p className="text-sm font-semibold text-slate-800">{user?.nombre_completo}</p>
+                <p className="text-xs font-medium capitalize text-slate-500">{user?.rol}</p>
               </div>
             </button>
 
-            {/* Dropdown del usuario */}
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                <div className="px-4 py-2 border-b border-gray-200">
-                  <p className="text-sm font-medium text-gray-900">{user?.nombre_completo}</p>
-                  <p className="text-xs text-gray-500">{user?.email}</p>
+              <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-xl shadow-slate-900/15 backdrop-blur-sm">
+                <div className="rounded-xl bg-slate-50/70 px-3 py-2">
+                  <p className="text-sm font-semibold text-slate-800">{user?.nombre_completo}</p>
+                  <p className="text-xs text-slate-500">{user?.email}</p>
                 </div>
-                
                 <button
                   onClick={() => setShowUserMenu(false)}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100/80"
                 >
-                  <Settings className="mr-3 h-4 w-4" />
-                  Configuración
+                  <Settings className="h-4 w-4" /> Configuración
                 </button>
-                
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-rose-600 transition hover:bg-rose-50"
                 >
-                  <LogOut className="mr-3 h-4 w-4" />
-                  Cerrar sesión
+                  <LogOut className="h-4 w-4" /> Cerrar sesión
                 </button>
               </div>
             )}

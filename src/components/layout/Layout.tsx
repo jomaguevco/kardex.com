@@ -4,37 +4,35 @@ import { useState } from 'react'
 import Sidebar from './Sidebar'
 import Header from './Header'
 
-interface LayoutProps {
+type LayoutProps = {
   children: React.ReactNode
 }
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev)
 
   return (
-    <div className="relative min-h-screen bg-transparent">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="floating absolute -left-24 top-24 h-72 w-72 rounded-full bg-gradient-to-br from-indigo-200/50 via-blue-200/40 to-emerald-200/40 blur-3xl" />
-        <div className="floating absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-gradient-to-br from-emerald-200/40 via-sky-200/40 to-purple-200/40 blur-3xl" style={{ animationDelay: '2s' }} />
-      </div>
-
-      {/* Sidebar */}
+    <div className="relative min-h-screen bg-slate-950/95">
+      <BackgroundDecorations />
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-
-      {/* Contenido principal */}
-      <div className="relative lg:pl-64">
-        {/* Header */}
+      <div className="relative transition-all duration-500 lg:pl-64">
         <Header onMenuToggle={toggleSidebar} />
-
-        {/* Contenido de la página */}
-        <main className="relative z-10 p-6">
-          {children}
+        <main className="relative z-10 px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl space-y-10">{children}</div>
         </main>
       </div>
+    </div>
+  )
+}
+
+function BackgroundDecorations() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-indigo-600/40 via-purple-600/30 to-transparent blur-3xl" />
+      <div className="absolute -left-40 top-32 h-80 w-80 rounded-full bg-emerald-500/30 blur-[120px]" />
+      <div className="absolute -right-32 bottom-10 h-72 w-72 rounded-full bg-sky-500/25 blur-[120px]" />
     </div>
   )
 }

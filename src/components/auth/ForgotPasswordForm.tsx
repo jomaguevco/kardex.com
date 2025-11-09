@@ -4,19 +4,21 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { authService } from '@/services/authService'
-import { Mail, User, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { Mail, User, ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { authService } from '@/services/authService'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
-const forgotPasswordSchema = z.object({
-  email: z.string().email().optional(),
-  nombre_usuario: z.string().min(3).max(50).optional()
-}).refine((data) => data.email || data.nombre_usuario, {
-  message: 'Debe proporcionar email o nombre de usuario',
-  path: ['email']
-})
+const forgotPasswordSchema = z
+  .object({
+    email: z.string().email().optional(),
+    nombre_usuario: z.string().min(3).max(50).optional()
+  })
+  .refine((data) => data.email || data.nombre_usuario, {
+    message: 'Ingresa un email o un usuario',
+    path: ['email']
+  })
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
 
@@ -25,7 +27,11 @@ export default function ForgotPasswordForm() {
   const [isSuccess, setIsSuccess] = useState(false)
   const [resetLink, setResetLink] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema)
   })
 
@@ -33,19 +39,18 @@ export default function ForgotPasswordForm() {
     setIsLoading(true)
     try {
       const response = await authService.requestPasswordReset(data.email, data.nombre_usuario)
-      
+
       if (response.success) {
         setIsSuccess(true)
-        // En desarrollo, mostrar el link directamente
         if ((response as any).resetLink) {
           setResetLink((response as any).resetLink)
         }
-        toast.success('Si el usuario existe, se enviará un enlace de recuperación')
+        toast.success('Si el usuario existe, enviaremos un enlace de recuperación')
       } else {
-        toast.error(response.message || 'Error al solicitar recuperación')
+        toast.error(response.message || 'No pudimos procesar tu solicitud')
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al solicitar recuperación de contraseña')
+      toast.error(error.response?.data?.message || 'Error al solicitar la recuperación')
     } finally {
       setIsLoading(false)
     }
@@ -53,40 +58,29 @@ export default function ForgotPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-                <Mail className="h-6 w-6 text-green-600" />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 px-4 py-16">
+        <div className="absolute inset-0 bg-[url('/grain.svg')] opacity-20" />
+        <div className="relative z-10 w-full max-w-md">
+          <div className="glass-card rounded-3xl p-8 text-center shadow-2xl">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+              <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+            </div>
+            <h2 className="mt-6 text-2xl font-semibold text-slate-900">Solicitud enviada</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Si las credenciales coinciden, recibirás un enlace de recuperación en tu correo.
+            </p>
+            {resetLink && (
+              <div className="mt-4 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-left text-xs text-indigo-700">
+                <p className="font-semibold">Enlace (modo desarrollo):</p>
+                <a className="mt-1 block break-all text-indigo-600 underline" href={resetLink} target="_blank" rel="noopener noreferrer">
+                  {resetLink}
+                </a>
               </div>
-              <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-                Solicitud Enviada
-              </h2>
-              <p className="mt-2 text-sm text-gray-600">
-                Si el usuario existe, se enviará un enlace de recuperación
-              </p>
-              {resetLink && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-md">
-                  <p className="text-xs text-blue-800 mb-2">Enlace de desarrollo:</p>
-                  <a 
-                    href={resetLink} 
-                    className="text-xs text-blue-600 underline break-all"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {resetLink}
-                  </a>
-                </div>
-              )}
-              <div className="mt-6">
-                <Link
-                  href="/login"
-                  className="text-sm text-blue-600 hover:text-blue-500"
-                >
-                  Volver al inicio de sesión
-                </Link>
-              </div>
+            )}
+            <div className="mt-6">
+              <Link href="/login" className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+                <ArrowLeft className="h-4 w-4" /> Volver al inicio de sesión
+              </Link>
             </div>
           </div>
         </div>
@@ -95,95 +89,91 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Recuperar Contraseña
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Ingresa tu email o nombre de usuario para recuperar tu contraseña
-          </p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 px-4 py-16">
+      <div className="absolute inset-0 bg-[url('/grain.svg')] opacity-20" />
+      <div className="relative z-10 w-full max-w-4xl">
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div className="hidden lg:block space-y-4 text-white/90">
+            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" /> Recuperación segura
+            </span>
+            <h1 className="text-4xl font-semibold leading-tight">
+              ¿Olvidaste tu contraseña? Te ayudamos a restablecerla en segundos.
+            </h1>
+            <p className="text-sm text-white/80">
+              Ingresa tu correo o nombre de usuario. Te enviaremos un correo con instrucciones para crear una nueva contraseña y mantener tu cuenta segura.
+            </p>
+          </div>
+
+          <div className="glass-card rounded-3xl p-8 shadow-2xl">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-slate-900">Recuperar contraseña</h2>
+              <p className="mt-1 text-sm text-slate-500">Ingresa tu email o usuario asociado a la cuenta.</p>
+            </div>
+
+            <form className="mt-6 space-y-5" onSubmit={handleSubmit(onSubmit)}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-600">Correo electrónico</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                    <Mail className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <input
+                    {...register('email')}
+                    type="email"
+                    placeholder="tu@email.com"
+                    className="input-field pl-9"
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-xs font-medium text-rose-500">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="text-center text-xs font-semibold uppercase tracking-wide text-slate-400">
+                o
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-600">Nombre de usuario</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                    <User className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <input
+                    {...register('nombre_usuario')}
+                    type="text"
+                    placeholder="usuario_demo"
+                    className="input-field pl-9"
+                  />
+                </div>
+                {errors.nombre_usuario && (
+                  <p className="text-xs font-medium text-rose-500">{errors.nombre_usuario.message}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary inline-flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isLoading ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" /> Enviando solicitud...
+                  </>
+                ) : (
+                  'Enviar enlace de recuperación'
+                )}
+              </button>
+
+              <div className="text-center">
+                <Link href="/login" className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+                  <ArrowLeft className="h-4 w-4" /> Volver al inicio de sesión
+                </Link>
+              </div>
+            </form>
+          </div>
         </div>
-        <form className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  {...register('email')}
-                  type="email"
-                  className="input-field pl-10"
-                  placeholder="tu@email.com"
-                />
-              </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">O</span>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="nombre_usuario" className="block text-sm font-medium text-gray-700">
-                Nombre de Usuario
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  {...register('nombre_usuario')}
-                  type="text"
-                  className="input-field pl-10"
-                  placeholder="nombre_usuario"
-                />
-              </div>
-              {errors.nombre_usuario && (
-                <p className="mt-1 text-sm text-red-600">{errors.nombre_usuario.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full flex justify-center items-center"
-            >
-              {isLoading ? (
-                <>
-                  <LoadingSpinner size="sm" className="mr-2" />
-                  Enviando...
-                </>
-              ) : (
-                'Enviar Enlace de Recuperación'
-              )}
-            </button>
-          </div>
-
-          <div className="text-center">
-            <Link
-              href="/login"
-              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Volver al inicio de sesión
-            </Link>
-          </div>
-        </form>
       </div>
     </div>
   )

@@ -1,589 +1,568 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { reporteService } from '@/services/reporteService';
-import ProtectedRoute from '../../components/auth/ProtectedRoute';
+import { useEffect, useState } from 'react'
+import {
+  Sparkles,
+  PieChart,
+  ShoppingBag,
+  Boxes,
+  Coins,
+  BarChart3,
+  ArrowRight,
+  FileBarChart,
+  TrendingUp
+} from 'lucide-react'
+import toast from 'react-hot-toast'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import Layout from '@/components/layout/Layout'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import reporteService from '@/services/reporteService'
+
+ type ReporteTab = 'ventas' | 'compras' | 'inventario' | 'rentabilidad' | 'movimientos'
+
+const tabs: { id: ReporteTab; label: string; icon: React.ReactNode; description: string }[] = [
+  {
+    id: 'ventas',
+    label: 'Reporte de ventas',
+    icon: <PieChart className="h-4 w-4" />,
+    description: 'Estadísticas de facturación y clientes.'
+  },
+  {
+    id: 'compras',
+    label: 'Reporte de compras',
+    icon: <ShoppingBag className="h-4 w-4" />,
+    description: 'Controla tus órdenes de abastecimiento.'
+  },
+  {
+    id: 'inventario',
+    label: 'Reporte de inventario',
+    icon: <Boxes className="h-4 w-4" />,
+    description: 'Valor y rotación de productos.'
+  },
+  {
+    id: 'rentabilidad',
+    label: 'Reporte de rentabilidad',
+    icon: <Coins className="h-4 w-4" />,
+    description: 'Ingresos, costos y márgenes.'
+  },
+  {
+    id: 'movimientos',
+    label: 'Movimientos KARDEX',
+    icon: <BarChart3 className="h-4 w-4" />,
+    description: 'Entradas y salidas del inventario.'
+  }
+]
 
 export default function ReportesPage() {
   return (
     <ProtectedRoute>
-      <ReportesContent />
+      <Layout>
+        <ReportesContent />
+      </Layout>
     </ProtectedRoute>
-  );
+  )
 }
 
 function ReportesContent() {
-  const [activeTab, setActiveTab] = useState<'ventas' | 'compras' | 'inventario' | 'rentabilidad' | 'movimientos'>('ventas');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Filtros comunes
-  const [fechaInicio, setFechaInicio] = useState('');
-  const [fechaFin, setFechaFin] = useState('');
-  
-  // Datos de reportes
-  const [reporteVentas, setReporteVentas] = useState<any>(null);
-  const [reporteCompras, setReporteCompras] = useState<any>(null);
-  const [reporteInventario, setReporteInventario] = useState<any>(null);
-  const [reporteRentabilidad, setReporteRentabilidad] = useState<any>(null);
-  const [reporteMovimientos, setReporteMovimientos] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<ReporteTab>('ventas')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [fechaInicio, setFechaInicio] = useState('')
+  const [fechaFin, setFechaFin] = useState('')
 
-  const cargarReporte = async () => {
-    setLoading(true);
-    setError(null);
+  const [reporteVentas, setReporteVentas] = useState<any>(null)
+  const [reporteCompras, setReporteCompras] = useState<any>(null)
+  const [reporteInventario, setReporteInventario] = useState<any>(null)
+  const [reporteRentabilidad, setReporteRentabilidad] = useState<any>(null)
+  const [reporteMovimientos, setReporteMovimientos] = useState<any>(null)
+
+  const cargarReporte = async (tab: ReporteTab = activeTab) => {
     try {
-      switch (activeTab) {
-        case 'ventas':
-          const ventas = await reporteService.getReporteVentas({
+      setIsLoading(true)
+      setError(null)
+      switch (tab) {
+        case 'ventas': {
+          const data = await reporteService.getReporteVentas({
             fecha_inicio: fechaInicio || undefined,
             fecha_fin: fechaFin || undefined
-          });
-          setReporteVentas(ventas);
-          break;
-        case 'compras':
-          const compras = await reporteService.getReporteCompras({
+          })
+          setReporteVentas(data)
+          break
+        }
+        case 'compras': {
+          const data = await reporteService.getReporteCompras({
             fecha_inicio: fechaInicio || undefined,
             fecha_fin: fechaFin || undefined
-          });
-          setReporteCompras(compras);
-          break;
-        case 'inventario':
-          const inventario = await reporteService.getReporteInventario({});
-          setReporteInventario(inventario);
-          break;
-        case 'rentabilidad':
-          const rentabilidad = await reporteService.getReporteRentabilidad({
+          })
+          setReporteCompras(data)
+          break
+        }
+        case 'inventario': {
+          const data = await reporteService.getReporteInventario({})
+          setReporteInventario(data)
+          break
+        }
+        case 'rentabilidad': {
+          const data = await reporteService.getReporteRentabilidad({
             fecha_inicio: fechaInicio || undefined,
             fecha_fin: fechaFin || undefined
-          });
-          setReporteRentabilidad(rentabilidad);
-          break;
-        case 'movimientos':
-          const movimientos = await reporteService.getReporteMovimientos({
+          })
+          setReporteRentabilidad(data)
+          break
+        }
+        case 'movimientos': {
+          const data = await reporteService.getReporteMovimientos({
             fecha_inicio: fechaInicio || undefined,
             fecha_fin: fechaFin || undefined
-          });
-          setReporteMovimientos(movimientos);
-          break;
+          })
+          setReporteMovimientos(data)
+          break
+        }
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Error al cargar el reporte');
+      const message = err?.response?.data?.message || err?.message || 'Error al cargar el reporte'
+      setError(message)
+      toast.error(message)
     } finally {
-      setLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    cargarReporte();
-  }, [activeTab]);
+    cargarReporte()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab])
 
-  const renderReporteVentas = () => {
-    if (!reporteVentas) return null;
-    
-    return (
-      <div>
-        <div style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Total Ventas</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              ${Number(reporteVentas.estadisticas?.total_ventas || 0).toFixed(2)}
+  const requiresFecha = ['ventas', 'compras', 'rentabilidad', 'movimientos'].includes(activeTab)
+
+  return (
+    <div className="space-y-8 pb-12 animate-fade-in">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-blue-600 to-sky-500 px-6 py-10 text-white shadow-xl">
+        <div className="absolute -right-14 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/20 blur-3xl lg:block" />
+        <div className="space-y-6 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
+          <div className="space-y-6">
+            <span className="inline-flex items-center rounded-full bg-white/25 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" /> Inteligencia comercial
+            </span>
+            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+              Visualiza el desempeño del negocio con reportes cohesivos y listos para compartir
+            </h1>
+            <p className="max-w-xl text-sm text-white/80 sm:text-base">
+              Accede a métricas de ventas, compras, inventario y rentabilidad con la misma estética refinada del dashboard. Exporta, filtra y toma decisiones con confianza.
+            </p>
+            <div className="inline-flex items-center rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white/90">
+              <FileBarChart className="mr-2 h-4 w-4" /> Reportes sincronizados con el backend en tiempo real
             </div>
           </div>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Cantidad de Ventas</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              {reporteVentas.estadisticas?.cantidad_ventas || 0}
-            </div>
-          </div>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Promedio por Venta</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              ${Number(reporteVentas.estadisticas?.promedio_venta || 0).toFixed(2)}
+
+          <div className="rounded-3xl bg-white/15 p-6 backdrop-blur-md">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <HeroMetric title="Snapshots al día" description="Consulta filtros por rango de fechas" />
+              <HeroMetric title="Exportación rápida" description="Usa las métricas para presentaciones" />
+              <HeroMetric title="Alertas de stock" description="Integra con el módulo de inventario" />
+              <HeroMetric title="KPIs clave" description="Ticket promedio, márgenes y más" />
             </div>
           </div>
         </div>
-        
-        <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ backgroundColor: '#f9fafb' }}>
-              <tr>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Factura</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Cliente</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Fecha</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(reporteVentas.ventas || []).map((venta: any, index: number) => (
-                <tr key={venta.id} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb' }}>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{venta.numero_factura}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{(venta.cliente as any)?.nombre || 'N/A'}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{new Date(venta.fecha_venta).toLocaleDateString()}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right', fontWeight: '600' }}>${Number(venta.total).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      </section>
+
+      <section className="space-y-6">
+        <div className="card overflow-hidden">
+          <nav className="flex flex-wrap gap-2 border-b border-slate-200 bg-white/70 px-4 py-3">
+            {tabs.map((tab) => {
+              const isActive = tab.id === activeTab
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`group inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                      : 'bg-indigo-50/60 text-indigo-600 hover:bg-indigo-100'
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              )
+            })}
+          </nav>
+
+          <div className="space-y-6 bg-white p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  {tabs.find((tab) => tab.id === activeTab)?.label}
+                </h2>
+                <p className="text-sm text-slate-500">
+                  {tabs.find((tab) => tab.id === activeTab)?.description}
+                </p>
+              </div>
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-800"
+              >
+                Generar PDF <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+
+            {requiresFecha && (
+              <div className="grid gap-4 rounded-2xl border border-slate-100 bg-slate-50/60 p-4 sm:grid-cols-[repeat(3,minmax(0,1fr))]">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha inicio</label>
+                  <input
+                    type="date"
+                    value={fechaInicio}
+                    onChange={(event) => setFechaInicio(event.target.value)}
+                    className="input-field"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha fin</label>
+                  <input
+                    type="date"
+                    value={fechaFin}
+                    onChange={(event) => setFechaFin(event.target.value)}
+                    className="input-field"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button
+                    onClick={() => cargarReporte()}
+                    disabled={isLoading}
+                    className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isLoading ? 'Actualizando...' : 'Aplicar filtros'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+                {error}
+              </div>
+            )}
+
+            {isLoading ? (
+              <div className="py-20 text-center text-sm text-slate-500">
+                <LoadingSpinner size="lg" />
+                <p className="mt-3">Cargando reporte...</p>
+              </div>
+            ) : (
+              <ReportContent
+                tab={activeTab}
+                reporteVentas={reporteVentas}
+                reporteCompras={reporteCompras}
+                reporteInventario={reporteInventario}
+                reporteRentabilidad={reporteRentabilidad}
+                reporteMovimientos={reporteMovimientos}
+              />
+            )}
+          </div>
         </div>
+      </section>
+    </div>
+  )
+}
+
+function ReportContent({
+  tab,
+  reporteVentas,
+  reporteCompras,
+  reporteInventario,
+  reporteRentabilidad,
+  reporteMovimientos
+}: any) {
+  switch (tab as ReporteTab) {
+    case 'ventas':
+      return <ReporteVentas data={reporteVentas} />
+    case 'compras':
+      return <ReporteCompras data={reporteCompras} />
+    case 'inventario':
+      return <ReporteInventario data={reporteInventario} />
+    case 'rentabilidad':
+      return <ReporteRentabilidad data={reporteRentabilidad} />
+    case 'movimientos':
+      return <ReporteMovimientos data={reporteMovimientos} />
+    default:
+      return null
+  }
+}
+
+function HeroMetric({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="rounded-2xl border border-white/40 bg-white/20 p-4 backdrop-blur-sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-white/85">{title}</p>
+      <p className="mt-2 text-xs text-white/75">{description}</p>
+    </div>
+  )
+}
+
+function StatCard({ label, value, tone = 'default' }: { label: string; value: string; tone?: 'default' | 'success' | 'warning' }) {
+  const classes = {
+    default: 'bg-slate-50 text-slate-900',
+    success: 'bg-emerald-50 text-emerald-700',
+    warning: 'bg-amber-50 text-amber-700'
+  }[tone]
+
+  return (
+    <div className={`rounded-2xl border border-slate-100 px-4 py-3 ${classes}`}>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-2 text-xl font-semibold">{value}</p>
+    </div>
+  )
+}
+
+function ReporteVentas({ data }: { data: any }) {
+  if (!data) {
+    return <EmptyState />
+  }
+
+  const stats = data.estadisticas || {}
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Total ventas" value={`$${Number(stats.total_ventas || 0).toFixed(2)}`} />
+        <StatCard label="Cantidad" value={`${stats.cantidad_ventas || 0} ventas`} />
+        <StatCard label="Ticket promedio" value={`$${Number(stats.promedio_venta || 0).toFixed(2)}`} />
+        <StatCard label="Clientes" value={`${data.resumen_clientes?.total_clientes || 0}`} />
       </div>
-    );
-  };
 
-  const renderReporteCompras = () => {
-    if (!reporteCompras) return null;
-    
-    return (
-      <div>
-        <div style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Total Compras</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              ${Number(reporteCompras.estadisticas?.total_compras || 0).toFixed(2)}
-            </div>
-          </div>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Cantidad de Compras</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              {reporteCompras.estadisticas?.cantidad_compras || 0}
-            </div>
-          </div>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Promedio por Compra</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              ${Number(reporteCompras.estadisticas?.promedio_compra || 0).toFixed(2)}
-            </div>
-          </div>
-        </div>
-        
-        <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ backgroundColor: '#f9fafb' }}>
-              <tr>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Factura</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Proveedor</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Fecha</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Total</th>
+      <div className="overflow-hidden rounded-2xl border border-slate-100">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Factura</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Cliente</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Total</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {(data.ventas || []).map((venta: any) => (
+              <tr key={venta.id} className="hover:bg-slate-50">
+                <td className="px-6 py-4 text-sm font-semibold text-slate-900">{venta.numero_factura}</td>
+                <td className="px-6 py-4 text-sm text-slate-700">{venta.cliente?.nombre || 'Cliente no registrado'}</td>
+                <td className="px-6 py-4 text-sm text-slate-500">{new Date(venta.fecha_venta).toLocaleDateString()}</td>
+                <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">${Number(venta.total).toFixed(2)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {(reporteCompras.compras || []).map((compra: any, index: number) => (
-                <tr key={compra.id} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb' }}>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{compra.numero_factura}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{(compra.proveedor as any)?.nombre || 'N/A'}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{new Date(compra.fecha_compra).toLocaleDateString()}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right', fontWeight: '600' }}>${Number(compra.total).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
-    );
-  };
+    </div>
+  )
+}
 
-  const renderReporteInventario = () => {
-    if (!reporteInventario) return null;
-    
-    return (
-      <div>
-        <div style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Total Productos</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              {reporteInventario.estadisticas?.total_productos || 0}
-            </div>
-          </div>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Valor Total Inventario</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              ${Number(reporteInventario.estadisticas?.valor_total_inventario || 0).toFixed(2)}
-            </div>
-          </div>
-          <div style={{ backgroundColor: '#fef2f2', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Productos Stock Bajo</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#dc2626' }}>
-              {reporteInventario.estadisticas?.productos_stock_bajo || 0}
-            </div>
-          </div>
-        </div>
-        
-        <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ backgroundColor: '#f9fafb' }}>
-              <tr>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Producto</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Stock Actual</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Stock Mínimo</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Precio Compra</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Valor Total</th>
+function ReporteCompras({ data }: { data: any }) {
+  if (!data) {
+    return <EmptyState />
+  }
+
+  const stats = data.estadisticas || {}
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Total compras" value={`$${Number(stats.total_compras || 0).toFixed(2)}`} />
+        <StatCard label="Órdenes" value={`${stats.cantidad_compras || 0}`} />
+        <StatCard label="Ticket promedio" value={`$${Number(stats.promedio_compra || 0).toFixed(2)}`} />
+        <StatCard label="Proveedores" value={`${data.resumen_proveedores?.total_proveedores || 0}`} />
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-slate-100">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Factura</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Proveedor</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Total</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {(data.compras || []).map((compra: any) => (
+              <tr key={compra.id} className="hover:bg-slate-50">
+                <td className="px-6 py-4 text-sm font-semibold text-slate-900">{compra.numero_factura}</td>
+                <td className="px-6 py-4 text-sm text-slate-700">{compra.proveedor?.nombre || 'Proveedor no registrado'}</td>
+                <td className="px-6 py-4 text-sm text-slate-500">{new Date(compra.fecha_compra).toLocaleDateString()}</td>
+                <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">${Number(compra.total).toFixed(2)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {(reporteInventario.productos || []).slice(0, 50).map((producto: any, index: number) => (
-                <tr key={producto.id} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb' }}>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{producto.nombre}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: producto.stock_actual <= producto.stock_minimo ? '#dc2626' : '#111827', textAlign: 'right', fontWeight: producto.stock_actual <= producto.stock_minimo ? '600' : 'normal' }}>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function ReporteInventario({ data }: { data: any }) {
+  if (!data) {
+    return <EmptyState />
+  }
+
+  const stats = data.estadisticas || {}
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard label="Productos" value={`${stats.total_productos || 0}`} />
+        <StatCard label="Valor inventario" value={`$${Number(stats.valor_total_inventario || 0).toFixed(2)}`} />
+        <StatCard label="Stock bajo" value={`${stats.productos_stock_bajo || 0}`} tone="warning" />
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-slate-100">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Producto</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Stock actual</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Stock mínimo</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Precio compra</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Valor total</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {(data.productos || []).slice(0, 80).map((producto: any) => {
+              const isLow = producto.stock_actual <= producto.stock_minimo
+              return (
+                <tr key={producto.id} className="hover:bg-slate-50">
+                  <td className="px-6 py-4 text-sm text-slate-700">{producto.nombre}</td>
+                  <td
+                    className={`px-6 py-4 text-right text-sm font-semibold ${
+                      isLow ? 'text-rose-600' : 'text-slate-900'
+                    }`}
+                  >
                     {producto.stock_actual}
                   </td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>{producto.stock_minimo}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>${Number(producto.precio_compra).toFixed(2)}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right', fontWeight: '600' }}>
+                  <td className="px-6 py-4 text-right text-sm text-slate-500">{producto.stock_minimo}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-500">${Number(producto.precio_compra).toFixed(2)}</td>
+                  <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">
                     ${(Number(producto.stock_actual) * Number(producto.precio_compra)).toFixed(2)}
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  const renderReporteRentabilidad = () => {
-    if (!reporteRentabilidad) return null;
-    
-    return (
-      <div>
-        <div style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Total Ingresos</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              ${Number(reporteRentabilidad.estadisticas_generales?.total_ingresos || 0).toFixed(2)}
-            </div>
-          </div>
-          <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Total Costos</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              ${Number(reporteRentabilidad.estadisticas_generales?.total_costos || 0).toFixed(2)}
-            </div>
-          </div>
-          <div style={{ backgroundColor: '#dcfce7', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Ganancia Total</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#15803d' }}>
-              ${Number(reporteRentabilidad.estadisticas_generales?.ganancia_total || 0).toFixed(2)}
-            </div>
-          </div>
-          <div style={{ backgroundColor: '#dbeafe', padding: '16px', borderRadius: '8px' }}>
-            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Margen General</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1d4ed8' }}>
-              {Number(reporteRentabilidad.estadisticas_generales?.margen_general || 0).toFixed(2)}%
-            </div>
-          </div>
-        </div>
-        
-        <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ backgroundColor: '#f9fafb' }}>
-              <tr>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Producto</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Cant. Vendida</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Ingresos</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Costos</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Ganancia</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Margen %</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(reporteRentabilidad.rentabilidad_por_producto || []).slice(0, 50).map((item: any, index: number) => (
-                <tr key={item.producto?.id || index} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb' }}>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{item.producto?.nombre || 'N/A'}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>{Number(item.cantidad_vendida || 0).toFixed(2)}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>${Number(item.ingreso_total || 0).toFixed(2)}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>${Number(item.costo_total || 0).toFixed(2)}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: item.ganancia_total >= 0 ? '#15803d' : '#dc2626', textAlign: 'right', fontWeight: '600' }}>
-                    ${Number(item.ganancia_total || 0).toFixed(2)}
-                  </td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: item.margen_promedio >= 0 ? '#15803d' : '#dc2626', textAlign: 'right', fontWeight: '600' }}>
-                    {Number(item.margen_promedio || 0).toFixed(2)}%
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  const renderReporteMovimientos = () => {
-    if (!reporteMovimientos) return null;
-    
-    return (
-      <div>
-        <div style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ backgroundColor: '#f9fafb' }}>
-              <tr>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Fecha</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Producto</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Tipo Movimiento</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Cantidad</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Stock Anterior</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Stock Nuevo</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontSize: '14px', fontWeight: '600', color: '#111827' }}>Costo Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(reporteMovimientos.movimientos || []).slice(0, 100).map((movimiento: any, index: number) => (
-                <tr key={movimiento.id} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb' }}>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{new Date(movimiento.fecha_movimiento).toLocaleDateString()}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{(movimiento.producto as any)?.nombre || 'N/A'}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>{movimiento.tipo_movimiento}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>{movimiento.cantidad}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>{movimiento.stock_anterior}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right', fontWeight: '600' }}>{movimiento.stock_nuevo}</td>
-                  <td style={{ padding: '12px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>${Number(movimiento.costo_total || 0).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#f9fafb',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      {/* Header */}
-      <div style={{
-        backgroundColor: 'white',
-        padding: '16px',
-        borderBottom: '1px solid #e5e7eb',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        marginLeft: '256px'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1400px',
-          margin: '0 auto'
-        }}>
-          <h1 style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>
-            Sistema de Ventas KARDEX
-          </h1>
-          <div style={{ fontSize: '14px' }}>
-            <p style={{ fontWeight: '500', color: '#111827', margin: '0' }}>
-              Administrador del Sistema
-            </p>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0' }}>
-              ADMINISTRADOR
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto' }}>
-        {/* Sidebar */}
-        <div style={{
-          width: '256px',
-          backgroundColor: 'white',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          minHeight: '100vh',
-          padding: '16px 0',
-          position: 'fixed',
-          left: '0',
-          top: '0',
-          zIndex: '50'
-        }}>
-          <div style={{ padding: '0 16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: '0' }}>
-              Sistema KARDEX
-            </h2>
-          </div>
-          
-          <nav style={{ marginTop: '16px', padding: '0 8px' }}>
-            {[
-              { href: '/dashboard', icon: '📊', label: 'Dashboard' },
-              { href: '/productos', icon: '📦', label: 'Productos' },
-              { href: '/ventas', icon: '🛒', label: 'Ventas' },
-              { href: '/compras', icon: '🛍️', label: 'Compras' },
-              { href: '/kardex', icon: '📈', label: 'KARDEX' },
-              { href: '/clientes', icon: '👥', label: 'Clientes' },
-              { href: '/proveedores', icon: '🏢', label: 'Proveedores' },
-              { href: '/reportes', icon: '📄', label: 'Reportes', active: true },
-              { href: '/configuracion', icon: '⚙️', label: 'Configuración' }
-            ].map((item) => (
-              <div key={item.href} style={{ marginBottom: '4px' }}>
-                <button
-                  onClick={() => window.location.href = item.href}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '8px 12px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    borderRadius: '6px',
-                    backgroundColor: item.active ? '#dbeafe' : 'transparent',
-                    color: item.active ? '#1d4ed8' : '#6b7280',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <span style={{ marginRight: '12px' }}>{item.icon}</span>
-                  {item.label}
-                </button>
-              </div>
-            ))}
-          </nav>
-          
-          <div style={{
-            position: 'absolute',
-            bottom: '0',
-            left: '0',
-            right: '0',
-            padding: '16px',
-            borderTop: '1px solid #e5e7eb',
-            backgroundColor: 'white'
-          }}>
-            <div style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>
-              Sistema de Ventas KARDEX v1.0
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div style={{ marginLeft: '256px', padding: '24px', width: '100%' }}>
-          <div style={{ marginBottom: '24px' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', margin: '0 0 8px 0' }}>
-              Reportes
-            </h1>
-            <p style={{ color: '#6b7280', margin: '0' }}>
-              Genera y visualiza reportes del sistema
-            </p>
-          </div>
-
-          {/* Tabs */}
-          <div style={{ marginBottom: '24px', display: 'flex', gap: '8px', borderBottom: '2px solid #e5e7eb' }}>
-            {[
-              { id: 'ventas', label: '📊 Reporte de Ventas' },
-              { id: 'compras', label: '🛍️ Reporte de Compras' },
-              { id: 'inventario', label: '📦 Reporte de Inventario' },
-              { id: 'rentabilidad', label: '💰 Reporte de Rentabilidad' },
-              { id: 'movimientos', label: '📈 Movimientos KARDEX' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                style={{
-                  padding: '12px 24px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: activeTab === tab.id ? '#1d4ed8' : '#6b7280',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  borderBottom: activeTab === tab.id ? '3px solid #1d4ed8' : '3px solid transparent',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Filtros de Fecha */}
-          {(activeTab === 'ventas' || activeTab === 'compras' || activeTab === 'rentabilidad' || activeTab === 'movimientos') && (
-            <div style={{ 
-              backgroundColor: 'white', 
-              padding: '16px', 
-              borderRadius: '8px', 
-              marginBottom: '24px',
-              display: 'flex',
-              gap: '16px',
-              alignItems: 'end'
-            }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                  Fecha Inicio
-                </label>
-                <input
-                  type="date"
-                  value={fechaInicio}
-                  onChange={(e) => setFechaInicio(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px'
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                  Fecha Fin
-                </label>
-                <input
-                  type="date"
-                  value={fechaFin}
-                  onChange={(e) => setFechaFin(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    fontSize: '14px'
-                  }}
-                />
-              </div>
-              <button
-                onClick={cargarReporte}
-                disabled={loading}
-                style={{
-                  padding: '8px 24px',
-                  backgroundColor: loading ? '#9ca3af' : '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: loading ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {loading ? 'Cargando...' : '🔍 Filtrar'}
-              </button>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {error && (
-            <div style={{
-              backgroundColor: '#fef2f2',
-              border: '1px solid #fecaca',
-              color: '#dc2626',
-              padding: '12px 16px',
-              borderRadius: '6px',
-              marginBottom: '16px'
-            }}>
-              {error}
-            </div>
-          )}
-
-          {/* Loading */}
-          {loading && (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <div style={{ fontSize: '16px', color: '#6b7280' }}>Cargando reporte...</div>
-            </div>
-          )}
-
-          {/* Report Content */}
-          {!loading && (
-            <>
-              {activeTab === 'ventas' && renderReporteVentas()}
-              {activeTab === 'compras' && renderReporteCompras()}
-              {activeTab === 'inventario' && renderReporteInventario()}
-              {activeTab === 'rentabilidad' && renderReporteRentabilidad()}
-              {activeTab === 'movimientos' && renderReporteMovimientos()}
-            </>
-          )}
-        </div>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
-  );
+  )
+}
+
+function ReporteRentabilidad({ data }: { data: any }) {
+  if (!data) {
+    return <EmptyState />
+  }
+
+  const stats = data.estadisticas_generales || {}
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Ingresos" value={`$${Number(stats.total_ingresos || 0).toFixed(2)}`} />
+        <StatCard label="Costos" value={`$${Number(stats.total_costos || 0).toFixed(2)}`} />
+        <StatCard label="Ganancia" value={`$${Number(stats.ganancia_total || 0).toFixed(2)}`} tone="success" />
+        <StatCard label="Margen" value={`${Number(stats.margen_general || 0).toFixed(2)}%`} />
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-slate-100">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Producto</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Cant. vendida</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Ingresos</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Costos</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Ganancia</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Margen</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {(data.rentabilidad_por_producto || []).slice(0, 80).map((item: any, index: number) => {
+              const ganancia = Number(item.ganancia_total || 0)
+              const margen = Number(item.margen_promedio || 0)
+              return (
+                <tr key={index} className="hover:bg-slate-50">
+                  <td className="px-6 py-4 text-sm text-slate-700">{item.producto?.nombre || 'Producto no registrado'}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-500">{Number(item.cantidad_vendida || 0).toFixed(2)}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-500">${Number(item.ingreso_total || 0).toFixed(2)}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-500">${Number(item.costo_total || 0).toFixed(2)}</td>
+                  <td
+                    className={`px-6 py-4 text-right text-sm font-semibold ${
+                      ganancia >= 0 ? 'text-emerald-600' : 'text-rose-600'
+                    }`}
+                  >
+                    ${ganancia.toFixed(2)}
+                  </td>
+                  <td
+                    className={`px-6 py-4 text-right text-sm font-semibold ${
+                      margen >= 0 ? 'text-emerald-600' : 'text-rose-600'
+                    }`}
+                  >
+                    {margen.toFixed(2)}%
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function ReporteMovimientos({ data }: { data: any }) {
+  if (!data) {
+    return <EmptyState />
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3 text-sm text-slate-600">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-4 w-4" />
+          Los movimientos sincronizan automáticamente las existencias y alimentan el dashboard.
+        </div>
+      </div>
+      <div className="overflow-hidden rounded-2xl border border-slate-100">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Producto</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Movimiento</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Cantidad</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Stock anterior</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Stock nuevo</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Costo total</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {(data.movimientos || []).slice(0, 120).map((movimiento: any) => (
+              <tr key={movimiento.id} className="hover:bg-slate-50">
+                <td className="px-6 py-4 text-sm text-slate-500">{new Date(movimiento.fecha_movimiento).toLocaleString()}</td>
+                <td className="px-6 py-4 text-sm text-slate-700">{movimiento.producto?.nombre || 'Producto no registrado'}</td>
+                <td className="px-6 py-4 text-sm text-slate-500">{movimiento.tipo_movimiento}</td>
+                <td className="px-6 py-4 text-right text-sm text-slate-500">{movimiento.cantidad}</td>
+                <td className="px-6 py-4 text-right text-sm text-slate-500">{movimiento.stock_anterior}</td>
+                <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">{movimiento.stock_nuevo}</td>
+                <td className="px-6 py-4 text-right text-sm text-slate-500">${Number(movimiento.costo_total || 0).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 px-6 py-16 text-center text-sm text-slate-500">
+      Aún no hay información disponible para este reporte en el rango seleccionado.
+    </div>
+  )
 }

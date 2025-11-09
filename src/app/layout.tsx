@@ -9,25 +9,19 @@ export const metadata: Metadata = {
   title: 'Sistema de Ventas KARDEX',
   description: 'Sistema completo de gestión de inventario con KARDEX',
   keywords: ['ventas', 'inventario', 'kardex', 'gestión'],
-  authors: [{ name: 'Sistema de Ventas' }],
+  authors: [{ name: 'Sistema de Ventas' }]
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
-  initialScale: 1,
+  initialScale: 1
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
-      <body className={inter.className}>
-        <Providers>
-          {children}
-        </Providers>
+    <html lang="es" className="scroll-smooth">
+      <body className={`${inter.className} bg-slate-950/95 antialiased`}> 
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

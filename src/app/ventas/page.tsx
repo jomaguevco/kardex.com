@@ -1,1151 +1,264 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { ventaService } from '@/services/ventaService';
-import { Venta, VentaForm, DetalleVentaForm } from '@/types';
-import { clienteService, Cliente } from '@/services/clienteService';
-import { productoService, Producto } from '@/services/productoService';
-import ProtectedRoute from '../../components/auth/ProtectedRoute';
+import { useState } from 'react'
+import { Sparkles, BarChart3, Plus, Receipt } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import Layout from '@/components/layout/Layout'
+import VentasTable from '@/components/ventas/VentasTable'
+import NuevaVentaForm from '@/components/ventas/NuevaVentaForm'
+import { ventaService } from '@/services/ventaService'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { Venta } from '@/types'
+import { cn } from '@/utils/cn'
 
 export default function VentasPage() {
-  return <VentasContent />;
+  return (
+    <ProtectedRoute>
+      <Layout>
+        <VentasContent />
+      </Layout>
+    </ProtectedRoute>
+  )
 }
 
 function VentasContent() {
-  const [ventas, setVentas] = useState<Venta[]>([]);
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedVenta, setSelectedVenta] = useState<Venta | null>(null);
-  const [loadingDetails, setLoadingDetails] = useState(false);
-  const [formData, setFormData] = useState<VentaForm>({
-    numero_factura: '',
-    cliente_id: 0,
-    fecha_venta: new Date().toISOString().split('T')[0],
-    subtotal: 0,
-    descuento: 0,
-    impuestos: 0,
-    total: 0,
-    observaciones: '',
-    detalles: []
-  });
-  const [nuevoDetalle, setNuevoDetalle] = useState<DetalleVentaForm>({
-    producto_id: 0,
-    cantidad: 1,
-    precio_unitario: 0,
-    descuento: 0,
-    subtotal: 0
-  });
+  const queryClient = useQueryClient()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedVenta, setSelectedVenta] = useState<Venta | null>(null)
+  const [detallesLoading, setDetallesLoading] = useState(false)
+  const [detallesError, setDetallesError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const handleNuevaVenta = () => {
+    setIsModalOpen(true)
+  }
 
-  const loadData = async () => {
+  const handleSuccess = () => {
+    setIsModalOpen(false)
+    queryClient.invalidateQueries({ queryKey: ['ventas'] })
+  }
+
+  const handleCancel = () => {
+    setIsModalOpen(false)
+  }
+
+  const handleViewVenta = async (venta: Venta) => {
+    setSelectedVenta({ ...venta, detalles: venta.detalles || [] })
+    setDetallesError(null)
+    setDetallesLoading(true)
     try {
-      setLoading(true);
-      const [ventasResponse, clientesResponse, productosResponse] = await Promise.all([
-        ventaService.getVentas({ limit: 50 }),
-        clienteService.getClientesActivos(),
-        productoService.getProductos({ limit: 100 })
-      ]);
-
-      // Backend devuelve { success, data: { ventas, pagination } }
-      const ventasLista = (ventasResponse as any)?.data?.ventas || (ventasResponse as any)?.ventas || [];
-      const clientesLista = (clientesResponse as any)?.data || clientesResponse || [];
-      const productosLista = (productosResponse as any)?.data?.productos || (productosResponse as any)?.productos || [];
-
-      setVentas(ventasLista);
-      setClientes(clientesLista);
-      setProductos(productosLista);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar datos');
+      const ventaCompleta = await ventaService.getVentaById(venta.id)
+      setSelectedVenta(ventaCompleta as Venta)
+    } catch (error: any) {
+      setDetallesError(error?.response?.data?.message || error?.message || 'No se pudo cargar el detalle de la venta')
     } finally {
-      setLoading(false);
+      setDetallesLoading(false)
     }
-  };
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCloseDetalle = () => {
+    setSelectedVenta(null)
+    setDetallesError(null)
+  }
+
+  const handleCancelarVenta = async (venta: Venta) => {
+    const confirmar = window.confirm(`¿Deseas cancelar la venta ${venta.numero_factura}?`)
+    if (!confirmar) return
+
     try {
-      if (formData.detalles.length === 0) {
-        setError('Debe agregar al menos un producto');
-        return;
-      }
-
-      // Calcular totales
-      const subtotal = formData.detalles.reduce((sum, detalle) => sum + (detalle.cantidad * detalle.precio_unitario), 0);
-      const total = subtotal; // Por simplicidad, sin descuentos ni impuestos
-
-      const ventaData = {
-        ...formData,
-        subtotal,
-        total
-      };
-
-      // Asegurar que los detalles tengan todos los campos requeridos
-      const detallesCompletos = ventaData.detalles.map(detalle => ({
-        producto_id: detalle.producto_id,
-        cantidad: detalle.cantidad,
-        precio_unitario: detalle.precio_unitario,
-        descuento: detalle.descuento || 0,
-        subtotal: detalle.subtotal || (detalle.cantidad * detalle.precio_unitario)
-      }));
-
-      // Limpiar campos vacíos antes de enviar
-      const ventaDataCompleto: any = {
-        ...ventaData,
-        detalles: detallesCompletos,
-        numero_factura: ventaData.numero_factura || `FAC-${Date.now()}`
-      };
-      
-      // Eliminar observaciones si está vacía
-      if (!ventaDataCompleto.observaciones || ventaDataCompleto.observaciones.trim() === '') {
-        delete ventaDataCompleto.observaciones;
-      }
-
-      console.log('Enviando venta:', ventaDataCompleto);
-      await ventaService.createVenta(ventaDataCompleto);
-      setShowModal(false);
-      setFormData({
-        numero_factura: '',
-        cliente_id: 0,
-        fecha_venta: new Date().toISOString().split('T')[0],
-        subtotal: 0,
-        descuento: 0,
-        impuestos: 0,
-        total: 0,
-        observaciones: '',
-        detalles: []
-      });
-      loadData();
-    } catch (err: any) {
-      console.error('Error al crear venta:', err);
-      const errorMessage = err.response?.data?.details 
-        ? err.response.data.details.join(', ')
-        : err.response?.data?.message || err.message || 'Error al crear venta';
-      setError(errorMessage);
-      alert(`Error: ${errorMessage}`);
+      await ventaService.updateVenta(venta.id, { estado: 'ANULADA' as any })
+      toast.success('Venta cancelada correctamente')
+      handleCloseDetalle()
+      queryClient.invalidateQueries({ queryKey: ['ventas'] })
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || 'No se pudo cancelar la venta')
     }
-  };
-
-  const agregarDetalle = () => {
-    if (nuevoDetalle.producto_id && nuevoDetalle.cantidad > 0) {
-      const producto = productos.find(p => p.id === nuevoDetalle.producto_id);
-      if (producto) {
-        const precioUnitario = nuevoDetalle.precio_unitario || producto.precio_venta;
-        const subtotal = nuevoDetalle.cantidad * precioUnitario - (nuevoDetalle.descuento || 0);
-        const detalle = {
-          producto_id: nuevoDetalle.producto_id,
-          cantidad: nuevoDetalle.cantidad,
-          precio_unitario: precioUnitario,
-          descuento: nuevoDetalle.descuento || 0,
-          subtotal: subtotal
-        };
-        setFormData({
-          ...formData,
-          detalles: [...formData.detalles, detalle]
-        });
-        setNuevoDetalle({
-          producto_id: 0,
-          cantidad: 1,
-          precio_unitario: 0,
-          descuento: 0,
-          subtotal: 0
-        });
-      }
-    }
-  };
-
-  const eliminarDetalle = (index: number) => {
-    setFormData({
-      ...formData,
-      detalles: formData.detalles.filter((_, i) => i !== index)
-    });
-  };
-
-  const getClienteNombre = (clienteId: number, venta?: any) => {
-    // 1) Si la venta viene con cliente incluido desde backend
-    if (venta?.cliente?.nombre) {
-      const apellido = venta.cliente.apellido || '';
-      return `${venta.cliente.nombre}${apellido ? ' ' + apellido : ''}`;
-    }
-
-    // 2) Buscar en la lista de clientes cargada
-    if (clientes && Array.isArray(clientes)) {
-      const cliente = clientes.find(c => c.id === clienteId);
-      if (cliente) {
-        // Algunos esquemas usan nombre + apellido
-        const anyCliente: any = cliente as any;
-        const apellido = anyCliente.apellido || '';
-        return `${cliente.nombre}${apellido ? ' ' + apellido : ''}`;
-      }
-    }
-    return 'Cliente no encontrado';
-  };
-
-  const getProductoNombre = (productoId: number) => {
-    if (!productos || !Array.isArray(productos)) {
-      return 'Producto no encontrado';
-    }
-    const producto = productos.find(p => p.id === productoId);
-    return producto ? producto.nombre : 'Producto no encontrado';
-  };
-
-  const calcularTotalVenta = (detalles: any[]) => {
-    return detalles.reduce((sum, detalle) => sum + (detalle.cantidad * detalle.precio_unitario), 0);
-  };
-
-  const handleViewDetails = async (venta: Venta) => {
-    setSelectedVenta(venta);
-    setShowDetailsModal(true);
-    setLoadingDetails(true);
-    
-    try {
-      const ventaCompleta = await ventaService.getVentaById(venta.id);
-      setSelectedVenta(ventaCompleta as Venta);
-    } catch (err: any) {
-      console.error('Error al cargar detalles:', err);
-      setError('Error al cargar los detalles de la venta');
-    } finally {
-      setLoadingDetails(false);
-    }
-  };
-
-  const handleReloadDetails = async () => {
-    if (!selectedVenta) return;
-    
-    setLoadingDetails(true);
-    try {
-      const ventaCompleta = await ventaService.getVentaById(selectedVenta.id);
-      setSelectedVenta(ventaCompleta as Venta);
-    } catch (err: any) {
-      console.error('Error al recargar detalles:', err);
-      setError('Error al recargar los detalles de la venta');
-    } finally {
-      setLoadingDetails(false);
-    }
-  };
+  }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#f9fafb',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      {/* Header */}
-      <div style={{
-        backgroundColor: 'white',
-        padding: '16px',
-        borderBottom: '1px solid #e5e7eb',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        marginLeft: '256px'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
-          <h1 style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>
-            Sistema de Ventas KARDEX
-          </h1>
-          <div style={{ fontSize: '14px' }}>
-            <p style={{ fontWeight: '500', color: '#111827', margin: '0' }}>
-              Administrador del Sistema
+    <div className="space-y-8 pb-12 animate-fade-in">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-500 px-6 py-10 text-white shadow-xl">
+        <div className="absolute -left-16 top-16 hidden h-60 w-60 rounded-full bg-white/20 blur-3xl lg:block" />
+        <div className="absolute -right-20 bottom-[-40px] hidden h-72 w-72 rounded-full bg-white/15 blur-3xl lg:block" />
+
+        <div className="space-y-6 lg:grid lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12">
+          <div className="space-y-6">
+            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+              Ventas dinámicas
+            </span>
+            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+              Potencia tu ciclo comercial con una vista moderna y acciones rápidas
+            </h1>
+            <p className="max-w-xl text-sm text-white/80 sm:text-base">
+              Gestiona facturas, estados y clientes desde un panel consistente con el dashboard. Crea ventas al vuelo, visualiza detalles y mantén el control en tiempo real.
             </p>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0' }}>
-              ADMINISTRADOR
-            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                onClick={handleNuevaVenta}
+                className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-indigo-600 shadow-lg shadow-indigo-900/20 transition hover:-translate-y-0.5 hover:shadow-xl"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Registrar venta
+              </button>
+              <div className="inline-flex items-center rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white/90">
+                <BarChart3 className="mr-2 h-4 w-4" /> Indicadores listos para el dashboard
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white/15 p-6 backdrop-blur-md">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <MetricCard titulo="Ventas hoy" valor="--" subtitulo="Sincronizado con dashboard" />
+              <MetricCard titulo="Ticket promedio" valor="--" subtitulo="Actualiza tus datos" />
+              <MetricCard titulo="Pendientes" valor="--" subtitulo="Revisa estados en la tabla" />
+              <MetricCard titulo="Facturas emitidas" valor="--" subtitulo="Descarga PDF al instante" />
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Sidebar Fixed */}
-      <div style={{
-        width: '256px',
-        backgroundColor: 'white',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        minHeight: '100vh',
-        padding: '16px 0',
-        position: 'fixed',
-        left: '0',
-        top: '0',
-        zIndex: '50'
-      }}>
-        <div style={{ padding: '0 16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: '0' }}>
-            Sistema KARDEX
-          </h2>
-        </div>
-        
-        <nav style={{ marginTop: '16px', padding: '0 8px' }}>
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/dashboard'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📊</span>
-              Dashboard
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/productos'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📦</span>
-              Productos
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => alert('Ventas clickeado!')}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                backgroundColor: '#dbeafe',
-                color: '#1d4ed8',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <span style={{ marginRight: '12px' }}>🛒</span>
-              Ventas
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/compras'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🛍️</span>
-              Compras
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/kardex'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📈</span>
-              KARDEX
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/clientes'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>👥</span>
-              Clientes
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/proveedores'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🏢</span>
-              Proveedores
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/reportes'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📄</span>
-              Reportes
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/configuracion'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>⚙️</span>
-              Configuración
-            </button>
-          </div>
-        </nav>
-        
-        <div style={{
-          position: 'absolute',
-          bottom: '0',
-          left: '0',
-          right: '0',
-          padding: '16px',
-          borderTop: '1px solid #e5e7eb',
-          backgroundColor: 'white'
-        }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>
-            Sistema de Ventas KARDEX v1.0
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ marginLeft: '256px', padding: '24px' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', margin: '0 0 8px 0' }}>
-            Gestión de Ventas
-          </h1>
-          <p style={{ color: '#6b7280', margin: '0' }}>
-            Administra las ventas del sistema
-          </p>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div style={{
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            color: '#dc2626',
-            padding: '12px 16px',
-            borderRadius: '6px',
-            marginBottom: '16px'
-          }}>
-            {error}
-          </div>
-        )}
-
-        {/* Actions */}
-        <div style={{
-          backgroundColor: 'white',
-          padding: '16px',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          marginBottom: '24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
+      <section className="space-y-6">
+        <div className="card flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white/95 px-6 py-4 shadow-lg shadow-slate-900/5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0' }}>
-              Lista de Ventas
-            </h3>
-            <p style={{ fontSize: '14px', color: '#6b7280', margin: '4px 0 0 0' }}>
-              {ventas.length} ventas registradas
+            <h2 className="text-lg font-semibold text-slate-900">Historial de ventas</h2>
+            <p className="text-sm text-slate-500">
+              Visualiza, filtra y analiza tus ventas con la misma estética y fluidez del dashboard.
             </p>
           </div>
           <button
-            onClick={() => {
-              setFormData({
-                numero_factura: '',
-                cliente_id: 0,
-                fecha_venta: new Date().toISOString().split('T')[0],
-                subtotal: 0,
-                descuento: 0,
-                impuestos: 0,
-                total: 0,
-                observaciones: '',
-                detalles: []
-              });
-              setShowModal(true);
-            }}
-            style={{
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              padding: '10px 16px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}
+            onClick={handleNuevaVenta}
+            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:-translate-y-0.5 hover:shadow-xl"
           >
-            + Nueva Venta
+            <Receipt className="mr-2 h-4 w-4" /> Nueva venta
           </button>
         </div>
 
-        {/* Sales Table */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          overflow: 'hidden'
-        }}>
-          {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center' }}>
-              <div style={{ fontSize: '16px', color: '#6b7280' }}>Cargando ventas...</div>
-            </div>
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Factura
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Cliente
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Fecha
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Total
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Estado
-                  </th>
-                  <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {ventas.map((venta) => (
-                  <tr key={venta.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                    <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                      {venta.numero_factura}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                      {getClienteNombre(venta.cliente_id, venta as any)}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                      {new Date(venta.fecha_venta).toLocaleDateString()}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                      ${Number(venta.total).toFixed(2)}
-                    </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                      <span style={{
-                        backgroundColor: venta.estado === 'PROCESADA' ? '#f0fdf4' : '#fef3c7',
-                        color: venta.estado === 'PROCESADA' ? '#16a34a' : '#d97706',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: '500'
-                      }}>
-                        {venta.estado}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewDetails(venta);
-                        }}
-                        style={{
-                          backgroundColor: '#3b82f6',
-                          color: 'white',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '12px',
-                          fontWeight: '500'
-                        }}
-                        onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#2563eb'}
-                        onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = '#3b82f6'}
-                      >
-                        Ver Detalle
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+        <div className="card">
+          <VentasTable onView={handleViewVenta} onCancel={handleCancelarVenta} />
         </div>
+      </section>
 
-        {/* Modal */}
-        {showModal && (
-          <div style={{
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            right: '0',
-            bottom: '0',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: '1000'
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '24px',
-              width: '90%',
-              maxWidth: '1200px',
-              maxHeight: '95vh',
-              overflow: 'auto'
-            }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 16px 0' }}>
-                Nueva Venta
-              </h2>
-              
-              <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Cliente *
-                  </label>
-                  <select
-                    value={formData.cliente_id}
-                    onChange={(e) => setFormData({ ...formData, cliente_id: Number(e.target.value) })}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
-                    }}
-                  >
-                    <option value={0}>Seleccionar cliente</option>
-                    {clientes.map(cliente => (
-                      <option key={cliente.id} value={cliente.id}>
-                        {cliente.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-
-                {/* Agregar Producto */}
-                <div style={{ marginBottom: '16px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', margin: '0 0 12px 0' }}>
-                    Agregar Producto
-                  </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                    <select
-                      value={nuevoDetalle.producto_id}
-                      onChange={(e) => {
-                        const productoId = Number(e.target.value);
-                        const producto = productos.find(p => p.id === productoId);
-                        setNuevoDetalle({
-                          ...nuevoDetalle,
-                          producto_id: productoId,
-                          precio_unitario: producto?.precio_venta || 0
-                        });
-                      }}
-                      style={{
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    >
-                      <option value={0}>Seleccionar producto</option>
-                      {productos.map(producto => (
-                        <option key={producto.id} value={producto.id}>
-                          {producto.nombre} - Stock: {producto.stock_actual}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      min="1"
-                      value={nuevoDetalle.cantidad}
-                      onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, cantidad: Number(e.target.value) })}
-                      placeholder="Cantidad"
-                      style={{
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={nuevoDetalle.precio_unitario}
-                      onChange={(e) => setNuevoDetalle({ ...nuevoDetalle, precio_unitario: Number(e.target.value) })}
-                      placeholder="Precio"
-                      style={{
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={agregarDetalle}
-                    style={{
-                      backgroundColor: '#10b981',
-                      color: 'white',
-                      border: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Agregar
-                  </button>
-                </div>
-
-                {/* Lista de Productos */}
-                {formData.detalles.length > 0 && (
-                  <div style={{ marginBottom: '16px' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', margin: '0 0 12px 0' }}>
-                      Productos Seleccionados
-                    </h3>
-                    <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                          <tr style={{ backgroundColor: '#f3f4f6' }}>
-                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Producto</th>
-                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Cantidad</th>
-                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Precio</th>
-                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Subtotal</th>
-                            <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#111827', borderBottom: '2px solid #e5e7eb' }}>Acción</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {formData.detalles.map((detalle, index) => (
-                            <tr key={index} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
-                              <td style={{ padding: '12px', fontSize: '14px', color: '#111827', fontWeight: '500' }}>
-                                {getProductoNombre(detalle.producto_id)}
-                              </td>
-                              <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right', color: '#374151' }}>
-                                {detalle.cantidad}
-                              </td>
-                              <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right', color: '#374151' }}>
-                                ${Number(detalle.precio_unitario).toFixed(2)}
-                              </td>
-                              <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right', color: '#111827', fontWeight: '600' }}>
-                                ${(Number(detalle.cantidad) * Number(detalle.precio_unitario)).toFixed(2)}
-                              </td>
-                              <td style={{ padding: '12px', textAlign: 'center' }}>
-                                <button
-                                  type="button"
-                                  onClick={() => eliminarDetalle(index)}
-                                  style={{
-                                    backgroundColor: '#ef4444',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '6px 12px',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '12px',
-                                    fontWeight: '500'
-                                  }}
-                                >
-                                  Eliminar
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div style={{ padding: '16px', backgroundColor: '#f9fafb', textAlign: 'right', borderTop: '2px solid #e5e7eb' }}>
-                      <strong style={{ fontSize: '18px', color: '#111827', fontWeight: '700' }}>
-                        Total: ${Number(calcularTotalVenta(formData.detalles)).toFixed(2)}
-                      </strong>
-                    </div>
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    style={{
-                      backgroundColor: '#f3f4f6',
-                      color: '#374151',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    style={{
-                      backgroundColor: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    Crear Venta
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Modal de Detalles de Venta */}
-        {showDetailsModal && selectedVenta && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '24px',
-              maxWidth: '800px',
-              width: '90%',
-              maxHeight: '90vh',
-              overflow: 'auto'
-            }}>
-              <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: '600', color: '#111827' }}>
-                Detalle de Venta - {selectedVenta.numero_factura}
-              </h2>
-              
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Cliente
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {getClienteNombre(selectedVenta.cliente_id, selectedVenta as any)}
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Fecha
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      {new Date(selectedVenta.fecha_venta).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Estado
-                    </label>
-                    <select
-                      value={selectedVenta.estado}
-                      onChange={async (e) => {
-                        try {
-                          await ventaService.updateVenta(selectedVenta.id, { estado: e.target.value as any });
-                          setSelectedVenta({ ...selectedVenta, estado: e.target.value as any });
-                          loadData(); // Recargar lista
-                        } catch (err: any) {
-                          alert('Error al actualizar el estado: ' + (err.response?.data?.message || err.message));
-                        }
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        backgroundColor: 'white',
-                        color: '#111827',
-                        fontWeight: '500'
-                      }}
-                    >
-                      <option value="PENDIENTE" style={{ color: '#111827', backgroundColor: 'white' }}>PENDIENTE</option>
-                      <option value="PROCESADA" style={{ color: '#111827', backgroundColor: 'white' }}>PROCESADA</option>
-                      <option value="ANULADA" style={{ color: '#111827', backgroundColor: 'white' }}>ANULADA</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Subtotal
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#111827' }}>
-                      ${Number((selectedVenta as any).subtotal || selectedVenta.total).toFixed(2)}
-                    </p>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#374151' }}>
-                      Total
-                    </label>
-                    <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#111827' }}>
-                      ${Number(selectedVenta.total).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-4xl rounded-3xl p-6 shadow-2xl">
+            <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#111827' }}>
-                    Productos Vendidos
-                  </h3>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!selectedVenta) return;
-                        try {
-                          await ventaService.downloadFacturaPDF(selectedVenta.id);
-                        } catch (err: any) {
-                          alert('Error al descargar la factura: ' + (err.response?.data?.message || err.message));
-                        }
-                      }}
-                      style={{
-                        backgroundColor: '#10b981',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      📄 Descargar Factura PDF
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleReloadDetails}
-                      disabled={loadingDetails}
-                      style={{
-                        backgroundColor: loadingDetails ? '#9ca3af' : '#3b82f6',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        cursor: loadingDetails ? 'not-allowed' : 'pointer',
-                        fontSize: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                    >
-                      {loadingDetails ? 'Cargando...' : '🔄 Recargar'}
-                    </button>
-                  </div>
-                </div>
-                
-                {loadingDetails ? (
-                  <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <div style={{ fontSize: '16px', color: '#6b7280' }}>Cargando detalles...</div>
-                  </div>
-                ) : (selectedVenta as any).detalles && (selectedVenta as any).detalles.length > 0 ? (
-                  <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead style={{ backgroundColor: '#f9fafb' }}>
-                        <tr>
-                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600' }}>
-                            Producto
-                          </th>
-                          <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
-                            Cantidad
-                          </th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600' }}>
-                            Precio Unit.
-                          </th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600' }}>
-                            Subtotal
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(selectedVenta as any).detalles.map((detalle: any, index: number) => (
-                          <tr key={index} style={{ borderTop: '1px solid #e5e7eb' }}>
-                            <td style={{ padding: '12px', fontSize: '14px', color: '#111827' }}>
-                              {getProductoNombre(detalle.producto_id)}
-                            </td>
-                            <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: '#111827' }}>
-                              {detalle.cantidad}
-                            </td>
-                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#111827' }}>
-                              ${Number(detalle.precio_unitario).toFixed(2)}
-                            </td>
-                            <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: '#111827' }}>
-                              ${Number(detalle.subtotal || (detalle.cantidad * detalle.precio_unitario)).toFixed(2)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div style={{
-                    padding: '20px', 
-                    textAlign: 'center', 
-                    backgroundColor: '#fef2f2', 
-                    border: '1px solid #fecaca', 
-                    borderRadius: '6px'
-                  }}>
-                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>⚠️</div>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#dc2626', fontWeight: '500' }}>
-                      No se encontraron detalles de productos para esta venta.
-                    </p>
-                    <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#7f1d1d' }}>
-                      Esta venta puede haberse creado sin detalles o los detalles no se guardaron correctamente.
-                    </p>
-                    <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#7f1d1d' }}>
-                      Total de la venta: <strong>${Number(selectedVenta.total).toFixed(2)}</strong>
-                    </p>
-                    <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#7f1d1d' }}>
-                      Usa el botón &quot;Recargar&quot; para intentar cargar los detalles nuevamente.
-                    </p>
-                  </div>
-                )}
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Nueva venta
+                </span>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                  Registra una venta y sincroniza el inventario automáticamente
+                </h2>
+                <p className="text-sm text-slate-500">
+                  El dashboard se actualizará con las métricas más recientes cuando completes el registro.
+                </p>
               </div>
+              <button
+                onClick={handleCancel}
+                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40"
+              >
+                ✕
+              </button>
+            </div>
 
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowDetailsModal(false)}
-                  style={{
-                    backgroundColor: '#f3f4f6',
-                    color: '#374151',
-                    border: 'none',
-                    padding: '10px 16px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
-                >
-                  Cerrar
-                </button>
+            <NuevaVentaForm onSuccess={handleSuccess} onCancel={handleCancel} />
+          </div>
+        </div>
+      )}
+
+      {selectedVenta && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 px-4 py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-4xl rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Detalle de venta</span>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
+                <p className="text-sm text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
               </div>
+              <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <DetalleCard label="Cliente" value={selectedVenta.cliente?.nombre || 'Cliente no registrado'} />
+              <DetalleCard label="Fecha" value={new Date(selectedVenta.fecha_venta).toLocaleString()} />
+              <DetalleCard label="Subtotal" value={`$${Number((selectedVenta as any).subtotal ?? selectedVenta.total ?? 0).toFixed(2)}`} />
+              <DetalleCard label="Total" value={`$${Number(selectedVenta.total ?? 0).toFixed(2)}`} highlight />
+            </div>
+
+            {detallesError && (
+              <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+                {detallesError}
+              </div>
+            )}
+
+            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-100">
+              {detallesLoading ? (
+                <div className="flex items-center justify-center gap-2 px-6 py-10 text-sm text-slate-500">
+                  <LoadingSpinner size="sm" /> Cargando detalles...
+                </div>
+              ) : (selectedVenta.detalles || []).length === 0 ? (
+                <div className="px-6 py-10 text-center text-sm text-slate-500">
+                  Esta venta no tiene productos asociados.
+                </div>
+              ) : (
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Precio unit.</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {(selectedVenta.detalles || []).map((detalle: any, index: number) => (
+                      <tr key={detalle.id || index}>
+                        <td className="text-sm text-slate-700">{detalle.producto?.nombre || 'Producto'}</td>
+                        <td className="text-sm text-slate-600">{detalle.cantidad}</td>
+                        <td className="text-sm text-slate-600">${Number(detalle.precio_unitario).toFixed(2)}</td>
+                        <td className="text-sm font-semibold text-slate-900">${Number(detalle.subtotal ?? detalle.cantidad * detalle.precio_unitario).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
+                Cerrar
+              </button>
+              {selectedVenta.estado?.toUpperCase() !== 'ANULADA' && (
+                <button onClick={() => handleCancelarVenta(selectedVenta)} className="btn-primary sm:min-w-[180px]">
+                  Cancelar venta
+                </button>
+              )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
-  );
+  )
+}
+
+function MetricCard({ titulo, valor, subtitulo }: { titulo: string; valor: string; subtitulo: string }) {
+  return (
+    <div className="rounded-2xl border border-white/40 bg-white/20 p-4 backdrop-blur-sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-white/80">{titulo}</p>
+      <p className="mt-2 text-2xl font-semibold text-white">{valor}</p>
+      <p className="text-xs text-white/70">{subtitulo}</p>
+    </div>
+  )
+}
+
+function DetalleCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div className={cn('rounded-2xl border border-slate-100 px-4 py-3', highlight ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-600')}>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-2 text-sm font-semibold text-slate-900">{value}</p>
+    </div>
+  )
 }

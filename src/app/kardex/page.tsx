@@ -1,681 +1,360 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { kardexService, MovimientoKardex, KardexProductoResponse } from '@/services/kardexService';
-import { productoService, Producto } from '@/services/productoService';
-import ProtectedRoute from '../../components/auth/ProtectedRoute';
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Sparkles, PackageSearch, Filter, ArrowUpRight, Layers, RefreshCw } from 'lucide-react'
+import toast from 'react-hot-toast'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import Layout from '@/components/layout/Layout'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { kardexService, MovimientoKardex, KardexProductoResponse } from '@/services/kardexService'
+import { productoService, Producto } from '@/services/productoService'
 
 export default function KardexPage() {
-  return <KardexContent />;
+  return (
+    <ProtectedRoute>
+      <Layout>
+        <KardexContent />
+      </Layout>
+    </ProtectedRoute>
+  )
 }
 
 function KardexContent() {
-  const [movimientos, setMovimientos] = useState<MovimientoKardex[]>([]);
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null);
-  const [kardexProducto, setKardexProducto] = useState<KardexProductoResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filtros, setFiltros] = useState({
-    producto_id: '',
-    fecha_inicio: '',
-    fecha_fin: ''
-  });
+  const router = useRouter()
+  const [movimientos, setMovimientos] = useState<MovimientoKardex[]>([])
+  const [productos, setProductos] = useState<Producto[]>([])
+  const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null)
+  const [kardexProducto, setKardexProducto] = useState<KardexProductoResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isConsulting, setIsConsulting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [filtros, setFiltros] = useState({ producto_id: '', fecha_inicio: '', fecha_fin: '' })
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData()
+  }, [])
 
   const loadData = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true)
       const [movimientosResponse, productosResponse] = await Promise.all([
-        kardexService.getMovimientos({ limit: 50 }),
-        productoService.getProductos({ limit: 100 })
-      ]);
-      setMovimientos(movimientosResponse.movimientos);
-      setProductos(productosResponse.productos);
+        kardexService.getMovimientos({ limit: 80 }),
+        productoService.getProductos({ limit: 150 })
+      ])
+      setMovimientos(movimientosResponse.movimientos || [])
+      setProductos(productosResponse.productos || [])
     } catch (err: any) {
-      setError(err.message || 'Error al cargar datos');
+      const message = err?.message || 'No se pudieron cargar los movimientos'
+      setError(message)
+      toast.error(message)
     } finally {
-      setLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const cargarKardexProducto = async (productoId: number) => {
     try {
-      const producto = productos.find(p => p.id === productoId);
-      if (producto) {
-        setProductoSeleccionado(producto);
-        const kardex = await kardexService.getKardexProducto(productoId, {
-          fecha_inicio: filtros.fecha_inicio || undefined,
-          fecha_fin: filtros.fecha_fin || undefined
-        });
-        setKardexProducto(kardex);
+      setIsConsulting(true)
+      const producto = productos.find((p) => p.id === productoId)
+      if (!producto) {
+        toast.error('No encontramos el producto seleccionado')
+        return
       }
+      setProductoSeleccionado(producto)
+      const kardex = await kardexService.getKardexProducto(productoId, {
+        fecha_inicio: filtros.fecha_inicio || undefined,
+        fecha_fin: filtros.fecha_fin || undefined
+      })
+      setKardexProducto(kardex)
     } catch (err: any) {
-      setError(err.message || 'Error al cargar KARDEX del producto');
+      const message = err?.message || 'No se pudo consultar el KARDEX del producto'
+      toast.error(message)
+      setError(message)
+    } finally {
+      setIsConsulting(false)
     }
-  };
+  }
 
-  const getTipoMovimientoColor = (tipo: string) => {
-    if (tipo.includes('ENTRADA')) {
-      return { color: '#16a34a', bg: '#f0fdf4' };
-    } else if (tipo.includes('SALIDA')) {
-      return { color: '#dc2626', bg: '#fef2f2' };
-    }
-    return { color: '#6b7280', bg: '#f9fafb' };
-  };
-
-  const getProductoNombre = (productoId: number) => {
-    const producto = productos.find(p => p.id === productoId);
-    return producto ? producto.nombre : 'Producto no encontrado';
-  };
+  const resumenMovimientos = useMemo(() => {
+    const entradas = movimientos.filter((mov) => mov.tipo_movimiento.includes('ENTRADA')).length
+    const salidas = movimientos.filter((mov) => mov.tipo_movimiento.includes('SALIDA')).length
+    const productosUnicos = new Set(movimientos.map((mov) => mov.producto_id)).size
+    return { entradas, salidas, productosUnicos }
+  }, [movimientos])
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#f9fafb',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      {/* Header */}
-      <div style={{
-        backgroundColor: 'white',
-        padding: '16px',
-        borderBottom: '1px solid #e5e7eb',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        marginLeft: '256px'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
-          <h1 style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>
-            Sistema de Ventas KARDEX
-          </h1>
-          <div style={{ fontSize: '14px' }}>
-            <p style={{ fontWeight: '500', color: '#111827', margin: '0' }}>
-              Administrador del Sistema
+    <div className="space-y-8 pb-12 animate-fade-in">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 px-6 py-10 text-white shadow-xl">
+        <div className="absolute -right-20 top-1/2 hidden h-72 w-72 -translate-y-1/2 rounded-full bg-white/15 blur-3xl lg:block" />
+        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div className="space-y-6">
+            <span className="inline-flex items-center rounded-full bg-white/25 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+              Control de inventario en vivo
+            </span>
+            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+              Consulta movimientos de inventario con la misma estética refinada del dashboard
+            </h1>
+            <p className="max-w-xl text-sm text-white/80 sm:text-base">
+              Filtra por producto, obtén resúmenes y visualiza el historial KARDEX para tomar decisiones rápidas sobre stock, compras y transferencias.
             </p>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0' }}>
-              ADMINISTRADOR
-            </p>
+            <div className="inline-flex items-center rounded-xl border border-white/40 px-5 py-3 text-sm font-semibold text-white/90">
+              <PackageSearch className="mr-2 h-4 w-4" /> Integrado con reportes y el módulo de productos
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white/15 p-6 backdrop-blur-md">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <HeroStat title="Entradas" value={resumenMovimientos.entradas} tone="success" />
+              <HeroStat title="Salidas" value={resumenMovimientos.salidas} tone="warning" />
+              <HeroStat title="Productos" value={resumenMovimientos.productosUnicos} tone="neutral" />
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Sidebar Fixed */}
-      <div style={{
-        width: '256px',
-        backgroundColor: 'white',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        minHeight: '100vh',
-        padding: '16px 0',
-        position: 'fixed',
-        left: '0',
-        top: '0',
-        zIndex: '50'
-      }}>
-        <div style={{ padding: '0 16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: '0' }}>
-            Sistema KARDEX
-          </h2>
-        </div>
-        
-        <nav style={{ marginTop: '16px', padding: '0 8px' }}>
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/dashboard'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📊</span>
-              Dashboard
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/productos'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📦</span>
-              Productos
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/ventas'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🛒</span>
-              Ventas
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/compras'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🛍️</span>
-              Compras
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => alert('KARDEX clickeado!')}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                backgroundColor: '#dbeafe',
-                color: '#1d4ed8',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <span style={{ marginRight: '12px' }}>📈</span>
-              KARDEX
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/clientes'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>👥</span>
-              Clientes
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/proveedores'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>🏢</span>
-              Proveedores
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/reportes'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>📄</span>
-              Reportes
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '4px' }}>
-            <button
-              onClick={() => window.location.href = '/configuracion'}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '6px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => (e.target as HTMLElement).style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-            >
-              <span style={{ marginRight: '12px' }}>⚙️</span>
-              Configuración
-            </button>
-          </div>
-        </nav>
-        
-        <div style={{
-          position: 'absolute',
-          bottom: '0',
-          left: '0',
-          right: '0',
-          padding: '16px',
-          borderTop: '1px solid #e5e7eb',
-          backgroundColor: 'white'
-        }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>
-            Sistema de Ventas KARDEX v1.0
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ marginLeft: '256px', padding: '24px' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', margin: '0 0 8px 0' }}>
-            KARDEX - Control de Inventario
-          </h1>
-          <p style={{ color: '#6b7280', margin: '0' }}>
-            Consulta el movimiento de inventario por producto
-          </p>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div style={{
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            color: '#dc2626',
-            padding: '12px 16px',
-            borderRadius: '6px',
-            marginBottom: '16px'
-          }}>
-            {error}
-          </div>
-        )}
-
-        {/* Filtros */}
-        <div style={{
-          backgroundColor: 'white',
-          padding: '16px',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          marginBottom: '24px'
-        }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', margin: '0 0 16px 0' }}>
-            Consultar KARDEX por Producto
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
+      <section className="space-y-6">
+        <div className="card space-y-6 p-6">
+          <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                Producto
+              <h2 className="text-lg font-semibold text-slate-900">Consulta personalizada</h2>
+              <p className="text-sm text-slate-500">Selecciona un producto y acota por rango de fechas para ver su historial detallado.</p>
+            </div>
+            <button
+              onClick={() => router.push('/productos')}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-800"
+            >
+              Administrar productos <ArrowUpRight className="h-4 w-4" />
+            </button>
+          </header>
+
+          <div className="grid gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 sm:grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))_auto]">
+            <div>
+              <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Filter className="h-3.5 w-3.5" /> Producto
               </label>
               <select
                 value={filtros.producto_id}
-                onChange={(e) => setFiltros({ ...filtros, producto_id: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px'
-                }}
+                onChange={(event) => setFiltros({ ...filtros, producto_id: event.target.value })}
+                className="input-field mt-1"
               >
-                <option value="">Seleccionar producto</option>
-                {productos.map(producto => (
+                <option value="">Selecciona un producto</option>
+                {productos.map((producto) => (
                   <option key={producto.id} value={producto.id}>
-                    {producto.nombre} - Stock: {producto.stock_actual}
+                    {producto.nombre} · Stock {producto.stock_actual}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                Fecha Inicio
-              </label>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha inicio</label>
               <input
                 type="date"
                 value={filtros.fecha_inicio}
-                onChange={(e) => setFiltros({ ...filtros, fecha_inicio: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px'
-                }}
+                onChange={(event) => setFiltros({ ...filtros, fecha_inicio: event.target.value })}
+                className="input-field mt-1"
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                Fecha Fin
-              </label>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha fin</label>
               <input
                 type="date"
                 value={filtros.fecha_fin}
-                onChange={(e) => setFiltros({ ...filtros, fecha_fin: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px'
-                }}
+                onChange={(event) => setFiltros({ ...filtros, fecha_fin: event.target.value })}
+                className="input-field mt-1"
               />
             </div>
-            <button
-              onClick={() => {
-                if (filtros.producto_id) {
-                  cargarKardexProducto(Number(filtros.producto_id));
-                }
-              }}
-              disabled={!filtros.producto_id}
-              style={{
-                backgroundColor: filtros.producto_id ? '#3b82f6' : '#9ca3af',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                cursor: filtros.producto_id ? 'pointer' : 'not-allowed',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              Consultar
-            </button>
+            <div className="flex items-end">
+              <button
+                onClick={() => filtros.producto_id && cargarKardexProducto(Number(filtros.producto_id))}
+                disabled={!filtros.producto_id || isConsulting}
+                className="btn-primary inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isConsulting ? <LoadingSpinner size="sm" /> : <SearchIcon />} Consultar
+              </button>
+            </div>
           </div>
+
+          {kardexProducto && productoSeleccionado && (
+            <KardexProductoDetalle producto={productoSeleccionado} data={kardexProducto} />
+          )}
         </div>
 
-        {/* KARDEX del Producto */}
-        {kardexProducto && productoSeleccionado && (
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            marginBottom: '24px',
-            overflow: 'hidden'
-          }}>
-            <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 8px 0' }}>
-                KARDEX - {productoSeleccionado.nombre}
-              </h3>
-              <p style={{ fontSize: '14px', color: '#6b7280', margin: '0' }}>
-                Código: {productoSeleccionado.codigo_interno} | Stock Actual: {productoSeleccionado.stock_actual}
-              </p>
+        <div className="card space-y-4 p-6">
+          <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Movimientos recientes</h2>
+              <p className="text-sm text-slate-500">Visualiza las últimas entradas, salidas y ajustes que afectan tu inventario.</p>
             </div>
+            <button
+              onClick={loadData}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-800"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} /> Actualizar
+            </button>
+          </header>
 
-            {/* Resumen */}
-            <div style={{ padding: '16px', backgroundColor: '#f9fafb' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#16a34a' }}>
-                    {kardexProducto.resumen.total_entradas}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#6b7280' }}>Entradas</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#dc2626' }}>
-                    {kardexProducto.resumen.total_salidas}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#6b7280' }}>Salidas</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#6b7280' }}>
-                    {kardexProducto.resumen.stock_inicial}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#6b7280' }}>Stock Inicial</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1d4ed8' }}>
-                    {kardexProducto.resumen.stock_final}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#6b7280' }}>Stock Final</div>
-                </div>
-              </div>
+          {error && !isLoading && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+              {error}
             </div>
+          )}
 
-            {/* Tabla de Movimientos */}
-            <div style={{ overflow: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Fecha
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Tipo Movimiento
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Cantidad
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Precio Unit.
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Stock Anterior
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Stock Nuevo
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Documento
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {kardexProducto.movimientos.map((movimiento) => {
-                    const tipoColor = getTipoMovimientoColor(movimiento.tipo_movimiento);
-                    return (
-                      <tr key={movimiento.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                          {new Date(movimiento.fecha_movimiento).toLocaleDateString()}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                          <span style={{
-                            backgroundColor: tipoColor.bg,
-                            color: tipoColor.color,
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontWeight: '500'
-                          }}>
-                            {movimiento.tipo_movimiento.replace('_', ' ')}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                          {movimiento.cantidad}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                          ${Number(movimiento.precio_unitario).toFixed(2)}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                          {movimiento.stock_anterior}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                          {movimiento.stock_nuevo}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                          {movimiento.numero_documento || movimiento.documento_referencia}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          {isLoading ? (
+            <div className="py-20 text-center text-sm text-slate-500">
+              <LoadingSpinner size="lg" />
+              <p className="mt-3">Cargando movimientos...</p>
             </div>
-          </div>
-        )}
-
-        {/* Movimientos Recientes */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          overflow: 'hidden'
-        }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0' }}>
-              Movimientos Recientes
-            </h3>
-          </div>
-          
-          {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center' }}>
-              <div style={{ fontSize: '16px', color: '#6b7280' }}>Cargando movimientos...</div>
-            </div>
+          ) : movimientos.length === 0 ? (
+            <EmptyState message="Todavía no registraste movimientos en el inventario." />
           ) : (
-            <div style={{ overflow: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Fecha
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Producto
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Tipo Movimiento
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Cantidad
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Stock Final
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                      Documento
-                    </th>
+            <div className="overflow-hidden rounded-2xl border border-slate-100">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Producto</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Movimiento</th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Cantidad</th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Stock nuevo</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Documento</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100 bg-white">
                   {movimientos.map((movimiento) => {
-                    const tipoColor = getTipoMovimientoColor(movimiento.tipo_movimiento);
+                    const { badgeClass, label } = getMovimientoBadge(movimiento.tipo_movimiento)
                     return (
-                      <tr key={movimiento.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                          {new Date(movimiento.fecha_movimiento).toLocaleDateString()}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                          {getProductoNombre(movimiento.producto_id)}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                          <span style={{
-                            backgroundColor: tipoColor.bg,
-                            color: tipoColor.color,
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontWeight: '500'
-                          }}>
-                            {movimiento.tipo_movimiento.replace('_', ' ')}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                          {movimiento.cantidad}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827', textAlign: 'right' }}>
-                          {movimiento.stock_nuevo}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                          {movimiento.numero_documento || movimiento.documento_referencia}
-                        </td>
+                      <tr key={movimiento.id} className="hover:bg-slate-50">
+                        <td className="px-6 py-4 text-sm text-slate-500">{new Date(movimiento.fecha_movimiento).toLocaleString()}</td>
+                        <td className="px-6 py-4 text-sm text-slate-700">{getProductoNombre(productos, movimiento.producto_id)}</td>
+                        <td className="px-6 py-4 text-sm"><span className={badgeClass}>{label}</span></td>
+                        <td className="px-6 py-4 text-right text-sm text-slate-600">{movimiento.cantidad}</td>
+                        <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">{movimiento.stock_nuevo}</td>
+                        <td className="px-6 py-4 text-sm text-slate-500">{movimiento.numero_documento || movimiento.documento_referencia}</td>
                       </tr>
-                    );
+                    )
                   })}
                 </tbody>
               </table>
             </div>
           )}
         </div>
+      </section>
+    </div>
+  )
+}
+
+function KardexProductoDetalle({ producto, data }: { producto: Producto; data: KardexProductoResponse }) {
+  const resumen = data.resumen || {}
+
+  return (
+    <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-inner">
+      <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Historial por producto</h3>
+          <p className="text-sm text-slate-500">{producto.nombre} · Código {producto.codigo_interno}</p>
+        </div>
+        <div className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">
+          Stock actual: <span className="text-slate-900">{producto.stock_actual}</span>
+        </div>
+      </header>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ResumenCard title="Entradas" value={resumen.total_entradas || 0} tone="success" />
+        <ResumenCard title="Salidas" value={resumen.total_salidas || 0} tone="warning" />
+        <ResumenCard title="Stock inicial" value={resumen.stock_inicial || 0} tone="neutral" />
+        <ResumenCard title="Stock final" value={resumen.stock_final || 0} tone="primary" />
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-slate-100">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Movimiento</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Cantidad</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Precio unit.</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Stock anterior</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Stock nuevo</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Documento</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {data.movimientos.map((movimiento) => {
+              const { badgeClass, label } = getMovimientoBadge(movimiento.tipo_movimiento)
+              return (
+                <tr key={movimiento.id} className="hover:bg-slate-50">
+                  <td className="px-6 py-4 text-sm text-slate-500">{new Date(movimiento.fecha_movimiento).toLocaleString()}</td>
+                  <td className="px-6 py-4 text-sm"><span className={badgeClass}>{label}</span></td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-600">{movimiento.cantidad}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-600">${Number(movimiento.precio_unitario).toFixed(2)}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-600">{movimiento.stock_anterior}</td>
+                  <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">{movimiento.stock_nuevo}</td>
+                  <td className="px-6 py-4 text-sm text-slate-500">{movimiento.numero_documento || movimiento.documento_referencia}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
-  );
+  )
+}
+
+function ResumenCard({ title, value, tone }: { title: string; value: number; tone: 'success' | 'warning' | 'neutral' | 'primary' }) {
+  const styles = {
+    success: 'bg-emerald-50 text-emerald-700',
+    warning: 'bg-amber-50 text-amber-700',
+    neutral: 'bg-slate-50 text-slate-700',
+    primary: 'bg-indigo-50 text-indigo-700'
+  }[tone]
+
+  return (
+    <div className={`rounded-2xl border border-slate-100 px-4 py-3 ${styles}`}>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
+      <p className="mt-2 text-xl font-semibold">{value}</p>
+    </div>
+  )
+}
+
+function HeroStat({ title, value, tone }: { title: string; value: number; tone: 'success' | 'warning' | 'neutral' }) {
+  const colors = {
+    success: 'text-emerald-100',
+    warning: 'text-amber-100',
+    neutral: 'text-indigo-100'
+  }[tone]
+
+  return (
+    <div className="rounded-2xl border border-white/40 bg-white/20 p-4 text-center backdrop-blur-sm">
+      <p className={`text-xs font-semibold uppercase tracking-wide ${colors}`}>{title}</p>
+      <p className="mt-2 text-3xl font-semibold text-white">{value}</p>
+    </div>
+  )
+}
+
+function getMovimientoBadge(tipo: string) {
+  if (tipo.includes('ENTRADA')) {
+    return { badgeClass: 'inline-flex rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-600', label: tipo.replace('_', ' ') }
+  }
+  if (tipo.includes('SALIDA')) {
+    return { badgeClass: 'inline-flex rounded-full bg-rose-500/15 px-3 py-1 text-xs font-semibold text-rose-600', label: tipo.replace('_', ' ') }
+  }
+  return { badgeClass: 'inline-flex rounded-full bg-slate-500/15 px-3 py-1 text-xs font-semibold text-slate-600', label: tipo.replace('_', ' ') }
+}
+
+function getProductoNombre(productos: Producto[], productoId: number) {
+  return productos.find((p) => p.id === productoId)?.nombre || 'Producto no identificado'
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 px-6 py-12 text-center text-sm text-slate-500">
+      {message}
+    </div>
+  )
+}
+
+function SearchIcon() {
+  return <span className="text-lg leading-none">🔎</span>
 }

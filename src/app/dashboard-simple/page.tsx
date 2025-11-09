@@ -2,92 +2,80 @@
 
 import LayoutSimple from '@/components/layout/LayoutSimple'
 import AuthDebug from '@/components/debug/AuthDebug'
+import { Sparkles, TrendingUp, Users, Package2, ShoppingBag } from 'lucide-react'
+
+const stats = [
+  {
+    label: 'Ingresos diarios',
+    value: '$12,450',
+    tone: 'from-emerald-500/20 via-emerald-500/10 to-transparent',
+    icon: <TrendingUp className="h-5 w-5 text-emerald-500" />
+  },
+  {
+    label: 'Ventas registradas',
+    value: '156',
+    tone: 'from-sky-500/20 via-sky-500/10 to-transparent',
+    icon: <ShoppingBag className="h-5 w-5 text-sky-500" />
+  },
+  {
+    label: 'Productos activos',
+    value: '1,234',
+    tone: 'from-indigo-500/20 via-indigo-500/10 to-transparent',
+    icon: <Package2 className="h-5 w-5 text-indigo-500" />
+  },
+  {
+    label: 'Clientes fidelizados',
+    value: '89',
+    tone: 'from-purple-500/20 via-purple-500/10 to-transparent',
+    icon: <Users className="h-5 w-5 text-purple-500" />
+  }
+]
 
 export default function DashboardPage() {
   return (
     <>
       <AuthDebug />
       <LayoutSimple>
-        <div className="space-y-6">
-          {/* Título de la página */}
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">Resumen general del sistema</p>
-          </div>
-
-          {/* Contenido de prueba */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Ventas del Día</p>
-                  <p className="text-2xl font-semibold text-gray-900">$12,450</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Ventas Totales</p>
-                  <p className="text-2xl font-semibold text-gray-900">156</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Productos</p>
-                  <p className="text-2xl font-semibold text-gray-900">1,234</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Crecimiento</p>
-                  <p className="text-2xl font-semibold text-gray-900">23.5%</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Mensaje de prueba */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Dashboard Simplificado Funcionando
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Si puedes ver esta página y el panel de debug, el sistema está funcionando correctamente.
+        <div className="space-y-8">
+          <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-sky-600 to-emerald-500 px-6 py-8 text-white shadow-lg">
+            <div className="absolute -right-16 top-1/2 hidden h-56 w-56 -translate-y-1/2 rounded-full bg-white/20 blur-3xl lg:block" />
+            <div className="space-y-4">
+              <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+                <Sparkles className="mr-2 h-3.5 w-3.5" /> Demo de dashboard
+              </span>
+              <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">
+                Visualiza métricas clave en un panel ligero listo para pruebas
+              </h1>
+              <p className="max-w-2xl text-sm text-white/85">
+                Este dashboard simplificado replica la estética y lenguaje visual del panel principal. Ideal para mostrar indicadores rápidos mientras ajustamos la experiencia completa.
               </p>
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                ✅ Dashboard funcionando correctamente
-              </div>
             </div>
-          </div>
+          </section>
+
+          <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-slate-100 bg-white p-5 shadow-md transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className={`inline-flex items-center gap-2 rounded-xl bg-gradient-to-r ${stat.tone} px-3 py-2`}>{stat.icon}
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">{stat.label}</span>
+                </div>
+                <p className="mt-4 text-3xl font-semibold text-slate-900">{stat.value}</p>
+                <p className="mt-2 text-sm text-slate-500">Sincronizado con los datos de muestra actuales.</p>
+              </div>
+            ))}
+          </section>
+
+          <section className="rounded-3xl border border-slate-100 bg-white/95 p-6 text-center shadow-md">
+            <h2 className="text-xl font-semibold text-slate-900">Dashboard simplificado operativo</h2>
+            <p className="mt-3 text-sm text-slate-500">
+              Si puedes ver esta tarjeta y los indicadores anteriores, el modo demo está funcionando correctamente. Usa este entorno para validar autenticación, layout base y estilos.
+            </p>
+            <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600">
+              ✅ Entorno de pruebas listo
+            </div>
+          </section>
         </div>
       </LayoutSimple>
     </>
