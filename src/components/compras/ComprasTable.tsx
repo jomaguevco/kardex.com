@@ -97,7 +97,7 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
         </div>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="card overflow-hidden animate-fade-in">
         {compras.length === 0 ? (
           <div className="px-6 py-16 text-center text-sm text-slate-500">
             No encontramos compras con los filtros seleccionados.
@@ -105,7 +105,7 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+              <thead className="bg-gradient-to-r from-slate-50 to-white">
                 <tr>
                   <th>Factura</th>
                   <th>Proveedor</th>
@@ -117,8 +117,12 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {compras.map((compra: any) => (
-                  <tr key={compra.id} className="transition hover:bg-slate-50">
+                {compras.map((compra: any, index: number) => (
+                  <tr 
+                    key={compra.id} 
+                    className="animate-fade-in transition-all duration-200 hover:bg-slate-50 hover:shadow-sm"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
                     <td className="font-mono text-sm text-slate-700">{compra.numero_factura}</td>
                     <td>
                       <div className="flex items-center">

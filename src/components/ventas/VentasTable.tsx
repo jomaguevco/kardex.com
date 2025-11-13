@@ -97,7 +97,7 @@ export default function VentasTable({ onView, onEdit, onCancel }: VentasTablePro
         </div>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="card overflow-hidden animate-fade-in">
         {ventas.length === 0 ? (
           <div className="px-6 py-16 text-center text-sm text-slate-500">
             No encontramos ventas con los filtros seleccionados.
@@ -105,7 +105,7 @@ export default function VentasTable({ onView, onEdit, onCancel }: VentasTablePro
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+              <thead className="bg-gradient-to-r from-slate-50 to-white">
                 <tr>
                   <th>Factura</th>
                   <th>Cliente</th>
@@ -117,8 +117,12 @@ export default function VentasTable({ onView, onEdit, onCancel }: VentasTablePro
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {ventas.map((venta: any) => (
-                  <tr key={venta.id} className="transition hover:bg-slate-50">
+                {ventas.map((venta: any, index: number) => (
+                  <tr 
+                    key={venta.id} 
+                    className="animate-fade-in transition-all duration-200 hover:bg-slate-50 hover:shadow-sm"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
                     <td className="font-mono text-sm text-slate-700">{venta.numero_factura}</td>
                     <td>
                       <div className="flex items-center">
