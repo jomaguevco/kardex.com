@@ -51,6 +51,8 @@ function ClientesContent() {
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [clienteToDelete, setClienteToDelete] = useState<Cliente | null>(null)
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['clientes', searchTerm],
@@ -103,13 +105,20 @@ function ClientesContent() {
     setIsDetailOpen(true)
   }
 
-  const handleDeleteCliente = async (cliente: Cliente) => {
-    if (!window.confirm(`¿Deseas eliminar a ${cliente.nombre}?`)) return
+  const handleDeleteClick = (cliente: Cliente) => {
+    setClienteToDelete(cliente)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!clienteToDelete) return
 
     try {
-      await clienteService.deleteCliente(cliente.id)
+      await clienteService.deleteCliente(clienteToDelete.id)
       toast.success('Cliente eliminado correctamente')
       queryClient.invalidateQueries({ queryKey: ['clientes'] })
+      setIsDeleteModalOpen(false)
+      setClienteToDelete(null)
     } catch (error: any) {
       toast.error(error?.response?.data?.message || error?.message || 'No se pudo eliminar el cliente')
     }
@@ -341,7 +350,7 @@ function ClientesContent() {
                               Editar
                             </button>
                             <button
-                              onClick={() => handleDeleteCliente(cliente)}
+                              onClick={() => handleDeleteClick(cliente)}
                               className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm transition hover:bg-red-100"
                             >
                               Eliminar
@@ -532,6 +541,52 @@ function ClientesContent() {
                   Cerrar
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de eliminación */}
+      {isDeleteModalOpen && clienteToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-md rounded-3xl p-6 shadow-2xl animate-fade-in">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100">
+                <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">Confirmar eliminación</h2>
+                <p className="text-sm text-slate-500">Esta acción no se puede deshacer</p>
+              </div>
+            </div>
+            
+            <div className="mb-6 rounded-2xl border border-red-200 bg-red-50/50 p-4">
+              <p className="text-sm text-slate-700">
+                ¿Estás seguro de que deseas eliminar al cliente <span className="font-semibold">{clienteToDelete.nombre}</span>?
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
+                Documento: {clienteToDelete.numero_documento}
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setIsDeleteModalOpen(false)
+                  setClienteToDelete(null)
+                }}
+                className="btn-outline flex-1"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-red-700"
+              >
+                Eliminar
+              </button>
             </div>
           </div>
         </div>

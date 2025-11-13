@@ -1,12 +1,15 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Sparkles, User as UserIcon, Shield, Bell } from 'lucide-react'
+import toast from 'react-hot-toast'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import { useAuthStore } from '@/store/authStore'
 import FotoPerfilUpload from '@/components/perfil/FotoPerfilUpload'
 import EditarPerfilForm from '@/components/perfil/EditarPerfilForm'
 import CambiarContrasenaForm from '@/components/perfil/CambiarContrasenaForm'
+import usuarioService from '@/services/usuarioService'
 
 export default function PerfilPage() {
   return (
@@ -20,6 +23,41 @@ export default function PerfilPage() {
 
 function PerfilContent() {
   const { user } = useAuthStore()
+  const [notificacionesHabilitadas, setNotificacionesHabilitadas] = useState(true)
+  const [guardandoPreferencias, setGuardandoPreferencias] = useState(false)
+
+  // Cargar preferencias al montar el componente
+  useEffect(() => {
+    if (user?.preferencias) {
+      try {
+        const prefs = typeof user.preferencias === 'string' 
+          ? JSON.parse(user.preferencias) 
+          : user.preferencias
+        setNotificacionesHabilitadas(prefs.notificaciones !== false)
+      } catch (error) {
+        console.error('Error al cargar preferencias:', error)
+      }
+    }
+  }, [user])
+
+  const handleToggleNotificaciones = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nuevoValor = e.target.checked
+    setNotificacionesHabilitadas(nuevoValor)
+
+    try {
+      setGuardandoPreferencias(true)
+      await usuarioService.actualizarPreferencias({
+        notificaciones: nuevoValor
+      })
+      toast.success('Preferencias actualizadas')
+    } catch (error: any) {
+      toast.error('Error al actualizar preferencias')
+      // Revertir el cambio si falla
+      setNotificacionesHabilitadas(!nuevoValor)
+    } finally {
+      setGuardandoPreferencias(false)
+    }
+  }
 
   return (
     <div className="space-y-10 animate-fade-in">
@@ -80,8 +118,14 @@ function PerfilContent() {
               </div>
             </div>
             <label className="relative inline-flex cursor-pointer items-center">
-              <input type="checkbox" className="peer sr-only" defaultChecked />
-              <div className="peer h-6 w-11 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-indigo-300"></div>
+              <input 
+                type="checkbox" 
+                className="peer sr-only" 
+                checked={notificacionesHabilitadas}
+                onChange={handleToggleNotificaciones}
+                disabled={guardandoPreferencias}
+              />
+              <div className="peer h-6 w-11 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-indigo-300 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
             </label>
           </div>
 
