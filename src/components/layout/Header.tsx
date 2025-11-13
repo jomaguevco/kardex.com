@@ -6,10 +6,9 @@ import { useAuthStore } from '@/store/authStore'
 
 interface HeaderProps {
   onMenuToggle: () => void
-  topOffset?: number
 }
 
-export default function Header({ onMenuToggle, topOffset = 24 }: HeaderProps) {
+export default function Header({ onMenuToggle }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const { user, logout } = useAuthStore()
 
@@ -20,8 +19,7 @@ export default function Header({ onMenuToggle, topOffset = 24 }: HeaderProps) {
 
   return (
     <header 
-      className="sticky z-40 h-[73px] border-b border-white/30 bg-white/60 shadow-sm shadow-slate-950/10 backdrop-blur-xl"
-      style={{ top: `${topOffset}px` }}
+      className="sticky top-0 z-40 h-[73px] border-b border-white/30 bg-white/60 shadow-sm shadow-slate-950/10 backdrop-blur-xl"
     >
       <div className="flex h-full items-center justify-between px-4 lg:px-8">
         <div className="flex items-center">
