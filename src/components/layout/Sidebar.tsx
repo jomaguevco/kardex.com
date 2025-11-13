@@ -30,7 +30,7 @@ const menuItems = [
   { title: 'Clientes', href: '/clientes', icon: Users },
   { title: 'Proveedores', href: '/proveedores', icon: Users },
   { title: 'Reportes', href: '/reportes', icon: FileText },
-  { title: 'Configuración', href: '/configuracion', icon: Settings }
+  { title: 'Perfil', href: '/perfil', icon: Settings }
 ]
 
 export default function Sidebar({ isOpen, onToggle, topOffset = 24 }: SidebarProps) {

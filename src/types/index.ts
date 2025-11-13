@@ -5,6 +5,8 @@ export interface Usuario {
   nombre_completo: string;
   email?: string;
   telefono?: string;
+  foto_perfil?: string;
+  preferencias?: string;
   rol: 'ADMINISTRADOR' | 'VENDEDOR' | 'ALMACENERO' | 'CONTADOR';
   activo: boolean;
   fecha_ultimo_acceso?: string;
@@ -400,4 +402,26 @@ export interface RentabilidadStats {
   total_costos: number;
   ganancia_total: number;
   margen_general: number;
+}
+
+// Tipos de Notificación
+export interface Notificacion {
+  id: number;
+  usuario_id: number;
+  tipo: 'STOCK_BAJO' | 'COMPRA_PENDIENTE' | 'VENTA_PENDIENTE' | 'TRANSACCION' | 'SISTEMA';
+  titulo: string;
+  mensaje: string;
+  leido: boolean;
+  referencia_id?: number;
+  referencia_tipo?: string;
+  fecha_creacion: string;
+}
+
+export interface ResumenNotificaciones {
+  total: number;
+  noLeidas: number;
+  porTipo: Array<{
+    tipo: string;
+    cantidad: number;
+  }>;
 }

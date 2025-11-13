@@ -1,19 +1,46 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Menu, Bell, User, LogOut, Settings, Sparkles } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
+import NotificationPanel from './NotificationPanel'
+import notificacionService from '@/services/notificacionService'
 
 interface HeaderProps {
   onMenuToggle: () => void
 }
 
 export default function Header({ onMenuToggle }: HeaderProps) {
+  const router = useRouter()
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [notificationCount, setNotificationCount] = useState(0)
   const { user, logout } = useAuthStore()
+
+  useEffect(() => {
+    loadNotificationCount()
+    // Actualizar cada 30 segundos
+    const interval = setInterval(loadNotificationCount, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const loadNotificationCount = async () => {
+    try {
+      const resumen = await notificacionService.getResumen()
+      setNotificationCount(resumen.noLeidas)
+    } catch (error) {
+      // Silently fail
+    }
+  }
 
   const handleLogout = () => {
     logout()
+    setShowUserMenu(false)
+  }
+
+  const handleConfigClick = () => {
+    router.push('/perfil')
     setShowUserMenu(false)
   }
 
@@ -35,9 +62,16 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
-          <button className="relative rounded-xl border border-white/30 bg-white/70 p-2 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/60 hover:shadow-lg">
+          <button 
+            onClick={() => setShowNotifications(true)}
+            className="relative rounded-xl border border-white/30 bg-white/70 p-2 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/60 hover:shadow-lg"
+          >
             <Bell className="h-5 w-5 text-slate-600" />
-            <span className="absolute -top-1 right-1 h-2 w-2 rounded-full bg-rose-500" />
+            {notificationCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-xs font-semibold text-white">
+                {notificationCount > 9 ? '9+' : notificationCount}
+              </span>
+            )}
           </button>
 
           <div className="relative">
@@ -61,7 +95,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
                   <p className="text-xs text-slate-500">{user?.email}</p>
                 </div>
                 <button
-                  onClick={() => setShowUserMenu(false)}
+                  onClick={handleConfigClick}
                   className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100/80"
                 >
                   <Settings className="h-4 w-4" /> Configuración
@@ -77,6 +111,12 @@ export default function Header({ onMenuToggle }: HeaderProps) {
           </div>
         </div>
       </div>
+      
+      <NotificationPanel 
+        isOpen={showNotifications} 
+        onClose={() => setShowNotifications(false)}
+        onNotificationUpdate={loadNotificationCount}
+      />
     </header>
   )
 }
