@@ -9,6 +9,7 @@ interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
+  permisos: any | null;
 }
 
 interface AuthActions {
@@ -18,6 +19,7 @@ interface AuthActions {
   setLoading: (loading: boolean) => void;
   setUser: (user: Usuario) => void;
   setToken: (token: string) => void;
+  getRedirectPath: () => string;
 }
 
 type AuthStore = AuthState & AuthActions;
@@ -31,6 +33,7 @@ export const useAuthStore = create<AuthStore>()(
       isLoading: false,
       isAuthenticated: false,
       error: null,
+      permisos: null,
 
       // Actions
       login: async (nombre_usuario: string, contrasena: string) => {
@@ -49,17 +52,23 @@ export const useAuthStore = create<AuthStore>()(
           clearTimeout(timeoutId);
           
           if (response.success) {
+            const { user, token, permisos } = response.data as any;
+            
             set({
-              user: (response.data as any).user,
-              token: (response.data as any).token,
+              user,
+              token,
+              permisos: permisos || null,
               isAuthenticated: true,
               isLoading: false
             });
             
             // Guardar manualmente en localStorage para asegurar persistencia
             if (typeof window !== 'undefined') {
-              localStorage.setItem('token', (response.data as any).token);
-              localStorage.setItem('user', JSON.stringify((response.data as any).user));
+              localStorage.setItem('token', token);
+              localStorage.setItem('user', JSON.stringify(user));
+              if (permisos) {
+                localStorage.setItem('permisos', JSON.stringify(permisos));
+              }
             }
           } else {
             // Si la respuesta no es exitosa, resetear loading
@@ -83,6 +92,7 @@ export const useAuthStore = create<AuthStore>()(
         set({
           user: null,
           token: null,
+          permisos: null,
           isAuthenticated: false,
           error: null
         });
@@ -91,6 +101,7 @@ export const useAuthStore = create<AuthStore>()(
         if (typeof window !== 'undefined') {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          localStorage.removeItem('permisos');
         }
       },
 
@@ -163,6 +174,27 @@ export const useAuthStore = create<AuthStore>()(
         if (typeof window !== 'undefined') {
           localStorage.setItem('token', token);
         }
+      },
+
+      // Obtener ruta de redirección según rol
+      getRedirectPath: () => {
+        const { user } = get();
+        if (!user || !user.rol) return '/';
+
+        switch (user.rol) {
+          case 'ADMINISTRADOR':
+            return '/dashboard';
+          case 'VENDEDOR':
+            return '/ventas';
+          case 'CLIENTE':
+            return '/cliente-portal';
+          case 'ALMACENERO':
+            return '/kardex';
+          case 'CONTADOR':
+            return '/reportes';
+          default:
+            return '/dashboard';
+        }
       }
     }),
     {
@@ -170,6 +202,7 @@ export const useAuthStore = create<AuthStore>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
+        permisos: state.permisos,
         isAuthenticated: state.isAuthenticated
       })
     }
