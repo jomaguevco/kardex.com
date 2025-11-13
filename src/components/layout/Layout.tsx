@@ -18,10 +18,10 @@ export default function Layout({ children }: LayoutProps) {
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
 
   return (
-    <div className="relative min-h-screen bg-slate-950/95">
+    <div className="relative min-h-screen bg-slate-950/95" style={{ paddingTop: `${TOP_OFFSET}px` }}>
       <BackgroundDecorations />
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={TOP_OFFSET} />
-      <div className="relative transition-all duration-500 lg:pl-64" style={{ paddingTop: `${TOP_OFFSET}px` }}>
+      <div className="relative min-h-screen transition-all duration-500 lg:pl-64">
         <Header onMenuToggle={toggleSidebar} />
         <main
           className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8"
