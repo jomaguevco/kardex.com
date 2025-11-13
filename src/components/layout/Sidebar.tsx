@@ -42,13 +42,13 @@ export default function Sidebar({ isOpen, onToggle, topOffset = 24 }: SidebarPro
 
       <aside
         className={cn(
-          'fixed left-0 z-50 flex h-full w-64 flex-col border-r border-white/20 bg-white/20 shadow-xl shadow-slate-950/20 backdrop-blur-2xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0',
+          'fixed left-0 bottom-0 z-50 flex w-64 flex-col border-r border-white/20 bg-white/20 shadow-xl shadow-slate-950/20 backdrop-blur-2xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
-        style={{ top: `${topOffset}px` }}
+        style={{ top: `${topOffset}px`, height: `calc(100vh - ${topOffset}px)` }}
       >
         <div 
-          className="relative flex items-center justify-between border-b border-white/20 px-5"
+          className="relative flex shrink-0 items-center justify-between border-b border-white/20 px-5"
           style={{ height: '73px' }}
         >
           <div className="space-y-0.5">
@@ -94,7 +94,7 @@ export default function Sidebar({ isOpen, onToggle, topOffset = 24 }: SidebarPro
           })}
         </nav>
 
-        <div className="space-y-3 border-t border-white/15 px-5 pb-6 pt-4">
+        <div className="shrink-0 space-y-3 border-t border-white/15 px-5 pb-6 pt-4">
           <div className="rounded-2xl border border-white/20 bg-white/10 px-3 py-2 text-xs text-white/80 shadow-inner">
             Sistema de Ventas KARDEX v1.0
           </div>
