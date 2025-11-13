@@ -42,11 +42,15 @@ export default function Sidebar({ isOpen, onToggle, topOffset = 24 }: SidebarPro
 
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 flex h-full w-64 flex-col border-r border-white/20 bg-white/20 shadow-xl shadow-slate-950/20 backdrop-blur-2xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0',
+          'fixed left-0 z-50 flex h-full w-64 flex-col border-r border-white/20 bg-white/20 shadow-xl shadow-slate-950/20 backdrop-blur-2xl transition-transform duration-300 ease-in-out lg:static lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
+        style={{ top: `${topOffset}px` }}
       >
-        <div className="relative flex h-[73px] items-center justify-between border-b border-white/20 px-5">
+        <div 
+          className="relative flex items-center justify-between border-b border-white/20 px-5"
+          style={{ height: '73px' }}
+        >
           <div className="space-y-0.5">
             <span className="text-xs font-semibold uppercase tracking-wide text-white/60">Sistema Kardex</span>
             <p className="text-sm font-semibold text-white">Panel administrativo</p>
@@ -57,8 +61,7 @@ export default function Sidebar({ isOpen, onToggle, topOffset = 24 }: SidebarPro
         </div>
 
         <nav
-          className="flex-1 space-y-1 overflow-y-auto px-3 pb-4"
-          style={{ paddingTop: topOffset }}
+          className="flex-1 space-y-1 overflow-y-auto px-3 pb-4 pt-6"
         >
           {menuItems.map((item) => {
             const isActive = pathname === item.href

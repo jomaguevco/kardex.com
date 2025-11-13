@@ -9,6 +9,7 @@ type LayoutProps = {
 }
 
 const HEADER_HEIGHT = 73
+const TOP_OFFSET = 24
 const CONTENT_OFFSET = 24
 
 export default function Layout({ children }: LayoutProps) {
@@ -19,9 +20,9 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="relative min-h-screen bg-slate-950/95">
       <BackgroundDecorations />
-      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={CONTENT_OFFSET} />
+      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={TOP_OFFSET} />
       <div className="relative transition-all duration-500 lg:pl-64">
-        <Header onMenuToggle={toggleSidebar} />
+        <Header onMenuToggle={toggleSidebar} topOffset={TOP_OFFSET} />
         <main
           className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8"
           style={{ paddingTop: CONTENT_OFFSET }}
