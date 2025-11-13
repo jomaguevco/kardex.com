@@ -15,21 +15,23 @@ interface StatCardProps {
 
 function StatCard({ title, value, change, changeType = 'neutral', icon: Icon, color }: StatCardProps) {
   return (
-    <div className="card p-6">
+    <div className="card-hover p-6 group">
       <div className="flex items-center">
-        <div className={cn('p-3 rounded-lg', color)}>
+        <div className={cn('p-3 rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3', color)}>
           <Icon className="h-6 w-6 text-white" />
         </div>
-        <div className="ml-4">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
+        <div className="ml-4 flex-1">
+          <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">{title}</p>
+          <p className="text-2xl font-bold text-slate-900 mt-1 transition-all duration-300 group-hover:text-indigo-600">{value}</p>
           {change && (
             <p className={cn(
-              'text-sm',
-              changeType === 'positive' && 'text-green-600',
-              changeType === 'negative' && 'text-red-600',
-              changeType === 'neutral' && 'text-gray-600'
+              'text-sm font-medium mt-1 flex items-center gap-1',
+              changeType === 'positive' && 'text-emerald-600',
+              changeType === 'negative' && 'text-rose-600',
+              changeType === 'neutral' && 'text-slate-600'
             )}>
+              {changeType === 'positive' && '↗'}
+              {changeType === 'negative' && '↘'}
               {change}
             </p>
           )}
@@ -79,15 +81,20 @@ export default function DashboardStats() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       {stats.map((stat, index) => (
-        <StatCard
+        <div
           key={index}
-          title={stat.title}
-          value={stat.value}
-          change={stat.change}
-          changeType={stat.changeType}
-          icon={stat.icon}
-          color={stat.color}
-        />
+          className="animate-fade-in"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
+          <StatCard
+            title={stat.title}
+            value={stat.value}
+            change={stat.change}
+            changeType={stat.changeType}
+            icon={stat.icon}
+            color={stat.color}
+          />
+        </div>
       ))}
     </div>
   )

@@ -71,10 +71,10 @@ export default function ProductosTable({
   }
 
   return (
-    <div className="card">
-      <div className="border-b border-gray-200 px-4 py-4 sm:px-6">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Lista de Productos ({pagination?.total || 0})
+    <div className="card animate-fade-in">
+      <div className="border-b border-slate-200 px-4 py-5 sm:px-6 bg-gradient-to-r from-slate-50 to-white">
+        <h3 className="text-lg font-bold text-slate-900">
+          Lista de Productos <span className="text-indigo-600">({pagination?.total || 0})</span>
         </h3>
       </div>
 
@@ -98,11 +98,15 @@ export default function ProductosTable({
                 </td>
               </tr>
             ) : (
-              productos.map((producto) => {
+              productos.map((producto, index) => {
                 const stockStatus = getStockStatus(producto.stock_actual, producto.stock_minimo)
 
                 return (
-                  <tr key={producto.id} className="transition hover:bg-gray-50">
+                  <tr 
+                    key={producto.id} 
+                    className="animate-fade-in transition-all duration-200 hover:bg-slate-50 hover:shadow-sm"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
                     <td className="font-mono text-sm">{producto.codigo_interno}</td>
                     <td>
                       <div className="flex items-center">
@@ -154,8 +158,8 @@ export default function ProductosTable({
                           onClick={() => onView?.(producto)}
                           disabled={!onView}
                           className={cn(
-                            'rounded-md p-1 text-gray-400 transition',
-                            onView ? 'hover:text-gray-700' : 'cursor-not-allowed opacity-40'
+                            'rounded-lg p-2 text-slate-400 transition-all duration-200',
+                            onView ? 'hover:bg-slate-100 hover:text-slate-700 hover:scale-110' : 'cursor-not-allowed opacity-40'
                           )}
                           title="Ver detalles"
                         >
@@ -166,8 +170,8 @@ export default function ProductosTable({
                           onClick={() => onEdit?.(producto)}
                           disabled={!onEdit}
                           className={cn(
-                            'rounded-md p-1 text-gray-400 transition',
-                            onEdit ? 'hover:text-blue-600' : 'cursor-not-allowed opacity-40'
+                            'rounded-lg p-2 text-slate-400 transition-all duration-200',
+                            onEdit ? 'hover:bg-blue-100 hover:text-blue-600 hover:scale-110' : 'cursor-not-allowed opacity-40'
                           )}
                           title="Editar"
                         >
@@ -178,8 +182,8 @@ export default function ProductosTable({
                           onClick={() => onDelete?.(producto)}
                           disabled={!onDelete}
                           className={cn(
-                            'rounded-md p-1 text-gray-400 transition',
-                            onDelete ? 'hover:text-red-600' : 'cursor-not-allowed opacity-40'
+                            'rounded-lg p-2 text-slate-400 transition-all duration-200',
+                            onDelete ? 'hover:bg-rose-100 hover:text-rose-600 hover:scale-110' : 'cursor-not-allowed opacity-40'
                           )}
                           title="Eliminar"
                         >
