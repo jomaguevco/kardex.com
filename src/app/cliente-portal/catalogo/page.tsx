@@ -38,7 +38,7 @@ export default function CatalogoPage() {
 
   const filteredProductos = productos.filter(producto =>
     producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    producto.codigo.toLowerCase().includes(searchTerm.toLowerCase())
+    (producto.codigo_interno || '').toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const agregarAlCarrito = (producto: any) => {
@@ -114,8 +114,16 @@ export default function CatalogoPage() {
               key={producto.id}
               className="glass-card group rounded-2xl p-6 transition hover:shadow-xl"
             >
-              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200">
-                <Package className="h-16 w-16 text-slate-400" />
+              <div className="mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-slate-100 to-slate-200">
+                {producto.imagen_url ? (
+                  <img
+                    src={producto.imagen_url}
+                    alt={producto.nombre}
+                    className="h-full w-full object-cover transition group-hover:scale-105"
+                  />
+                ) : (
+                  <Package className="h-16 w-16 text-slate-400" />
+                )}
               </div>
               
               <h3 className="font-bold text-slate-900 line-clamp-2">
@@ -123,7 +131,7 @@ export default function CatalogoPage() {
               </h3>
               
               <p className="mt-1 text-sm text-slate-600">
-                Código: {producto.codigo}
+                Código: {producto.codigo_interno}
               </p>
 
               {producto.descripcion && (
