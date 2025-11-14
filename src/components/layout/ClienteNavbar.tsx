@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
+import NotificacionesPanel from './NotificacionesPanel'
 import {
   Store, ShoppingBag, Package, Receipt, CreditCard,
   MessageCircle, User, LogOut, Bell, ShoppingCart,
@@ -16,9 +17,11 @@ export default function ClienteNavbar() {
   const { user, logout } = useAuthStore()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isNotificacionesOpen, setIsNotificacionesOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [cartCount, setCartCount] = useState(0)
   const [favoritesCount, setFavoritesCount] = useState(0)
+  const [notificacionesCount, setNotificacionesCount] = useState(0)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,6 +48,34 @@ export default function ClienteNavbar() {
       window.removeEventListener('storage', updateCounts)
       clearInterval(interval)
     }
+  }, [])
+
+  useEffect(() => {
+    // Cargar notificaciones no leídas
+    const fetchNotificaciones = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) return
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notificaciones`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        const data = await response.json()
+        if (data.success) {
+          const noLeidas = data.data.filter((n: any) => !n.leida).length
+          setNotificacionesCount(noLeidas)
+        }
+      } catch (error) {
+        console.error('Error al cargar notificaciones:', error)
+      }
+    }
+
+    fetchNotificaciones()
+    const interval = setInterval(fetchNotificaciones, 30000) // Actualizar cada 30 segundos
+
+    return () => clearInterval(interval)
   }, [])
 
   const navItems = [
@@ -159,6 +190,7 @@ export default function ClienteNavbar() {
 
               {/* Notificaciones */}
               <button
+                onClick={() => setIsNotificacionesOpen(true)}
                 className={`relative rounded-xl p-2 transition ${
                   scrolled
                     ? 'text-slate-700 hover:bg-slate-100'
@@ -166,7 +198,11 @@ export default function ClienteNavbar() {
                 }`}
               >
                 <Bell className="h-6 w-6" />
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+                {notificacionesCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white animate-pulse">
+                    {notificacionesCount > 9 ? '9+' : notificacionesCount}
+                  </span>
+                )}
               </button>
 
               {/* Perfil */}
@@ -289,6 +325,35 @@ export default function ClienteNavbar() {
 
       {/* Espaciador para el contenido */}
       <div className="h-20" />
+
+      {/* Panel de notificaciones */}
+      <NotificacionesPanel 
+        isOpen={isNotificacionesOpen} 
+        onClose={() => {
+          setIsNotificacionesOpen(false)
+          // Recargar contador después de cerrar
+          const fetchNotificaciones = async () => {
+            try {
+              const token = localStorage.getItem('token')
+              if (!token) return
+
+              const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notificaciones`, {
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              })
+              const data = await response.json()
+              if (data.success) {
+                const noLeidas = data.data.filter((n: any) => !n.leida).length
+                setNotificacionesCount(noLeidas)
+              }
+            } catch (error) {
+              console.error('Error al cargar notificaciones:', error)
+            }
+          }
+          fetchNotificaciones()
+        }}
+      />
     </>
   )
 }
