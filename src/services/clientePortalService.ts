@@ -79,6 +79,13 @@ class ClientePortalService {
   }
 
   /**
+   * Obtener detalle de una compra específica (con productos)
+   */
+  async getDetalleCompra(id: string | number): Promise<FacturaResponse> {
+    return await apiService.get(`/cliente-portal/compra/${id}`);
+  }
+
+  /**
    * Obtener dashboard del cliente (resumen)
    */
   async getDashboard(): Promise<any> {
