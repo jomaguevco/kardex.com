@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import clientePortalService from '@/services/clientePortalService'
 import { 
   Package, Search, Loader2, ShoppingCart, Heart, 
@@ -337,33 +338,37 @@ export default function CatalogoPage() {
                   />
                 </button>
 
-                {/* Imagen del producto */}
-                <div className="relative h-64 overflow-hidden bg-slate-100">
-                  {producto.imagen_url ? (
-                    <img
-                      src={producto.imagen_url}
-                      alt={producto.nombre}
-                      className="h-full w-full object-cover transition group-hover:scale-110"
-                    />
-                  ) : (
-                    <Package className="absolute inset-0 m-auto h-20 w-20 text-slate-300" />
-                  )}
-                  {enCarrito > 0 && (
-                    <div className="absolute bottom-3 left-3 flex items-center space-x-2 rounded-full bg-emerald-500 px-3 py-1 text-sm font-bold text-white shadow-lg">
-                      <Check className="h-4 w-4" />
-                      <span>{enCarrito} en carrito</span>
-                    </div>
-                  )}
-                </div>
+                {/* Imagen del producto - Clickeable */}
+                <Link href={`/cliente-portal/producto/${producto.id}`}>
+                  <div className="relative h-64 overflow-hidden bg-slate-100 cursor-pointer">
+                    {producto.imagen_url ? (
+                      <img
+                        src={producto.imagen_url}
+                        alt={producto.nombre}
+                        className="h-full w-full object-cover transition group-hover:scale-110"
+                      />
+                    ) : (
+                      <Package className="absolute inset-0 m-auto h-20 w-20 text-slate-300" />
+                    )}
+                    {enCarrito > 0 && (
+                      <div className="absolute bottom-3 left-3 flex items-center space-x-2 rounded-full bg-emerald-500 px-3 py-1 text-sm font-bold text-white shadow-lg">
+                        <Check className="h-4 w-4" />
+                        <span>{enCarrito} en carrito</span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
 
                 {/* Información del producto */}
                 <div className="p-5">
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                     {producto.codigo_interno}
                   </p>
-                  <h3 className="mt-1 text-lg font-bold text-slate-900 line-clamp-2 group-hover:text-primary-600 transition">
-                    {producto.nombre}
-                  </h3>
+                  <Link href={`/cliente-portal/producto/${producto.id}`}>
+                    <h3 className="mt-1 text-lg font-bold text-slate-900 line-clamp-2 group-hover:text-primary-600 transition cursor-pointer">
+                      {producto.nombre}
+                    </h3>
+                  </Link>
                   
                   {producto.descripcion && (
                     <p className="mt-2 text-sm text-slate-600 line-clamp-2">
@@ -410,18 +415,20 @@ export default function CatalogoPage() {
                 key={producto.id}
                 className="glass-card group flex items-center space-x-6 overflow-hidden rounded-2xl p-6 transition hover:shadow-xl"
               >
-                {/* Imagen */}
-                <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
-                  {producto.imagen_url ? (
-                    <img
-                      src={producto.imagen_url}
-                      alt={producto.nombre}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Package className="absolute inset-0 m-auto h-12 w-12 text-slate-300" />
-                  )}
-                </div>
+                {/* Imagen - Clickeable */}
+                <Link href={`/cliente-portal/producto/${producto.id}`}>
+                  <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100 cursor-pointer">
+                    {producto.imagen_url ? (
+                      <img
+                        src={producto.imagen_url}
+                        alt={producto.nombre}
+                        className="h-full w-full object-cover transition group-hover:scale-110"
+                      />
+                    ) : (
+                      <Package className="absolute inset-0 m-auto h-12 w-12 text-slate-300" />
+                    )}
+                  </div>
+                </Link>
 
                 {/* Información */}
                 <div className="flex-grow">
@@ -430,9 +437,11 @@ export default function CatalogoPage() {
                       <p className="text-xs font-semibold text-slate-500 uppercase">
                         {producto.codigo_interno}
                       </p>
-                      <h3 className="mt-1 text-xl font-bold text-slate-900">
-                        {producto.nombre}
-                      </h3>
+                      <Link href={`/cliente-portal/producto/${producto.id}`}>
+                        <h3 className="mt-1 text-xl font-bold text-slate-900 cursor-pointer hover:text-primary-600 transition">
+                          {producto.nombre}
+                        </h3>
+                      </Link>
                       {producto.descripcion && (
                         <p className="mt-2 text-sm text-slate-600 line-clamp-2">
                           {producto.descripcion}
