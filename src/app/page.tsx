@@ -25,7 +25,7 @@ type HealthResponse = {
 
 export default function HomePage() {
   const router = useRouter()
-  const { login } = useAuthStore()
+  const { login, getRedirectPath } = useAuthStore()
 
   const [credentials, setCredentials] = useState({
     username: '',
@@ -54,7 +54,9 @@ export default function HomePage() {
 
     try {
       await login(credentials.username, credentials.password)
-      router.push('/dashboard')
+      // Redirigir según el rol del usuario
+      const redirectPath = getRedirectPath()
+      router.push(redirectPath)
     } catch (err: any) {
       setError(err?.message || 'Error al iniciar sesi&#243;n. Intenta nuevamente.')
     } finally {
@@ -201,7 +203,19 @@ export default function HomePage() {
               </button>
             </form>
 
-            <div className="mt-8 rounded-2xl bg-slate-50 px-4 py-3 text-center text-sm text-slate-500">
+            <div className="mt-6 text-center">
+              <p className="text-sm text-slate-600">
+                ¿Eres cliente?{' '}
+                <Link
+                  href="/registro"
+                  className="font-semibold text-primary-600 hover:text-primary-500 transition"
+                >
+                  Regístrate aquí
+                </Link>
+              </p>
+            </div>
+
+            <div className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-center text-sm text-slate-500">
               Usuario demo: <span className="font-semibold text-slate-700">admin</span> /{' '}
               <span className="font-semibold text-slate-700">admin123</span>
             </div>

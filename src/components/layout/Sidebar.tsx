@@ -11,9 +11,14 @@ import {
   FileText,
   Settings,
   Users,
-  X
+  X,
+  Store,
+  ClipboardList,
+  Receipt,
+  CreditCard
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
+import { useAuthStore } from '@/store/authStore'
 
 interface SidebarProps {
   isOpen: boolean
@@ -21,20 +26,41 @@ interface SidebarProps {
   topOffset?: number
 }
 
-const menuItems = [
-  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { title: 'Productos', href: '/productos', icon: Package },
-  { title: 'Ventas', href: '/ventas', icon: ShoppingCart },
-  { title: 'Compras', href: '/compras', icon: ShoppingBag },
-  { title: 'KARDEX', href: '/kardex', icon: BarChart3 },
-  { title: 'Clientes', href: '/clientes', icon: Users },
-  { title: 'Proveedores', href: '/proveedores', icon: Users },
-  { title: 'Reportes', href: '/reportes', icon: FileText },
-  { title: 'Perfil', href: '/perfil', icon: Settings }
+interface MenuItem {
+  title: string
+  href: string
+  icon: any
+  roles: string[]
+}
+
+const allMenuItems: MenuItem[] = [
+  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
+  { title: 'Productos', href: '/productos', icon: Package, roles: ['ADMINISTRADOR'] },
+  { title: 'Ventas', href: '/ventas', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
+  { title: 'Compras', href: '/compras', icon: ShoppingBag, roles: ['ADMINISTRADOR'] },
+  { title: 'KARDEX', href: '/kardex', icon: BarChart3, roles: ['ADMINISTRADOR'] },
+  { title: 'Clientes', href: '/clientes', icon: Users, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
+  { title: 'Proveedores', href: '/proveedores', icon: Users, roles: ['ADMINISTRADOR'] },
+  { title: 'Reportes', href: '/reportes', icon: FileText, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
+  { title: 'Perfil', href: '/perfil', icon: Settings, roles: ['ADMINISTRADOR', 'VENDEDOR', 'CLIENTE'] },
+  
+  // Menú para clientes
+  { title: 'Mi Portal', href: '/cliente-portal', icon: Store, roles: ['CLIENTE'] },
+  { title: 'Mis Compras', href: '/cliente-portal/mis-compras', icon: ShoppingBag, roles: ['CLIENTE'] },
+  { title: 'Catálogo', href: '/cliente-portal/catalogo', icon: Package, roles: ['CLIENTE'] },
+  { title: 'Mis Pedidos', href: '/cliente-portal/pedidos', icon: ClipboardList, roles: ['CLIENTE'] },
+  { title: 'Facturas', href: '/cliente-portal/facturas', icon: Receipt, roles: ['CLIENTE'] },
+  { title: 'Estado de Cuenta', href: '/cliente-portal/estado-cuenta', icon: CreditCard, roles: ['CLIENTE'] },
 ]
 
 export default function Sidebar({ isOpen, onToggle, topOffset = 24 }: SidebarProps) {
   const pathname = usePathname()
+  const { user } = useAuthStore()
+
+  // Filtrar menú según el rol del usuario
+  const menuItems = allMenuItems.filter(item => 
+    user?.rol && item.roles.includes(user.rol)
+  )
 
   return (
     <>
@@ -53,7 +79,11 @@ export default function Sidebar({ isOpen, onToggle, topOffset = 24 }: SidebarPro
         >
           <div className="space-y-0.5">
             <span className="text-xs font-semibold uppercase tracking-wide text-white/60">Sistema Kardex</span>
-            <p className="text-sm font-semibold text-white">Panel administrativo</p>
+            <p className="text-sm font-semibold text-white">
+              {user?.rol === 'CLIENTE' ? 'Portal de Cliente' : 
+               user?.rol === 'VENDEDOR' ? 'Panel de Vendedor' : 
+               'Panel Administrativo'}
+            </p>
           </div>
           <button onClick={onToggle} className="rounded-xl border border-white/30 bg-white/20 p-1 text-white transition hover:border-white/50 lg:hidden">
             <X className="h-4 w-4" />
