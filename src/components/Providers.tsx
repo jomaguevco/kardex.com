@@ -3,7 +3,25 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from 'react-hot-toast'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuthStore } from '@/store/authStore'
+import WhatsAppButton from './layout/WhatsAppButton'
+
+function WhatsAppButtonWrapper() {
+  const { user } = useAuthStore()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Solo mostrar para usuarios con rol CLIENTE
+  if (!mounted || !user || user.rol !== 'CLIENTE') {
+    return null
+  }
+
+  return <WhatsAppButton />
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -45,6 +63,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           },
         }}
       />
+      <WhatsAppButtonWrapper />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )

@@ -15,7 +15,8 @@ import {
   Store,
   ClipboardList,
   Receipt,
-  CreditCard
+  CreditCard,
+  MessageCircle
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { useAuthStore } from '@/store/authStore'
@@ -51,6 +52,7 @@ const allMenuItems: MenuItem[] = [
   { title: 'Mis Pedidos', href: '/cliente-portal/pedidos', icon: ClipboardList, roles: ['CLIENTE'] },
   { title: 'Facturas', href: '/cliente-portal/facturas', icon: Receipt, roles: ['CLIENTE'] },
   { title: 'Estado de Cuenta', href: '/cliente-portal/estado-cuenta', icon: CreditCard, roles: ['CLIENTE'] },
+  { title: 'Soporte', href: '/cliente-portal/soporte', icon: MessageCircle, roles: ['CLIENTE'] },
 ]
 
 export default function Sidebar({ isOpen, onToggle, topOffset = 24 }: SidebarProps) {
