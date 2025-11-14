@@ -81,6 +81,7 @@ export default function NuevoPedidoPage() {
       }))
 
       const response = await pedidoService.crearPedido({
+        tipo_pedido: 'PEDIDO_APROBACION',
         detalles,
         observaciones: observaciones || undefined
       })
