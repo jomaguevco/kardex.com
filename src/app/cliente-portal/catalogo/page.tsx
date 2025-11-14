@@ -4,7 +4,12 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
 import clientePortalService from '@/services/clientePortalService'
-import { Package, Search, Loader2, ShoppingCart } from 'lucide-react'
+import { 
+  Package, Search, Loader2, ShoppingCart, Heart, 
+  Filter, Grid, List, Star, Zap, Check, X,
+  ChevronDown, SlidersHorizontal, TrendingUp
+} from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export default function CatalogoPage() {
   const router = useRouter()
@@ -13,6 +18,11 @@ export default function CatalogoPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [carrito, setCarrito] = useState<any[]>([])
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [sortBy, setSortBy] = useState<'nombre' | 'precio-asc' | 'precio-desc' | 'nuevo'>('nombre')
+  const [showFilters, setShowFilters] = useState(false)
+  const [favorites, setFavorites] = useState<number[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   useEffect(() => {
     if (!isAuthenticated || user?.rol !== 'CLIENTE') {
@@ -26,6 +36,12 @@ export default function CatalogoPage() {
       setCarrito(JSON.parse(carritoGuardado))
     }
 
+    // Cargar favoritos
+    const favoritosGuardados = localStorage.getItem('favoritos')
+    if (favoritosGuardados) {
+      setFavorites(JSON.parse(favoritosGuardados))
+    }
+
     fetchCatalogo()
   }, [isAuthenticated, user, router])
 
@@ -33,8 +49,15 @@ export default function CatalogoPage() {
   useEffect(() => {
     if (carrito.length > 0) {
       localStorage.setItem('carrito', JSON.stringify(carrito))
+    } else {
+      localStorage.removeItem('carrito')
     }
   }, [carrito])
+
+  // Guardar favoritos
+  useEffect(() => {
+    localStorage.setItem('favoritos', JSON.stringify(favorites))
+  }, [favorites])
 
   const fetchCatalogo = async () => {
     try {
@@ -44,146 +67,446 @@ export default function CatalogoPage() {
       }
     } catch (error) {
       console.error('Error al cargar catálogo:', error)
+      toast.error('Error al cargar el catálogo')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const filteredProductos = productos.filter(producto =>
-    producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (producto.codigo_interno || '').toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const toggleFavorite = (productoId: number) => {
+    if (favorites.includes(productoId)) {
+      setFavorites(favorites.filter(id => id !== productoId))
+      toast.success('Eliminado de favoritos')
+    } else {
+      setFavorites([...favorites, productoId])
+      toast.success('Agregado a favoritos')
+    }
+  }
 
   const agregarAlCarrito = (producto: any) => {
+    if (producto.stock_actual <= 0) {
+      toast.error('Producto sin stock disponible')
+      return
+    }
+
     const existente = carrito.find(item => item.id === producto.id)
     if (existente) {
+      if (existente.cantidad >= producto.stock_actual) {
+        toast.error('No hay más stock disponible')
+        return
+      }
       setCarrito(carrito.map(item =>
         item.id === producto.id
           ? { ...item, cantidad: item.cantidad + 1 }
           : item
       ))
+      toast.success(`${producto.nombre} agregado al carrito`)
     } else {
       setCarrito([...carrito, { ...producto, cantidad: 1 }])
+      toast.success(`${producto.nombre} agregado al carrito`)
     }
+  }
+
+  const getProductosOrdenados = () => {
+    let filtered = productos.filter(producto =>
+      producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (producto.codigo_interno || '').toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    // Filtrar por categoría
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(p => p.categoria_id?.toString() === selectedCategory)
+    }
+
+    // Ordenar
+    switch (sortBy) {
+      case 'precio-asc':
+        return filtered.sort((a, b) => Number(a.precio_venta) - Number(b.precio_venta))
+      case 'precio-desc':
+        return filtered.sort((a, b) => Number(b.precio_venta) - Number(a.precio_venta))
+      case 'nuevo':
+        return filtered.sort((a, b) => new Date(b.fecha_creacion || 0).getTime() - new Date(a.fecha_creacion || 0).getTime())
+      default:
+        return filtered.sort((a, b) => a.nombre.localeCompare(b.nombre))
+    }
+  }
+
+  const filteredProductos = getProductosOrdenados()
+
+  const cantidadEnCarrito = (productoId: number) => {
+    const item = carrito.find(i => i.id === productoId)
+    return item ? item.cantidad : 0
   }
 
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+        <div className="text-center">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary-600" />
+          <p className="mt-4 text-slate-600">Cargando catálogo...</p>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header con carrito flotante */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Catálogo de Productos</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-indigo-600 bg-clip-text text-transparent">
+            Catálogo de Productos
+          </h1>
           <p className="mt-2 text-slate-600">
-            Explora nuestros productos disponibles
+            Descubre {productos.length} productos increíbles
           </p>
         </div>
         {carrito.length > 0 && (
           <button
             onClick={() => router.push('/cliente-portal/pedidos/nuevo')}
-            className="flex items-center space-x-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl"
+            className="group relative flex items-center space-x-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 font-bold text-white shadow-2xl transition hover:scale-105 hover:shadow-3xl"
           >
-            <ShoppingCart className="h-5 w-5" />
-            <span>Ver Carrito ({carrito.length})</span>
+            <div className="relative">
+              <ShoppingCart className="h-6 w-6" />
+              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold animate-pulse">
+                {carrito.reduce((acc, item) => acc + item.cantidad, 0)}
+              </span>
+            </div>
+            <span>Ver Carrito</span>
+            <div className="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-emerald-400 animate-ping" />
           </button>
         )}
       </div>
 
-      {/* Barra de búsqueda */}
-      <div className="glass-card rounded-2xl p-4">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Buscar productos por nombre o código..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-field h-12 w-full rounded-xl bg-white pl-12"
-          />
+      {/* Barra de búsqueda y filtros mejorada */}
+      <div className="glass-card rounded-3xl p-6 shadow-xl">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+          {/* Búsqueda */}
+          <div className="relative flex-grow">
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Buscar productos por nombre o código..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-2xl border-2 border-slate-200 bg-white py-4 pl-12 pr-4 text-slate-900 transition focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-100"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-slate-200 p-1 transition hover:bg-slate-300"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Ordenar */}
+          <div className="flex items-center space-x-3">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="rounded-xl border-2 border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-100"
+            >
+              <option value="nombre">Ordenar: A-Z</option>
+              <option value="precio-asc">Precio: Menor a Mayor</option>
+              <option value="precio-desc">Precio: Mayor a Menor</option>
+              <option value="nuevo">Más Recientes</option>
+            </select>
+
+            {/* Vista */}
+            <div className="flex rounded-xl border-2 border-slate-200 bg-white p-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`rounded-lg p-2 transition ${
+                  viewMode === 'grid'
+                    ? 'bg-primary-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Grid className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`rounded-lg p-2 transition ${
+                  viewMode === 'list'
+                    ? 'bg-primary-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <List className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Filtros */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center space-x-2 rounded-xl bg-slate-100 px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-200"
+            >
+              <SlidersHorizontal className="h-5 w-5" />
+              <span className="hidden sm:inline">Filtros</span>
+            </button>
+          </div>
         </div>
+
+        {/* Panel de filtros expandible */}
+        {showFilters && (
+          <div className="mt-4 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4">
+            <h3 className="mb-3 font-bold text-slate-900">Categorías</h3>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={`rounded-full px-4 py-2 font-semibold transition ${
+                  selectedCategory === 'all'
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-white text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                Todas
+              </button>
+              {/* Agregar más categorías dinámicamente */}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Contador de resultados */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-slate-600">
+          Mostrando <span className="font-bold text-slate-900">{filteredProductos.length}</span> de{' '}
+          <span className="font-bold text-slate-900">{productos.length}</span> productos
+        </p>
+        {favorites.length > 0 && (
+          <button className="flex items-center space-x-2 text-sm text-slate-600 hover:text-red-600 transition">
+            <Heart className="h-4 w-4 fill-current" />
+            <span>{favorites.length} favoritos</span>
+          </button>
+        )}
       </div>
 
       {/* Grid de productos */}
       {filteredProductos.length === 0 ? (
-        <div className="glass-card rounded-2xl p-12 text-center">
-          <Package className="mx-auto h-16 w-16 text-slate-300" />
-          <h3 className="mt-4 text-lg font-semibold text-slate-900">
+        <div className="glass-card rounded-3xl p-16 text-center">
+          <Package className="mx-auto h-20 w-20 text-slate-300" />
+          <h3 className="mt-4 text-xl font-bold text-slate-900">
             No se encontraron productos
           </h3>
-          <p className="mt-2 text-sm text-slate-600">
-            {searchTerm ? 'Intenta con otro término de búsqueda' : 'El catálogo está vacío'}
+          <p className="mt-2 text-slate-600">
+            Intenta con otros términos de búsqueda
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredProductos.map((producto) => (
-            <div
-              key={producto.id}
-              className="glass-card group rounded-2xl p-6 transition hover:shadow-xl"
-            >
-              <div className="mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-slate-100 to-slate-200">
-                {producto.imagen_url ? (
-                  <img
-                    src={producto.imagen_url}
-                    alt={producto.nombre}
-                    className="h-full w-full object-cover transition group-hover:scale-105"
-                  />
-                ) : (
-                  <Package className="h-16 w-16 text-slate-400" />
-                )}
-              </div>
-              
-              <h3 className="font-bold text-slate-900 line-clamp-2">
-                {producto.nombre}
-              </h3>
-              
-              <p className="mt-1 text-sm text-slate-600">
-                Código: {producto.codigo_interno}
-              </p>
+        <div className={viewMode === 'grid' 
+          ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+          : 'space-y-4'
+        }>
+          {filteredProductos.map((producto) => {
+            const enCarrito = cantidadEnCarrito(producto.id)
+            const esFavorito = favorites.includes(producto.id)
+            const sinStock = producto.stock_actual <= 0
+            const stockBajo = producto.stock_actual > 0 && producto.stock_actual <= producto.stock_minimo
 
-              {producto.descripcion && (
-                <p className="mt-2 text-sm text-slate-600 line-clamp-2">
-                  {producto.descripcion}
-                </p>
-              )}
-
-              <div className="mt-4 flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-slate-500">Precio</p>
-                  <p className="text-2xl font-bold text-primary-600">
-                    S/ {Number(producto.precio_venta || 0).toFixed(2)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-500">Stock</p>
-                  <p className={`text-sm font-semibold ${
-                    producto.stock_actual > producto.stock_minimo
-                      ? 'text-emerald-600'
-                      : 'text-orange-600'
-                  }`}>
-                    {producto.stock_actual} unid.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => agregarAlCarrito(producto)}
-                disabled={producto.stock_actual <= 0}
-                className="mt-4 w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 text-sm font-semibold text-white shadow-md transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+            return viewMode === 'grid' ? (
+              // Vista de cuadrícula
+              <div
+                key={producto.id}
+                className="glass-card group relative overflow-hidden rounded-3xl transition hover:shadow-2xl"
               >
-                {producto.stock_actual <= 0 ? 'Sin Stock' : 'Agregar al Carrito'}
-              </button>
-            </div>
-          ))}
+                {/* Badge de stock */}
+                {sinStock && (
+                  <div className="absolute left-3 top-3 z-10 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                    Sin Stock
+                  </div>
+                )}
+                {stockBajo && !sinStock && (
+                  <div className="absolute left-3 top-3 z-10 flex items-center space-x-1 rounded-full bg-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                    <Zap className="h-3 w-3" />
+                    <span>Últimas Unidades</span>
+                  </div>
+                )}
+
+                {/* Botón de favorito */}
+                <button
+                  onClick={() => toggleFavorite(producto.id)}
+                  className="absolute right-3 top-3 z-10 rounded-full bg-white/90 p-2 shadow-lg backdrop-blur-sm transition hover:scale-110"
+                >
+                  <Heart
+                    className={`h-5 w-5 transition ${
+                      esFavorito ? 'fill-red-500 text-red-500' : 'text-slate-400'
+                    }`}
+                  />
+                </button>
+
+                {/* Imagen del producto */}
+                <div className="relative h-64 overflow-hidden bg-slate-100">
+                  {producto.imagen_url ? (
+                    <img
+                      src={producto.imagen_url}
+                      alt={producto.nombre}
+                      className="h-full w-full object-cover transition group-hover:scale-110"
+                    />
+                  ) : (
+                    <Package className="absolute inset-0 m-auto h-20 w-20 text-slate-300" />
+                  )}
+                  {enCarrito > 0 && (
+                    <div className="absolute bottom-3 left-3 flex items-center space-x-2 rounded-full bg-emerald-500 px-3 py-1 text-sm font-bold text-white shadow-lg">
+                      <Check className="h-4 w-4" />
+                      <span>{enCarrito} en carrito</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Información del producto */}
+                <div className="p-5">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    {producto.codigo_interno}
+                  </p>
+                  <h3 className="mt-1 text-lg font-bold text-slate-900 line-clamp-2 group-hover:text-primary-600 transition">
+                    {producto.nombre}
+                  </h3>
+                  
+                  {producto.descripcion && (
+                    <p className="mt-2 text-sm text-slate-600 line-clamp-2">
+                      {producto.descripcion}
+                    </p>
+                  )}
+
+                  {/* Stock */}
+                  <div className="mt-3 flex items-center justify-between text-sm">
+                    <span className="text-slate-600">Stock:</span>
+                    <span className={`font-bold ${
+                      sinStock ? 'text-red-600' : 
+                      stockBajo ? 'text-orange-600' : 
+                      'text-emerald-600'
+                    }`}>
+                      {producto.stock_actual} unid.
+                    </span>
+                  </div>
+
+                  {/* Precio y botón */}
+                  <div className="mt-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-2xl font-bold text-primary-600">
+                        S/ {Number(producto.precio_venta).toFixed(2)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => agregarAlCarrito(producto)}
+                      disabled={sinStock}
+                      className={`rounded-xl p-3 font-bold text-white shadow-lg transition ${
+                        sinStock
+                          ? 'cursor-not-allowed bg-slate-300'
+                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-110 hover:shadow-xl'
+                      }`}
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Vista de lista
+              <div
+                key={producto.id}
+                className="glass-card group flex items-center space-x-6 overflow-hidden rounded-2xl p-6 transition hover:shadow-xl"
+              >
+                {/* Imagen */}
+                <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                  {producto.imagen_url ? (
+                    <img
+                      src={producto.imagen_url}
+                      alt={producto.nombre}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Package className="absolute inset-0 m-auto h-12 w-12 text-slate-300" />
+                  )}
+                </div>
+
+                {/* Información */}
+                <div className="flex-grow">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase">
+                        {producto.codigo_interno}
+                      </p>
+                      <h3 className="mt-1 text-xl font-bold text-slate-900">
+                        {producto.nombre}
+                      </h3>
+                      {producto.descripcion && (
+                        <p className="mt-2 text-sm text-slate-600 line-clamp-2">
+                          {producto.descripcion}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => toggleFavorite(producto.id)}
+                      className="rounded-full bg-slate-100 p-2 transition hover:bg-slate-200"
+                    >
+                      <Heart
+                        className={`h-5 w-5 ${
+                          esFavorito ? 'fill-red-500 text-red-500' : 'text-slate-400'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center space-x-6">
+                      <div>
+                        <p className="text-sm text-slate-600">Precio</p>
+                        <p className="text-2xl font-bold text-primary-600">
+                          S/ {Number(producto.precio_venta).toFixed(2)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-600">Stock</p>
+                        <p className={`text-lg font-bold ${
+                          sinStock ? 'text-red-600' : 
+                          stockBajo ? 'text-orange-600' : 
+                          'text-emerald-600'
+                        }`}>
+                          {producto.stock_actual} unid.
+                        </p>
+                      </div>
+                      {enCarrito > 0 && (
+                        <div className="flex items-center space-x-2 rounded-full bg-emerald-100 px-4 py-2 text-emerald-700">
+                          <Check className="h-4 w-4" />
+                          <span className="font-semibold">{enCarrito} en carrito</span>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => agregarAlCarrito(producto)}
+                      disabled={sinStock}
+                      className={`flex items-center space-x-2 rounded-xl px-6 py-3 font-bold text-white shadow-lg transition ${
+                        sinStock
+                          ? 'cursor-not-allowed bg-slate-300'
+                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 hover:shadow-xl'
+                      }`}
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      <span>Agregar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
+
+      {/* Banner promocional al final */}
+      <div className="glass-card rounded-3xl bg-gradient-to-r from-primary-600 to-indigo-600 p-12 text-center text-white">
+        <Zap className="mx-auto h-16 w-16 mb-4" />
+        <h2 className="text-3xl font-bold">¿No encuentras lo que buscas?</h2>
+        <p className="mt-2 text-lg opacity-90">
+          Contáctanos y te ayudaremos a encontrar el producto perfecto
+        </p>
+        <button className="mt-6 rounded-xl bg-white px-8 py-4 font-bold text-primary-600 shadow-xl transition hover:scale-105">
+          Contactar Soporte
+        </button>
+      </div>
     </div>
   )
 }
-
