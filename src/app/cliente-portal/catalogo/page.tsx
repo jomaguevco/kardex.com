@@ -20,8 +20,21 @@ export default function CatalogoPage() {
       return
     }
 
+    // Cargar carrito desde localStorage
+    const carritoGuardado = localStorage.getItem('carrito')
+    if (carritoGuardado) {
+      setCarrito(JSON.parse(carritoGuardado))
+    }
+
     fetchCatalogo()
   }, [isAuthenticated, user, router])
+
+  // Guardar carrito en localStorage cada vez que cambie
+  useEffect(() => {
+    if (carrito.length > 0) {
+      localStorage.setItem('carrito', JSON.stringify(carrito))
+    }
+  }, [carrito])
 
   const fetchCatalogo = async () => {
     try {
