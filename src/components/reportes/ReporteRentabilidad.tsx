@@ -23,9 +23,7 @@ export default function ReporteRentabilidad() {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
-  const handleGenerarReporte = () => {
-    console.log('Generando reporte de rentabilidad...')
-  }
+  // El reporte se genera automáticamente desde la página principal
 
   if (isLoading) {
     return (
@@ -90,12 +88,6 @@ export default function ReporteRentabilidad() {
             />
           </div>
           <div className="flex items-end space-x-2">
-            <button
-              onClick={handleGenerarReporte}
-              className="btn-primary flex-1"
-            >
-              Generar Reporte
-            </button>
             <button
               onClick={() => console.log('Exportar a PDF')}
               className="btn-outline"

@@ -23,7 +23,8 @@ export default function ReporteInventario() {
   }
 
   const handleGenerarReporte = () => {
-    console.log('Generando reporte de inventario...')
+    // Esta función ya no es necesaria - el reporte se genera automáticamente
+    // Se mantiene para compatibilidad pero no hace nada
   }
 
   if (isLoading) {
@@ -76,15 +77,11 @@ export default function ReporteInventario() {
           </div>
           <div className="flex items-end space-x-2">
             <button
-              onClick={handleGenerarReporte}
-              className="btn-primary flex-1"
-            >
-              Generar Reporte
-            </button>
-            <button
               onClick={() => console.log('Exportar a PDF')}
               className="btn-outline"
               title="Exportar a PDF"
+              disabled
+              style={{ opacity: 0.5, cursor: 'not-allowed' }}
             >
               <Download className="h-4 w-4" />
             </button>

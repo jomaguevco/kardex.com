@@ -12,6 +12,7 @@ import { compraService } from '@/services/compraService'
 import { Compra } from '@/types'
 import { cn } from '@/utils/cn'
 import NuevaCompraForm from '@/components/compras/NuevaCompraForm'
+import EditarCompraForm from '@/components/compras/EditarCompraForm'
 
 export default function ComprasPage() {
   return (
@@ -30,6 +31,8 @@ function ComprasContent() {
   const [detallesLoading, setDetallesLoading] = useState(false)
   const [detallesError, setDetallesError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [compraEditando, setCompraEditando] = useState<Compra | null>(null)
 
   const handleNuevaCompra = () => {
     setIsModalOpen(true)
@@ -53,6 +56,27 @@ function ComprasContent() {
   const handleCloseDetalle = () => {
     setSelectedCompra(null)
     setDetallesError(null)
+  }
+
+  const handleEditCompra = async (compra: Compra) => {
+    try {
+      const compraCompleta = await compraService.getCompraById(compra.id)
+      setCompraEditando(compraCompleta as Compra)
+      setIsEditModalOpen(true)
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || 'No se pudo cargar la compra para editar')
+    }
+  }
+
+  const handleEditSuccess = () => {
+    setIsEditModalOpen(false)
+    setCompraEditando(null)
+    queryClient.invalidateQueries({ queryKey: ['compras'] })
+  }
+
+  const handleEditCancel = () => {
+    setIsEditModalOpen(false)
+    setCompraEditando(null)
   }
 
   const handleCancelarCompra = async (compra: Compra) => {
@@ -132,7 +156,7 @@ function ComprasContent() {
         )}
 
         <div className="card">
-          <ComprasTable onView={handleViewCompra} onCancel={handleCancelarCompra} />
+          <ComprasTable onView={handleViewCompra} onEdit={handleEditCompra} onCancel={handleCancelarCompra} />
         </div>
       </section>
 
@@ -233,6 +257,31 @@ function ComprasContent() {
                   Cancelar compra
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && compraEditando && (
+        <div className="fixed inset-0 z-[65] flex items-center justify-center bg-slate-900/70 px-4 py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-4xl rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Editar compra</span>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">{compraEditando.numero_factura}</h2>
+                <p className="text-sm text-slate-500">Modifica los detalles de la compra. Los cambios se reflejarán en el sistema.</p>
+              </div>
+              <button onClick={handleEditCancel} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <EditarCompraForm
+                compra={compraEditando}
+                onSuccess={handleEditSuccess}
+                onCancel={handleEditCancel}
+              />
             </div>
           </div>
         </div>

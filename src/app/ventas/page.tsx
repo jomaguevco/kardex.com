@@ -8,10 +8,13 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import VentasTable from '@/components/ventas/VentasTable'
 import NuevaVentaForm from '@/components/ventas/NuevaVentaForm'
+import EditarVentaForm from '@/components/ventas/EditarVentaForm'
 import { ventaService } from '@/services/ventaService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { Venta } from '@/types'
 import { cn } from '@/utils/cn'
+import { Download } from 'lucide-react'
+import MetricCards from './MetricCards'
 
 export default function VentasPage() {
   return (
@@ -26,6 +29,8 @@ export default function VentasPage() {
 function VentasContent() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [ventaEditando, setVentaEditando] = useState<Venta | null>(null)
   const [selectedVenta, setSelectedVenta] = useState<Venta | null>(null)
   const [detallesLoading, setDetallesLoading] = useState(false)
   const [detallesError, setDetallesError] = useState<string | null>(null)
@@ -60,6 +65,36 @@ function VentasContent() {
   const handleCloseDetalle = () => {
     setSelectedVenta(null)
     setDetallesError(null)
+  }
+
+  const handleEditVenta = async (venta: Venta) => {
+    try {
+      const ventaCompleta = await ventaService.getVentaById(venta.id)
+      setVentaEditando(ventaCompleta as Venta)
+      setIsEditModalOpen(true)
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || 'No se pudo cargar la venta para editar')
+    }
+  }
+
+  const handleEditSuccess = () => {
+    setIsEditModalOpen(false)
+    setVentaEditando(null)
+    queryClient.invalidateQueries({ queryKey: ['ventas'] })
+  }
+
+  const handleEditCancel = () => {
+    setIsEditModalOpen(false)
+    setVentaEditando(null)
+  }
+
+  const handleDownloadPDF = async (venta: Venta) => {
+    try {
+      await ventaService.downloadFacturaPDF(venta.id)
+      toast.success('PDF descargado correctamente')
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || 'No se pudo descargar el PDF')
+    }
   }
 
   const handleCancelarVenta = async (venta: Venta) => {
@@ -105,14 +140,7 @@ function VentasContent() {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-white/15 p-6 backdrop-blur-md">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <MetricCard titulo="Ventas hoy" valor="--" subtitulo="Sincronizado con dashboard" />
-              <MetricCard titulo="Ticket promedio" valor="--" subtitulo="Actualiza tus datos" />
-              <MetricCard titulo="Pendientes" valor="--" subtitulo="Revisa estados en la tabla" />
-              <MetricCard titulo="Facturas emitidas" valor="--" subtitulo="Descarga PDF al instante" />
-            </div>
-          </div>
+          <MetricCards />
         </div>
       </section>
 
@@ -133,7 +161,7 @@ function VentasContent() {
         </div>
 
         <div className="card">
-          <VentasTable onView={handleViewVenta} onCancel={handleCancelarVenta} />
+          <VentasTable onView={handleViewVenta} onEdit={handleEditVenta} onCancel={handleCancelarVenta} />
         </div>
       </section>
 
@@ -229,12 +257,47 @@ function VentasContent() {
               <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
                 Cerrar
               </button>
+              <button 
+                onClick={() => handleDownloadPDF(selectedVenta)} 
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <Download className="h-4 w-4" />
+                Descargar PDF
+              </button>
               {selectedVenta.estado?.toUpperCase() !== 'ANULADA' && (
                 <button onClick={() => handleCancelarVenta(selectedVenta)} className="btn-primary sm:min-w-[180px]">
                   Cancelar venta
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && ventaEditando && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-4xl rounded-3xl p-6 shadow-2xl">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Editar venta
+                </span>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                  {ventaEditando.numero_factura}
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Modifica los detalles de la venta. Los cambios se reflejarán en el sistema.
+                </p>
+              </div>
+              <button
+                onClick={handleEditCancel}
+                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40"
+              >
+                ✕
+              </button>
+            </div>
+
+            <EditarVentaForm venta={ventaEditando} onSuccess={handleEditSuccess} onCancel={handleEditCancel} />
           </div>
         </div>
       )}

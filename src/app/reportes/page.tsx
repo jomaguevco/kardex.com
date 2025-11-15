@@ -17,6 +17,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { reporteService } from '@/services/reporteService'
+import { generarPDFReporte } from '@/utils/pdfGenerator'
 
  type ReporteTab = 'ventas' | 'compras' | 'inventario' | 'rentabilidad' | 'movimientos'
 
@@ -200,7 +201,29 @@ function ReportesContent() {
                 </p>
               </div>
               <button
-                onClick={() => window.print()}
+                onClick={() => {
+                  const datosReporte = {
+                    ventas: reporteVentas,
+                    compras: reporteCompras,
+                    inventario: reporteInventario,
+                    rentabilidad: reporteRentabilidad,
+                    movimientos: reporteMovimientos
+                  }[activeTab]
+                  
+                  if (!datosReporte) {
+                    toast.error('No hay datos para generar el PDF')
+                    return
+                  }
+
+                  generarPDFReporte({
+                    titulo: tabs.find((tab) => tab.id === activeTab)?.label || 'Reporte',
+                    fechaInicio: fechaInicio || undefined,
+                    fechaFin: fechaFin || undefined,
+                    datos: datosReporte,
+                    tipo: activeTab
+                  })
+                  toast.success('PDF generado y descargado')
+                }}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-800"
               >
                 Generar PDF <ArrowRight className="h-4 w-4" />

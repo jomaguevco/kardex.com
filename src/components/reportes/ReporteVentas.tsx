@@ -24,10 +24,7 @@ export default function ReporteVentas() {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
-  const handleGenerarReporte = () => {
-    // Aquí se implementaría la generación del reporte
-    console.log('Generando reporte de ventas...')
-  }
+  // El reporte se genera automáticamente desde la página principal
 
   if (isLoading) {
     return (
@@ -100,12 +97,6 @@ export default function ReporteVentas() {
             </select>
           </div>
           <div className="flex items-end space-x-2">
-            <button
-              onClick={handleGenerarReporte}
-              className="btn-primary flex-1"
-            >
-              Generar Reporte
-            </button>
             <button
               onClick={() => console.log('Exportar a PDF')}
               className="btn-outline"
