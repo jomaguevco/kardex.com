@@ -3,7 +3,7 @@
 import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Sparkles, Users, Plus, Search, Phone, Mail, Building2, MapPin, X } from 'lucide-react'
+import { Sparkles, Users, Plus, Phone, Mail, Building2, MapPin, X } from 'lucide-react'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
@@ -213,14 +213,13 @@ function ClientesContent() {
         <aside className="space-y-4">
           <div className="glass-card p-5">
             <label className="mb-3 block text-sm font-semibold text-slate-700">Buscar cliente</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <div>
               <input
                 type="text"
                 placeholder="Nombre o documento..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl border border-slate-200/70 bg-white/90 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
+                className="w-full rounded-xl border border-slate-200/70 bg-white/90 py-2.5 px-4 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
               />
             </div>
           </div>

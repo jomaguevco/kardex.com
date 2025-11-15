@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import clientePortalService from '@/services/clientePortalService'
 import { 
-  Package, Search, Loader2, ShoppingCart, Heart, 
+  Package, Loader2, ShoppingCart, Heart, 
   Filter, Grid, List, Star, Zap, Check, X,
   ChevronDown, SlidersHorizontal, TrendingUp
 } from 'lucide-react'
@@ -184,13 +184,12 @@ export default function CatalogoPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
           {/* Búsqueda */}
           <div className="relative flex-grow">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Buscar productos por nombre o código..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-2xl border-2 border-slate-200 bg-white py-4 pl-12 pr-4 text-slate-900 transition focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-100"
+              className="w-full rounded-2xl border-2 border-slate-200 bg-white py-4 px-4 pr-12 text-slate-900 transition focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-100"
             />
             {searchTerm && (
               <button

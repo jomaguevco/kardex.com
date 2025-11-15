@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Plus, Trash2, Search, Calculator } from 'lucide-react'
+import { Plus, Trash2, Calculator } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { productoService } from '@/services/productoService'
 import { proveedorService } from '@/services/proveedorService'
@@ -232,16 +232,13 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
       <div>
         <label className="block text-sm font-medium text-slate-600">Agregar productos</label>
         <div className="mt-1 flex gap-2">
-          <div className="relative flex-1">
-            <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-              <Search className="h-4 w-4 text-slate-400" />
-            </div>
+          <div className="flex-1">
             <input
               type="text"
               value={busquedaProducto}
               onChange={(event) => setBusquedaProducto(event.target.value)}
               placeholder="Buscar por nombre o código..."
-              className="input-field pl-9"
+              className="input-field"
             />
           </div>
           <button

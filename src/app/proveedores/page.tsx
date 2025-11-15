@@ -2,7 +2,7 @@
 
 import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Building2, Sparkles, Factory, Plus, Search, Phone, Mail, MapPin, Globe2, Home, X } from 'lucide-react'
+import { Building2, Sparkles, Factory, Plus, Phone, Mail, MapPin, Globe2, Home, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
@@ -203,15 +203,12 @@ function ProveedoresContent() {
         <aside className="space-y-6">
           <div className="card space-y-4 p-5">
             <h2 className="text-lg font-semibold text-slate-900">Filtros rápidos</h2>
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-                <Search className="h-4 w-4 text-slate-400" />
-              </div>
+            <div>
               <input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Buscar por nombre, documento o email"
-                className="input-field pl-9"
+                className="input-field"
               />
             </div>
             <p className="text-xs text-slate-500">

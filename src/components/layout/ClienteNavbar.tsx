@@ -23,6 +23,21 @@ export default function ClienteNavbar() {
   const [favoritesCount, setFavoritesCount] = useState(0)
   const [notificacionesCount, setNotificacionesCount] = useState(0)
 
+  const getApiBaseUrl = () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api'
+    return apiUrl.replace(/\/api$/, '') || 'http://localhost:4001'
+  }
+
+  const getFotoUrl = () => {
+    if (!user?.foto_perfil) return null
+    const baseUrl = getApiBaseUrl()
+    if (user.foto_perfil.startsWith('http')) {
+      return user.foto_perfil
+    }
+    const path = user.foto_perfil.startsWith('/') ? user.foto_perfil : `/${user.foto_perfil}`
+    return `${baseUrl}${path}`
+  }
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20)
@@ -215,9 +230,22 @@ export default function ClienteNavbar() {
                       : 'bg-white/10 text-white backdrop-blur-sm hover:bg-white/20'
                   }`}
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-indigo-600 text-sm font-bold text-white">
-                    {user?.nombre_usuario?.charAt(0).toUpperCase() || 'C'}
-                  </div>
+                  {user?.foto_perfil ? (
+                    <img
+                      src={getFotoUrl() || ''}
+                      alt={user?.nombre_usuario || 'Cliente'}
+                      className="h-8 w-8 rounded-full object-cover border-2 border-white"
+                      onError={(e) => {
+                        // Si falla la carga, ocultar imagen y mostrar iniciales
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                  ) : null}
+                  {(!user?.foto_perfil || !getFotoUrl()) && (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-indigo-600 text-sm font-bold text-white">
+                      {user?.nombre_usuario?.charAt(0).toUpperCase() || 'C'}
+                    </div>
+                  )}
                   <span className="text-sm font-semibold">
                     {user?.nombre_usuario || 'Cliente'}
                   </span>

@@ -19,7 +19,7 @@ export default function SoportePage() {
   }, [isAuthenticated, user, router])
 
   const handleWhatsAppClick = () => {
-    const phoneNumber = '51999999999' // Cambiar por el número real
+    const phoneNumber = '51974382897' // Número del bot actualizado
     const message = encodeURIComponent('¡Hola! Necesito ayuda con mi pedido.')
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank')
   }

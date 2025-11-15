@@ -6,7 +6,11 @@ import toast from 'react-hot-toast'
 import usuarioService from '@/services/usuarioService'
 import { useAuthStore } from '@/store/authStore'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4001';
+const getApiBaseUrl = () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api'
+  // Remover /api del final si existe
+  return apiUrl.replace(/\/api$/, '') || 'http://localhost:4001'
+}
 
 export default function FotoPerfilUpload() {
   const { user, setUser } = useAuthStore()
@@ -66,7 +70,16 @@ export default function FotoPerfilUpload() {
 
   const getFotoUrl = () => {
     if (preview) return preview
-    if (user?.foto_perfil) return `${API_URL}${user.foto_perfil}`
+    if (user?.foto_perfil) {
+      const baseUrl = getApiBaseUrl()
+      // Si ya incluye http, usar directamente; si no, agregar baseUrl
+      if (user.foto_perfil.startsWith('http')) {
+        return user.foto_perfil
+      }
+      // Asegurar que empiece con /
+      const path = user.foto_perfil.startsWith('/') ? user.foto_perfil : `/${user.foto_perfil}`
+      return `${baseUrl}${path}`
+    }
     return null
   }
 

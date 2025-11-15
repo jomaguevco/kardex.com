@@ -37,6 +37,7 @@ interface MenuItem {
 const allMenuItems: MenuItem[] = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
   { title: 'Productos', href: '/productos', icon: Package, roles: ['ADMINISTRADOR'] },
+  { title: 'Pedidos', href: '/pedidos', icon: ClipboardList, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
   { title: 'Ventas', href: '/ventas', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
   { title: 'Compras', href: '/compras', icon: ShoppingBag, roles: ['ADMINISTRADOR'] },
   { title: 'KARDEX', href: '/kardex', icon: BarChart3, roles: ['ADMINISTRADOR'] },

@@ -9,7 +9,7 @@ interface WhatsAppButtonProps {
 }
 
 export default function WhatsAppButton({ 
-  phoneNumber = '51999999999', // Número por defecto (cambiar por el real)
+  phoneNumber = '51974382897', // Número del bot actualizado
   message = '¡Hola! Necesito ayuda con mi pedido.'
 }: WhatsAppButtonProps) {
   const [isVisible, setIsVisible] = useState(true)

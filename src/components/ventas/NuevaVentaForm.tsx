@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Trash2, Search, Calculator } from 'lucide-react'
+import { Plus, Trash2, Calculator } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { productoService } from '@/services/productoService'
 import { ventaService } from '@/services/ventaService'
@@ -169,23 +169,52 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
 
   const onSubmit = async (data: VentaFormData) => {
     try {
+      // Validaciones adicionales antes de enviar
+      if (!data.cliente_id || data.cliente_id === 0) {
+        toast.error('Debes seleccionar un cliente')
+        return
+      }
+
+      if (!data.detalles || data.detalles.length === 0) {
+        toast.error('Debes agregar al menos un producto')
+        return
+      }
+
+      // Validar que todos los detalles tengan información válida
+      const detallesInvalidos = data.detalles.filter(
+        detalle => !detalle.producto_id || detalle.cantidad <= 0 || detalle.precio_unitario <= 0
+      )
+
+      if (detallesInvalidos.length > 0) {
+        toast.error('Todos los productos deben tener cantidad y precio válidos')
+        return
+      }
+
+      // Formatear fecha correctamente
+      let fechaVenta = data.fecha
+      if (typeof fechaVenta === 'string' && fechaVenta.includes('T')) {
+        // Si es datetime-local, convertir a ISO
+        fechaVenta = new Date(fechaVenta).toISOString()
+      }
+
       const ventaData: VentaForm = {
         numero_factura: data.numero_factura,
         cliente_id: data.cliente_id,
-        fecha_venta: data.fecha,
-        subtotal: data.subtotal,
-        descuento: data.descuento || 0,
-        impuestos: data.impuesto || 0,
-        total: data.total,
-        observaciones: data.observaciones,
+        fecha_venta: fechaVenta,
+        subtotal: Number(data.subtotal) || 0,
+        descuento: Number(data.descuento) || 0,
+        impuestos: Number(data.impuesto) || 0,
+        total: Number(data.total) || 0,
+        observaciones: data.observaciones || '',
         detalles: data.detalles.map(detalle => ({
-          producto_id: detalle.producto_id,
-          cantidad: detalle.cantidad,
-          precio_unitario: detalle.precio_unitario,
-          descuento: detalle.descuento || 0,
-          subtotal: detalle.subtotal
+          producto_id: Number(detalle.producto_id),
+          cantidad: Number(detalle.cantidad),
+          precio_unitario: Number(detalle.precio_unitario),
+          descuento: Number(detalle.descuento) || 0,
+          subtotal: Number(detalle.subtotal)
         }))
       }
+
       await ventaService.createVenta(ventaData)
       toast.success('Venta creada exitosamente')
       reset({
@@ -201,9 +230,12 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       })
       setProductoSeleccionado(null)
       setBusquedaProducto('')
+      setProductosCache({})
       onSuccess?.()
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al crear la venta')
+      console.error('Error al crear venta:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al crear la venta'
+      toast.error(errorMessage)
     }
   }
 
@@ -267,15 +299,12 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
           Agregar Producto
         </label>
         <div className="flex space-x-2">
-          <div className="flex-1 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
+          <div className="flex-1">
             <input
               type="text"
               value={busquedaProducto}
               onChange={(e) => setBusquedaProducto(e.target.value)}
-              className="input-field pl-10"
+              className="input-field"
               placeholder="Buscar producto por nombre o código..."
             />
           </div>
