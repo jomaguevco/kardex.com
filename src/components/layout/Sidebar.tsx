@@ -42,7 +42,7 @@ const allMenuItems: MenuItem[] = [
   { title: 'Ventas', href: '/ventas', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
   { title: 'Compras', href: '/compras', icon: ShoppingBag, roles: ['ADMINISTRADOR'] },
   { title: 'KARDEX', href: '/kardex', icon: BarChart3, roles: ['ADMINISTRADOR'] },
-  { title: 'Ajustes Inventario', href: '/ajustes-inventario', icon: PackageCheck, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
+  { title: 'Ajustes Inventario', href: '/ajustes-inventario', icon: PackageCheck, roles: ['ADMINISTRADOR'] },
   { title: 'Clientes', href: '/clientes', icon: Users, roles: ['ADMINISTRADOR', 'VENDEDOR'] },
   { title: 'Proveedores', href: '/proveedores', icon: Users, roles: ['ADMINISTRADOR'] },
   { title: 'Reportes', href: '/reportes', icon: FileText, roles: ['ADMINISTRADOR', 'VENDEDOR'] },

@@ -1,7 +1,7 @@
 import apiService from './api';
 
 export interface TipoMovimiento {
-  id: number;
+  id?: number;
   codigo: string;
   nombre: string;
   descripcion?: string;

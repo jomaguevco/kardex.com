@@ -120,8 +120,9 @@ export default function AjusteInventarioForm({ tiposMovimiento, onSuccess, onCan
     }
   }
 
-  const tiposEntrada = tiposMovimiento.filter(t => t.tipo_operacion === 'ENTRADA')
-  const tiposSalida = tiposMovimiento.filter(t => t.tipo_operacion === 'SALIDA')
+  // Separar tipos por operación
+  const tiposEntrada = tiposMovimiento.filter(t => t.tipo_operacion === 'ENTRADA' || t.codigo?.includes('ENTRADA'))
+  const tiposSalida = tiposMovimiento.filter(t => t.tipo_operacion === 'SALIDA' || t.codigo?.includes('SALIDA'))
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -210,8 +211,8 @@ export default function AjusteInventarioForm({ tiposMovimiento, onSuccess, onCan
             <option value="">Selecciona un tipo</option>
             {tiposEntrada.length > 0 && (
               <optgroup label="Entradas">
-                {tiposEntrada.map((tipo) => (
-                  <option key={tipo.id} value={tipo.codigo}>
+                {tiposEntrada.map((tipo, index) => (
+                  <option key={tipo.id || tipo.codigo || index} value={tipo.codigo}>
                     {tipo.nombre} {tipo.requiere_autorizacion && '🔒'}
                   </option>
                 ))}
@@ -219,8 +220,8 @@ export default function AjusteInventarioForm({ tiposMovimiento, onSuccess, onCan
             )}
             {tiposSalida.length > 0 && (
               <optgroup label="Salidas">
-                {tiposSalida.map((tipo) => (
-                  <option key={tipo.id} value={tipo.codigo}>
+                {tiposSalida.map((tipo, index) => (
+                  <option key={tipo.id || tipo.codigo || index} value={tipo.codigo}>
                     {tipo.nombre} {tipo.requiere_autorizacion && '🔒'}
                   </option>
                 ))}
