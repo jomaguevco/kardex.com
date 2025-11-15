@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
-import { Calculator, Search } from 'lucide-react'
+import { Calculator } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { productoService } from '@/services/productoService'
 import { ajusteInventarioService, TipoMovimiento, CreateAjusteData } from '@/services/ajusteInventarioService'
@@ -132,13 +132,12 @@ export default function AjusteInventarioForm({ tiposMovimiento, onSuccess, onCan
           Producto <span className="text-red-500">*</span>
         </label>
         <div className="flex space-x-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="flex-1">
             <input
               type="text"
               value={busquedaProducto}
               onChange={(e) => setBusquedaProducto(e.target.value)}
-              className="input-field pl-10"
+              className="input-field"
               placeholder="Buscar producto por nombre o código..."
             />
           </div>

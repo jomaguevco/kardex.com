@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, XCircle, Clock, Eye, Search, Filter } from 'lucide-react'
+import { CheckCircle, XCircle, Clock, Eye, Filter } from 'lucide-react'
 import { AjusteInventario } from '@/services/ajusteInventarioService'
 import { cn } from '@/utils/cn'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
@@ -101,13 +101,12 @@ export default function AjustesInventarioTable({
       {/* Filtros */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-6 pt-4">
         <div className="flex flex-1 gap-2">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="flex-1 max-w-md">
             <input
               type="text"
               value={filters.search}
               onChange={(e) => onFilterChange({ ...filters, search: e.target.value, page: 1 })}
-              className="input-field pl-10"
+              className="input-field"
               placeholder="Buscar por número de documento, motivo..."
             />
           </div>
