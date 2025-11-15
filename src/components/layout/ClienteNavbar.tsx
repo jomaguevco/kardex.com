@@ -8,7 +8,7 @@ import NotificacionesPanel from './NotificacionesPanel'
 import {
   Store, ShoppingBag, Package, Receipt, CreditCard,
   MessageCircle, User, LogOut, Bell, ShoppingCart,
-  Menu, X, Search, Heart, ChevronDown
+  Menu, X, Heart, ChevronDown
 } from 'lucide-react'
 
 export default function ClienteNavbar() {
