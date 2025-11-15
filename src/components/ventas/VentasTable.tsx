@@ -107,24 +107,24 @@ export default function VentasTable({ onView, onEdit, onCancel }: VentasTablePro
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-gradient-to-r from-slate-50 to-white">
                 <tr>
-                  <th>Factura</th>
-                  <th>Cliente</th>
-                  <th>Fecha</th>
-                  <th>Total</th>
-                  <th>Estado</th>
-                  <th>Vendedor</th>
-                  <th>Acciones</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Factura</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Cliente</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Fecha</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Total</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Estado</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Vendedor</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-slate-200 bg-white">
                 {ventas.map((venta: any, index: number) => (
                   <tr 
                     key={venta.id} 
                     className="animate-fade-in transition-all duration-200 hover:bg-slate-50 hover:shadow-sm"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <td className="font-mono text-sm text-slate-700">{venta.numero_factura}</td>
-                    <td>
+                    <td className="px-6 py-4 font-mono text-sm text-slate-700">{venta.numero_factura}</td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500">
                           <User className="h-4 w-4" />
@@ -135,17 +135,17 @@ export default function VentasTable({ onView, onEdit, onCancel }: VentasTablePro
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center text-sm text-slate-600">
                         <Calendar className="mr-2 h-4 w-4" /> {new Date(venta.fecha_venta).toLocaleDateString()}
                       </div>
                     </td>
-                    <td className="text-sm font-semibold text-emerald-600">${Number(venta.total || 0).toFixed(2)}</td>
-                    <td>
+                    <td className="px-6 py-4 text-sm font-semibold text-emerald-600">${Number(venta.total || 0).toFixed(2)}</td>
+                    <td className="px-6 py-4">
                       <EstadoBadge estado={venta.estado} />
                     </td>
-                    <td className="text-sm text-slate-600">{venta.usuario?.nombre || 'N/A'}</td>
-                    <td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{venta.usuario?.nombre || 'N/A'}</td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         {onView && (
                           <AccionButton title="Ver detalles" onClick={() => onView(venta)}>
