@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import TableWrapper from '@/components/ui/TableWrapper'
 import { proveedorService, Proveedor, CreateProveedorData } from '@/services/proveedorService'
 
 const initialFormState: CreateProveedorData = {
@@ -243,7 +244,7 @@ function ProveedoresContent() {
           </div>
 
           <div className="card overflow-hidden">
-            <div className="overflow-x-auto -mx-6 px-6">
+            <TableWrapper>
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50">
                   <tr>
@@ -359,7 +360,7 @@ function ProveedoresContent() {
                   )}
                 </tbody>
               </table>
-            </div>
+            </TableWrapper>
           </div>
         </section>
       </div>

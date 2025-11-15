@@ -6,6 +6,7 @@ import { Eye, Calendar, Package, ArrowUp, ArrowDown, Minus, X } from 'lucide-rea
 import { KardexFilters, MovimientoKardex } from '@/types'
 import { kardexService } from '@/services/kardexService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import TableWrapper from '@/components/ui/TableWrapper'
 import { cn } from '@/utils/cn'
 
 export default function KardexTable() {
@@ -149,7 +150,7 @@ export default function KardexTable() {
           </h3>
         </div>
 
-        <div className="overflow-x-auto -mx-6 px-6">
+        <TableWrapper>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -224,7 +225,7 @@ export default function KardexTable() {
               ))}
             </tbody>
           </table>
-        </div>
+        </TableWrapper>
 
         {/* Paginación */}
         {pagination && pagination.totalPages > 1 && (

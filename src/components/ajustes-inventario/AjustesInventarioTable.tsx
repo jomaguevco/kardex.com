@@ -5,6 +5,7 @@ import { CheckCircle, XCircle, Clock, Eye, Filter } from 'lucide-react'
 import { AjusteInventario } from '@/services/ajusteInventarioService'
 import { cn } from '@/utils/cn'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import TableWrapper from '@/components/ui/TableWrapper'
 
 interface AjustesInventarioTableProps {
   ajustes: AjusteInventario[]
@@ -140,7 +141,7 @@ export default function AjustesInventarioTable({
       </div>
 
       {/* Tabla */}
-      <div className="overflow-x-auto -mx-6 px-6">
+      <TableWrapper>
         <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
@@ -255,7 +256,7 @@ export default function AjustesInventarioTable({
             ))}
           </tbody>
         </table>
-      </div>
+      </TableWrapper>
 
       {/* Paginación */}
       {pagination && pagination.pages > 1 && (

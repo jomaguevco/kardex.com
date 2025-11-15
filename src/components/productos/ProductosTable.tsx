@@ -5,6 +5,7 @@ import { Edit, Trash2, Eye, Package, AlertTriangle } from 'lucide-react'
 import { ProductoFilters, Producto } from '@/types'
 import { productoService } from '@/services/productoService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import TableWrapper from '@/components/ui/TableWrapper'
 import { cn } from '@/utils/cn'
 
 interface ProductosTableProps {
@@ -78,7 +79,7 @@ export default function ProductosTable({
         </h3>
       </div>
 
-      <div className="overflow-x-auto -mx-6 px-6">
+      <TableWrapper>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -197,7 +198,7 @@ export default function ProductosTable({
             )}
           </tbody>
         </table>
-      </div>
+      </TableWrapper>
 
       {pagination && pagination.totalPages > 1 && (
         <div className="border-t border-gray-200 px-4 py-4 sm:px-6">

@@ -6,6 +6,7 @@ import { Eye, Edit, X, Calendar, User } from 'lucide-react'
 import { VentaFilters, Venta } from '@/types'
 import { ventaService } from '@/services/ventaService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import TableWrapper from '@/components/ui/TableWrapper'
 import { cn } from '@/utils/cn'
 
 interface VentasTableProps {
@@ -103,7 +104,7 @@ export default function VentasTable({ onView, onEdit, onCancel }: VentasTablePro
             No encontramos ventas con los filtros seleccionados.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <TableWrapper>
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-gradient-to-r from-slate-50 to-white">
                 <tr>
@@ -168,7 +169,7 @@ export default function VentasTable({ onView, onEdit, onCancel }: VentasTablePro
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableWrapper>
         )}
 
         {pagination && pagination.totalPages > 1 && (

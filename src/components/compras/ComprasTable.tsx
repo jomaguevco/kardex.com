@@ -6,6 +6,7 @@ import { Eye, Edit, X, Calendar, Truck } from 'lucide-react'
 import { CompraFilters, Compra } from '@/types'
 import { compraService } from '@/services/compraService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import TableWrapper from '@/components/ui/TableWrapper'
 import { cn } from '@/utils/cn'
 
 interface ComprasTableProps {
@@ -103,7 +104,7 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
             No encontramos compras con los filtros seleccionados.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <TableWrapper>
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-gradient-to-r from-slate-50 to-white">
                 <tr>
@@ -168,7 +169,7 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableWrapper>
         )}
 
         {pagination && pagination.totalPages > 1 && (

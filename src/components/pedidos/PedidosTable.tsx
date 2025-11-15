@@ -6,6 +6,7 @@ import { Pedido } from '@/services/pedidoService'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import toast from 'react-hot-toast'
+import TableWrapper from '@/components/ui/TableWrapper'
 
 interface PedidosTableProps {
   pedidos: Pedido[]
@@ -57,7 +58,7 @@ export default function PedidosTable({
 
   return (
     <div className="glass-card overflow-hidden rounded-2xl">
-      <div className="overflow-x-auto -mx-6 px-6">
+      <TableWrapper>
         <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
@@ -176,7 +177,7 @@ export default function PedidosTable({
             ))}
           </tbody>
         </table>
-      </div>
+      </TableWrapper>
     </div>
   )
 }
