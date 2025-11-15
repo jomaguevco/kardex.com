@@ -79,6 +79,16 @@ a {
   padding-right: 1.5rem;
   width: calc(100% + 3rem);
   max-width: 100vw;
+  /* Optimizaciones para scroll fluido */
+  will-change: scroll-position;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Suavizar el scroll */
+  scroll-behavior: auto;
+  /* Mejorar rendimiento */
+  contain: layout style paint;
 }
 
 .table-scroll-wrapper::-webkit-scrollbar {

@@ -98,7 +98,7 @@ export default function VentasTable({ onView, onEdit, onCancel }: VentasTablePro
         </div>
       </div>
 
-      <div className="card overflow-hidden animate-fade-in">
+      <div className="card animate-fade-in" style={{ overflow: 'visible' }}>
         {ventas.length === 0 ? (
           <div className="px-6 py-16 text-center text-sm text-slate-500">
             No encontramos ventas con los filtros seleccionados.
