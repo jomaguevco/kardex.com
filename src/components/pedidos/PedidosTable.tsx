@@ -57,8 +57,8 @@ export default function PedidosTable({
 
   return (
     <div className="glass-card overflow-hidden rounded-2xl">
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div className="overflow-x-auto -mx-6 px-6">
+        <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">

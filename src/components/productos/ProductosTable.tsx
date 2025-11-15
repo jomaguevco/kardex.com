@@ -78,8 +78,8 @@ export default function ProductosTable({
         </h3>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="table min-w-full">
+      <div className="overflow-x-auto -mx-6 px-6">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th>Código</th>

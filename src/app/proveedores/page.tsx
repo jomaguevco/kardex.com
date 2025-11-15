@@ -243,7 +243,7 @@ function ProveedoresContent() {
           </div>
 
           <div className="card overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto -mx-6 px-6">
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50">
                   <tr>

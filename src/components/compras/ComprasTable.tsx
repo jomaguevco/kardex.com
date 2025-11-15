@@ -107,24 +107,24 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-gradient-to-r from-slate-50 to-white">
                 <tr>
-                  <th>Factura</th>
-                  <th>Proveedor</th>
-                  <th>Fecha</th>
-                  <th>Total</th>
-                  <th>Estado</th>
-                  <th>Usuario</th>
-                  <th>Acciones</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Factura</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Proveedor</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Fecha</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Total</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Estado</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Usuario</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-slate-200 bg-white">
                 {compras.map((compra: any, index: number) => (
                   <tr 
                     key={compra.id} 
                     className="animate-fade-in transition-all duration-200 hover:bg-slate-50 hover:shadow-sm"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <td className="font-mono text-sm text-slate-700">{compra.numero_factura}</td>
-                    <td>
+                    <td className="px-6 py-4 font-mono text-sm text-slate-700">{compra.numero_factura}</td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
                           <Truck className="h-4 w-4" />
@@ -135,17 +135,17 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center text-sm text-slate-600">
                         <Calendar className="mr-2 h-4 w-4" /> {new Date(compra.fecha_compra).toLocaleDateString()}
                       </div>
                     </td>
-                    <td className="text-sm font-semibold text-emerald-600">${Number(compra.total || 0).toFixed(2)}</td>
-                    <td>
+                    <td className="px-6 py-4 text-sm font-semibold text-emerald-600">${Number(compra.total || 0).toFixed(2)}</td>
+                    <td className="px-6 py-4">
                       <EstadoBadge estado={compra.estado} />
                     </td>
-                    <td className="text-sm text-slate-600">{compra.usuario?.nombre || 'N/A'}</td>
-                    <td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{compra.usuario?.nombre || 'N/A'}</td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         {onView && (
                           <AccionButton title="Ver detalles" onClick={() => onView(compra)}>
