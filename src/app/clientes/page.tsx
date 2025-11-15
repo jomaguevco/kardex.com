@@ -225,13 +225,13 @@ function ClientesContent() {
           </div>
 
           <div className="glass-card p-5">
-            <h3 className="mb-3 text-sm font-semibold text-slate-700">Acciones rápidas</h3>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">Acciones rápidas</h3>
             <div className="space-y-2">
               <button
                 onClick={handleCreateCliente}
-                className="btn-primary w-full justify-center text-sm"
+                className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               >
-                <Plus className="mr-2 h-4 w-4" /> Nuevo cliente
+                <Plus className="h-4 w-4" /> Nuevo cliente
               </button>
             </div>
           </div>

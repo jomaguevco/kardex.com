@@ -166,8 +166,8 @@ function VentasContent() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-4xl rounded-3xl p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card w-full max-w-4xl rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8">
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">

@@ -91,8 +91,35 @@ a {
   contain: layout style paint;
 }
 
+/* Máscara para ocultar contenido que sobresale en tablas con scroll */
+.card.overflow-hidden > div.overflow-x-auto {
+  position: relative;
+}
+
+.card.overflow-hidden > div.overflow-x-auto::before,
+.card.overflow-hidden > div.overflow-x-auto::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 12px; /* Dejar espacio para el scrollbar */
+  width: 24px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.card.overflow-hidden > div.overflow-x-auto::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+.card.overflow-hidden > div.overflow-x-auto::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
 .table-scroll-wrapper::-webkit-scrollbar {
   height: 12px;
+  display: block !important;
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-track {
@@ -110,10 +137,15 @@ a {
   background: #94a3b8;
 }
 
-/* Ensure tables inside scroll wrapper have minimum width */
+/* Ensure tables inside scroll wrapper have minimum width to trigger scroll */
 .table-scroll-wrapper table {
-  min-width: 100%;
-  width: max-content;
+  min-width: max-content;
+  width: 100%;
+}
+
+/* Forzar que la barra de scroll sea siempre visible cuando hay contenido que excede */
+.table-scroll-wrapper {
+  scrollbar-width: auto;
 }
 
 /* Loading spinner */

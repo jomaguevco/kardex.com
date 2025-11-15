@@ -240,9 +240,10 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Información básica */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Número de Factura
@@ -368,7 +369,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
               const producto = productosCache[watchedDetalles[index]?.producto_id]
               return (
                 <div key={field.id} className="card p-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2 sm:gap-4 items-center">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-2 sm:gap-4 items-center">
                     <div className="md:col-span-2">
                       <p className="font-medium text-gray-900">{producto?.nombre}</p>
                       <p className="text-sm text-gray-500">{producto?.codigo_interno}</p>
@@ -525,6 +526,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         </button>
       </div>
     </form>
+    </div>
   )
 }
 

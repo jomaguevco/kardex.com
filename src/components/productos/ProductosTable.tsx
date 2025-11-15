@@ -80,18 +80,18 @@ export default function ProductosTable({
       </div>
 
       <TableWrapper>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead className="bg-gradient-to-r from-slate-50 to-white">
             <tr>
-              <th>Código</th>
-              <th>Producto</th>
-              <th>Precio Venta</th>
-              <th>Stock</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-slate-600">Código</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Producto</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Precio Venta</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Stock</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Estado</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-slate-200 bg-white">
             {productos.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
@@ -105,14 +105,14 @@ export default function ProductosTable({
                 return (
                   <tr 
                     key={producto.id} 
-                    className="animate-fade-in transition-all duration-200 hover:bg-slate-50 hover:shadow-sm"
+                    className="animate-fade-in transition-all duration-200 hover:bg-slate-50 hover:shadow-sm border-b border-slate-200"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <td className="font-mono text-sm">{producto.codigo_interno}</td>
-                    <td>
+                    <td className="px-6 py-4 text-center font-mono text-sm text-slate-700">{producto.codigo_interno}</td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="mr-3 rounded-lg bg-gray-100 p-2">
-                          <Package className="h-4 w-4 text-gray-600" />
+                        <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50">
+                          <Package className="h-5 w-5 text-indigo-600" />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">{producto.nombre}</p>
@@ -122,10 +122,10 @@ export default function ProductosTable({
                         </div>
                       </div>
                     </td>
-                    <td className="font-semibold">
+                    <td className="px-6 py-4 text-sm font-semibold text-emerald-600">
                       ${Number(producto.precio_venta ?? 0).toFixed(2)}
                     </td>
-                    <td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center">
                         <span
                           className={cn(
@@ -140,9 +140,9 @@ export default function ProductosTable({
                           <AlertTriangle className="ml-2 h-4 w-4 text-red-500" />
                         )}
                       </div>
-                      <p className="text-xs text-gray-500">Mín: {producto.stock_minimo}</p>
+                      <p className="text-xs text-gray-500 mt-1">Mín: {producto.stock_minimo}</p>
                     </td>
-                    <td>
+                    <td className="px-6 py-4">
                       <span
                         className={cn(
                           'inline-flex rounded-full px-2 py-1 text-xs font-medium',
@@ -152,7 +152,7 @@ export default function ProductosTable({
                         {producto.activo ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <button
                           type="button"
