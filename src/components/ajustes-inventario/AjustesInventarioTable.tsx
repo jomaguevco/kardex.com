@@ -141,8 +141,9 @@ export default function AjustesInventarioTable({
       </div>
 
       {/* Tabla */}
-      <TableWrapper>
-        <table className="min-w-full divide-y divide-slate-200">
+      <div className="overflow-hidden">
+        <TableWrapper>
+          <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -256,7 +257,8 @@ export default function AjustesInventarioTable({
             ))}
           </tbody>
         </table>
-      </TableWrapper>
+        </TableWrapper>
+      </div>
 
       {/* Paginación */}
       {pagination && pagination.pages > 1 && (

@@ -98,7 +98,7 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
         </div>
       </div>
 
-      <div className="card animate-fade-in" style={{ overflow: 'visible' }}>
+      <div className="card overflow-hidden animate-fade-in">
         {compras.length === 0 ? (
           <div className="px-6 py-16 text-center text-sm text-slate-500">
             No encontramos compras con los filtros seleccionados.

@@ -7,6 +7,7 @@ import { Sparkles, Users, Plus, Phone, Mail, Building2, MapPin, X } from 'lucide
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import TableWrapper from '@/components/ui/TableWrapper'
 import { clienteService, Cliente, CreateClienteData } from '@/services/clienteService'
 
 const initialFormState: CreateClienteData = {
@@ -247,8 +248,8 @@ function ClientesContent() {
               <p className="text-sm text-red-600">Error al cargar clientes</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <TableWrapper>
+              <table className="min-w-full">
                 <thead className="border-b border-slate-200/70 bg-slate-50/80">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
@@ -361,7 +362,7 @@ function ClientesContent() {
                   )}
                 </tbody>
               </table>
-            </div>
+            </TableWrapper>
           )}
         </div>
       </div>

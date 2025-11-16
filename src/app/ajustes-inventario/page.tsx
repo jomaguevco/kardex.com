@@ -44,7 +44,10 @@ function AjustesInventarioContent() {
 
   const handleSuccess = () => {
     setIsModalOpen(false)
+    // Invalidar todas las queries relacionadas para refrescar la tabla
     queryClient.invalidateQueries({ queryKey: ['ajustes-inventario'] })
+    queryClient.refetchQueries({ queryKey: ['ajustes-inventario', filters] })
+    toast.success('Ajuste de inventario creado exitosamente')
   }
 
   const handleAprobar = async (id: number) => {
@@ -134,7 +137,7 @@ function AjustesInventarioContent() {
           </button>
         </div>
 
-        <div className="card">
+        <div className="card overflow-hidden">
           <AjustesInventarioTable 
             ajustes={ajustes}
             pagination={pagination}

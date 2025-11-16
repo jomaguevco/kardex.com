@@ -72,7 +72,7 @@ export default function ProductosTable({
   }
 
   return (
-    <div className="card animate-fade-in">
+    <div className="card overflow-hidden animate-fade-in">
       <div className="border-b border-slate-200 px-4 py-5 sm:px-6 bg-gradient-to-r from-slate-50 to-white">
         <h3 className="text-lg font-bold text-slate-900">
           Lista de Productos <span className="text-indigo-600">({pagination?.total || 0})</span>
