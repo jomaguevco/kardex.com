@@ -176,7 +176,7 @@ export default function NotificacionesPanel({ isOpen, onClose, onUpdate }: Notif
     <>
       {/* Overlay */}
       <div 
-        className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+        className="fixed inset-0 z-40 bg-slate-950/60"
         onClick={onClose}
       />
 

@@ -7,8 +7,8 @@ import usuarioService from '@/services/usuarioService'
 import { useAuthStore } from '@/store/authStore'
 
 const getApiBaseUrl = () => {
+  // Opción 2b: derivar SIEMPRE de NEXT_PUBLIC_API_URL
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api'
-  // Remover /api del final si existe
   return apiUrl.replace(/\/api$/, '') || 'http://localhost:4001'
 }
 
@@ -71,7 +71,7 @@ export default function FotoPerfilUpload() {
   const getFotoUrl = () => {
     if (preview) return preview
     if (user?.foto_perfil) {
-      const baseUrl = (process.env.NEXT_PUBLIC_FILES_BASE_URL || getApiBaseUrl()).replace(/\/$/, '')
+      const baseUrl = getApiBaseUrl().replace(/\/$/, '')
       let url = user.foto_perfil
       // Si ya incluye http, usar directo pero forzar https si la app está en https
       if (url.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
@@ -102,6 +102,11 @@ export default function FotoPerfilUpload() {
                 src={fotoUrl}
                 alt="Foto de perfil"
                 className="h-full w-full object-cover"
+                style={{ objectPosition: 'center center' }}
+                onError={(e) => {
+                  // Si falla la carga, mostrar placeholder
+                  (e.currentTarget as HTMLImageElement).style.display = 'none'
+                }}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-white">
