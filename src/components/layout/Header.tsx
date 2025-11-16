@@ -33,7 +33,8 @@ export default function Header({ onMenuToggle }: HeaderProps) {
       const path = url.startsWith('/') ? url : `/${url}`
       url = `${baseUrl}${path}`
     }
-    return url
+    const cacheBuster = `v=${Date.now()}`
+    return url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`
   }
 
   useEffect(() => {

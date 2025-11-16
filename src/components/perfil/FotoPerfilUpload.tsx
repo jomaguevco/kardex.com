@@ -81,6 +81,9 @@ export default function FotoPerfilUpload() {
         const path = url.startsWith('/') ? url : `/${url}`
         url = `${baseUrl}${path}`
       }
+      // Cache-busting para evitar imágenes viejas en CDN/navegador
+      const cacheBuster = `v=${Date.now()}`
+      url += url.includes('?') ? `&${cacheBuster}` : `?${cacheBuster}`
       return url
     }
     return null
