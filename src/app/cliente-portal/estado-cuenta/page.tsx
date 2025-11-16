@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
 import clientePortalService from '@/services/clientePortalService'
-import { TrendingUp, Loader2, Package, ShoppingBag, DollarSign } from 'lucide-react'
+import { TrendingUp, Loader2, Package, ShoppingBag, DollarSign, FileDown, CreditCard } from 'lucide-react'
 
 export default function EstadoCuentaPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
   const [estadoCuenta, setEstadoCuenta] = useState<any>(null)
+  const [facturas, setFacturas] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -26,6 +27,10 @@ export default function EstadoCuentaPage() {
       const response = await clientePortalService.getEstadoCuenta()
       if (response.success) {
         setEstadoCuenta(response.data)
+      }
+      const fact = await clientePortalService.getMisFacturas()
+      if ((fact as any).success) {
+        setFacturas((fact as any).data?.slice(0, 5) || [])
       }
     } catch (error) {
       console.error('Error al cargar estado de cuenta:', error)
@@ -157,6 +162,49 @@ export default function EstadoCuentaPage() {
           </div>
         </div>
       )}
+
+      {/* Facturas recientes */}
+      <div className="glass-card rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-slate-900">Facturas recientes</h2>
+          <button
+            onClick={() => router.push('/cliente-portal/facturas')}
+            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            Ver todas
+          </button>
+        </div>
+        {facturas.length === 0 ? (
+          <p className="text-sm text-slate-600">Aún no tienes facturas emitidas.</p>
+        ) : (
+          <div className="space-y-3">
+            {facturas.map((f) => (
+              <div key={f.id} className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+                <div>
+                  <p className="font-semibold text-slate-900">{f.numero_factura}</p>
+                  <p className="text-xs text-slate-600">{new Date(f.fecha_venta).toLocaleDateString('es-ES')}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <p className="text-lg font-bold text-primary-600">S/ {Number(f.total || 0).toFixed(2)}</p>
+                  <button
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    onClick={() => alert('Descarga de PDF desde Reportes (próx.)')}
+                  >
+                    <FileDown className="h-4 w-4" /> PDF
+                  </button>
+                  <button
+                    className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:shadow"
+                    onClick={() => router.push('/cliente-portal/soporte')}
+                    title="Pagar con Yape/Plin desde el Agente Virtual"
+                  >
+                    <CreditCard className="h-4 w-4" /> Pagar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Productos más comprados */}
       {estadoCuenta?.productosMasComprados && estadoCuenta.productosMasComprados.length > 0 && (

@@ -199,29 +199,7 @@ function ProveedoresContent() {
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-        <aside className="space-y-6">
-          <div className="card space-y-4 p-5">
-            <h2 className="text-lg font-semibold text-slate-900">Filtros rápidos</h2>
-            <div>
-              <input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Buscar por nombre, documento o email"
-                className="input-field"
-              />
-            </div>
-            <p className="text-xs text-slate-500">
-              Identifica rápidamente proveedores por documento o contacto para mantener negociaciones al día.
-            </p>
-          </div>
-
-          <div className="card space-y-3 p-5 text-sm text-slate-600">
-            <p className="font-medium text-slate-800">Tip operativo</p>
-            <p>Registra el contacto principal de cada proveedor para agilizar pedidos y seguimientos logísticos.</p>
-          </div>
-        </aside>
-
+      <div className="space-y-6">
         <section className="space-y-6">
           {error && (
             <div className="card border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600">
@@ -240,6 +218,28 @@ function ProveedoresContent() {
             >
               <Plus className="mr-2 h-4 w-4" /> Nuevo proveedor
             </button>
+          </div>
+
+          {/* Filtros rápidos y tip operativo debajo del header y antes de la tabla */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="card space-y-4 p-5">
+              <h2 className="text-lg font-semibold text-slate-900">Filtros rápidos</h2>
+              <div>
+                <input
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Buscar por nombre, documento o email"
+                  className="input-field"
+                />
+              </div>
+              <p className="text-xs text-slate-500">
+                Identifica rápidamente proveedores por documento o contacto para mantener negociaciones al día.
+              </p>
+            </div>
+            <div className="card space-y-3 p-5 text-sm text-slate-600">
+              <p className="font-medium text-slate-800">Tip operativo</p>
+              <p>Registra el contacto principal de cada proveedor para agilizar pedidos y seguimientos logísticos.</p>
+            </div>
           </div>
 
           <div className="card overflow-hidden relative">

@@ -79,7 +79,18 @@ export default function ClienteNavbar() {
         })
         const data = await response.json()
         if (data.success) {
-          const noLeidas = data.data.filter((n: any) => !n.leida).length
+          const todas = data.data || []
+          // Filtrar según el rol: en Portal Cliente ocultar alertas internas (stock, inventario, pendientes de ventas/compras)
+          const filtradas = user?.rol === 'CLIENTE'
+            ? todas.filter((n: any) => {
+                const t = (n.tipo || '').toLowerCase()
+                if (t.includes('stock')) return false
+                if (t.includes('inventario')) return false
+                if (t.includes('pendiente') && (t.includes('venta') || t.includes('compra'))) return false
+                return true
+              })
+            : todas
+          const noLeidas = filtradas.filter((n: any) => !n.leida).length
           setNotificacionesCount(noLeidas)
         }
       } catch (error) {
@@ -91,7 +102,7 @@ export default function ClienteNavbar() {
     const interval = setInterval(fetchNotificaciones, 30000) // Actualizar cada 30 segundos
 
     return () => clearInterval(interval)
-  }, [])
+  }, [user?.rol])
 
   const navItems = [
     { name: 'Inicio', href: '/cliente-portal', icon: Store },
@@ -99,7 +110,7 @@ export default function ClienteNavbar() {
     { name: 'Mis Compras', href: '/cliente-portal/mis-compras', icon: ShoppingBag },
     { name: 'Mis Pedidos', href: '/cliente-portal/pedidos', icon: Receipt },
     { name: 'Estado de Cuenta', href: '/cliente-portal/estado-cuenta', icon: CreditCard },
-    { name: 'Soporte', href: '/cliente-portal/soporte', icon: MessageCircle }
+    { name: 'Agente Virtual', href: '/cliente-portal/soporte', icon: MessageCircle }
   ]
 
   const handleLogout = () => {
@@ -372,7 +383,17 @@ export default function ClienteNavbar() {
               })
               const data = await response.json()
               if (data.success) {
-                const noLeidas = data.data.filter((n: any) => !n.leida).length
+                const todas = data.data || []
+                const filtradas = user?.rol === 'CLIENTE'
+                  ? todas.filter((n: any) => {
+                      const t = (n.tipo || '').toLowerCase()
+                      if (t.includes('stock')) return false
+                      if (t.includes('inventario')) return false
+                      if (t.includes('pendiente') && (t.includes('venta') || t.includes('compra'))) return false
+                      return true
+                    })
+                  : todas
+                const noLeidas = filtradas.filter((n: any) => !n.leida).length
                 setNotificacionesCount(noLeidas)
               }
             } catch (error) {

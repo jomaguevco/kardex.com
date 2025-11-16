@@ -19,7 +19,7 @@ export default function SoportePage() {
   }, [isAuthenticated, user, router])
 
   const handleWhatsAppClick = () => {
-    const phoneNumber = '51974382897' // Número del bot actualizado
+    const phoneNumber = '51956216912' // Teléfono oficial de contacto
     const message = encodeURIComponent('¡Hola! Necesito ayuda con mi pedido.')
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank')
   }
@@ -63,9 +63,9 @@ export default function SoportePage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Soporte y Asistencia</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Agente Virtual y Soporte</h1>
         <p className="mt-2 text-slate-600">
-          Estamos aquí para ayudarte. Contáctanos por cualquiera de nuestros canales.
+          Habla con nuestro Agente Virtual (el mismo de WhatsApp/ChatDex) o contáctanos por los otros canales.
         </p>
       </div>
 
@@ -104,7 +104,7 @@ export default function SoportePage() {
                 Llámanos directamente
               </p>
               <p className="mt-2 text-sm font-semibold text-blue-600">
-                +51 999 999 999
+                +51 956 216 912
               </p>
             </div>
           </div>
@@ -159,25 +159,23 @@ export default function SoportePage() {
         </div>
       </div>
 
-      {/* Integración de Chatbot (Preparado para futuro) */}
+      {/* Agente Virtual (Webchat unificado) */}
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-start space-x-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
             <MessageCircle className="h-6 w-6" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-slate-900">Asistente Virtual (Próximamente)</h3>
+            <h3 className="text-lg font-bold text-slate-900">Agente Virtual</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Pronto podrás chatear con nuestro asistente virtual inteligente para obtener respuestas instantáneas a tus preguntas.
+              Es el mismo bot que usa WhatsApp (ChatDex), pero aquí dentro del portal. Puedes pedir, consultar precios, ver tu pedido y pagar.
             </p>
-            <div className="mt-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-              <MessageCircle className="mx-auto h-12 w-12 text-slate-400" />
-              <p className="mt-2 text-sm font-semibold text-slate-500">
-                Chatbot en desarrollo
-              </p>
-              <p className="mt-1 text-xs text-slate-400">
-                Integración con Chatdex próximamente
-              </p>
+            <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3">
+              <iframe
+                src="/webchat"
+                title="Agente Virtual"
+                className="w-full h-[500px] rounded-xl border-0"
+              />
             </div>
           </div>
         </div>

@@ -24,7 +24,7 @@ interface NotificacionesPanelProps {
 }
 
 export default function NotificacionesPanel({ isOpen, onClose }: NotificacionesPanelProps) {
-  const { token } = useAuthStore()
+  const { token, user } = useAuthStore()
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
@@ -45,7 +45,20 @@ export default function NotificacionesPanel({ isOpen, onClose }: NotificacionesP
       })
       const data = await response.json()
       if (data.success) {
-        setNotificaciones(data.data || [])
+        const todas: Notificacion[] = data.data || []
+        // Filtrar según rol (clientes no deben ver alertas internas de administración)
+        const role = user?.rol
+        const filtradas = role === 'CLIENTE'
+          ? todas.filter(n => {
+              const t = (n.tipo || '').toLowerCase()
+              // Ocultar alertas internas
+              if (t.includes('stock')) return false
+              if (t.includes('inventario')) return false
+              if (t.includes('pendiente') && (t.includes('venta') || t.includes('compra'))) return false
+              return true
+            })
+          : todas
+        setNotificaciones(filtradas)
       }
     } catch (error) {
       console.error('Error al cargar notificaciones:', error)
