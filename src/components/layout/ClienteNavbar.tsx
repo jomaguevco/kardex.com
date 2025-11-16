@@ -30,12 +30,15 @@ export default function ClienteNavbar() {
 
   const getFotoUrl = () => {
     if (!user?.foto_perfil) return null
-    const baseUrl = getApiBaseUrl()
-    if (user.foto_perfil.startsWith('http')) {
-      return user.foto_perfil
+    const baseUrl = (process.env.NEXT_PUBLIC_FILES_BASE_URL || getApiBaseUrl()).replace(/\/$/, '')
+    let url = user.foto_perfil
+    if (url.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      url = url.replace(/^http:\/\//, 'https://')
+    } else if (!url.startsWith('http')) {
+      const path = url.startsWith('/') ? url : `/${url}`
+      url = `${baseUrl}${path}`
     }
-    const path = user.foto_perfil.startsWith('/') ? user.foto_perfil : `/${user.foto_perfil}`
-    return `${baseUrl}${path}`
+    return url
   }
 
   useEffect(() => {

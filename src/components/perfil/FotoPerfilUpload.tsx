@@ -71,14 +71,17 @@ export default function FotoPerfilUpload() {
   const getFotoUrl = () => {
     if (preview) return preview
     if (user?.foto_perfil) {
-      const baseUrl = getApiBaseUrl()
-      // Si ya incluye http, usar directamente; si no, agregar baseUrl
-      if (user.foto_perfil.startsWith('http')) {
-        return user.foto_perfil
+      const baseUrl = (process.env.NEXT_PUBLIC_FILES_BASE_URL || getApiBaseUrl()).replace(/\/$/, '')
+      let url = user.foto_perfil
+      // Si ya incluye http, usar directo pero forzar https si la app está en https
+      if (url.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
+        url = url.replace(/^http:\/\//, 'https://')
+      } else if (!url.startsWith('http')) {
+        // Asegurar slash inicial y componer con baseUrl
+        const path = url.startsWith('/') ? url : `/${url}`
+        url = `${baseUrl}${path}`
       }
-      // Asegurar que empiece con /
-      const path = user.foto_perfil.startsWith('/') ? user.foto_perfil : `/${user.foto_perfil}`
-      return `${baseUrl}${path}`
+      return url
     }
     return null
   }
