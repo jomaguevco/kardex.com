@@ -21,9 +21,10 @@ interface Notificacion {
 interface NotificacionesPanelProps {
   isOpen: boolean
   onClose: () => void
+  onUpdate?: () => void
 }
 
-export default function NotificacionesPanel({ isOpen, onClose }: NotificacionesPanelProps) {
+export default function NotificacionesPanel({ isOpen, onClose, onUpdate }: NotificacionesPanelProps) {
   const { token, user } = useAuthStore()
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -79,6 +80,7 @@ export default function NotificacionesPanel({ isOpen, onClose }: NotificacionesP
         setNotificaciones(notificaciones.map(n => 
           n.id === id ? { ...n, leida: true } : n
         ))
+        onUpdate?.()
       }
     } catch (error) {
       console.error('Error al marcar notificación:', error)
@@ -95,6 +97,7 @@ export default function NotificacionesPanel({ isOpen, onClose }: NotificacionesP
       })
       if (response.ok) {
         setNotificaciones(notificaciones.map(n => ({ ...n, leida: true })))
+        onUpdate?.()
       }
     } catch (error) {
       console.error('Error al marcar todas:', error)
@@ -111,6 +114,7 @@ export default function NotificacionesPanel({ isOpen, onClose }: NotificacionesP
       })
       if (response.ok) {
         setNotificaciones(notificaciones.filter(n => n.id !== id))
+        onUpdate?.()
       }
     } catch (error) {
       console.error('Error al eliminar notificación:', error)
