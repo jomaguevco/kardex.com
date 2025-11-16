@@ -37,12 +37,14 @@ class NotificacionService {
   }
 
   async marcarComoLeida(id: number): Promise<Notificacion> {
-    const response = await api.put<Notificacion>(`/notificaciones/${id}/marcar-leida`);
+    // Backend expone PUT /notificaciones/:id/leer
+    const response = await api.put<Notificacion>(`/notificaciones/${id}/leer`);
     return (response as any)?.data || response;
   }
 
   async marcarTodasComoLeidas(): Promise<void> {
-    await api.put('/notificaciones/marcar-todas-leidas');
+    // Backend expone PUT /notificaciones/leer-todas
+    await api.put('/notificaciones/leer-todas');
   }
 
   async generarNotificaciones(): Promise<void> {

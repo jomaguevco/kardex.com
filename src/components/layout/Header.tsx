@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Menu, Bell, User, LogOut, Settings, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
-import NotificationPanel from './NotificationPanel'
+import NotificacionesPanel from './NotificacionesPanel'
 import notificacionService from '@/services/notificacionService'
 
 interface HeaderProps {
@@ -112,10 +112,10 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         </div>
       </div>
       
-      <NotificationPanel 
+      <NotificacionesPanel 
         isOpen={showNotifications} 
         onClose={() => setShowNotifications(false)}
-        onNotificationUpdate={loadNotificationCount}
+        onUpdate={loadNotificationCount}
       />
     </header>
   )
