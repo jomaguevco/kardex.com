@@ -18,6 +18,24 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   const [notificationCount, setNotificationCount] = useState(0)
   const { user, logout } = useAuthStore()
 
+  const getApiBaseUrl = () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api'
+    return apiUrl.replace(/\/api$/, '') || 'http://localhost:4001'
+  }
+
+  const getFotoUrl = () => {
+    if (!user?.foto_perfil) return null
+    const baseUrl = getApiBaseUrl().replace(/\/$/, '')
+    let url = user.foto_perfil
+    if (url.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      url = url.replace(/^http:\/\//, 'https://')
+    } else if (!url.startsWith('http')) {
+      const path = url.startsWith('/') ? url : `/${url}`
+      url = `${baseUrl}${path}`
+    }
+    return url
+  }
+
   useEffect(() => {
     loadNotificationCount()
     // Actualizar cada 30 segundos
@@ -79,9 +97,20 @@ export default function Header({ onMenuToggle }: HeaderProps) {
               onClick={() => setShowUserMenu((prev) => !prev)}
               className="flex items-center gap-3 rounded-xl border border-white/30 bg-white/70 px-2 py-1.5 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/60 hover:shadow-lg"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500 text-white shadow-lg shadow-indigo-500/40">
-                <User className="h-5 w-5" />
-              </div>
+              {getFotoUrl() ? (
+                <img
+                  src={getFotoUrl() || ''}
+                  alt={user?.nombre_completo || 'Usuario'}
+                  className="h-10 w-10 rounded-xl object-cover border border-white/50"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500 text-white shadow-lg shadow-indigo-500/40">
+                  <User className="h-5 w-5" />
+                </div>
+              )}
               <div className="hidden text-left sm:block">
                 <p className="text-sm font-semibold text-slate-800">{user?.nombre_completo}</p>
                 <p className="text-xs font-medium capitalize text-slate-500">{user?.rol}</p>

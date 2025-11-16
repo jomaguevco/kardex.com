@@ -210,35 +210,47 @@ function ClientesContent() {
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-        <aside className="space-y-4">
-          <div className="glass-card p-5">
-            <label className="mb-3 block text-sm font-semibold text-slate-700">Buscar cliente</label>
-            <div>
-              <input
-                type="text"
-                placeholder="Nombre o documento..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl border border-slate-200/70 bg-white/90 py-2.5 px-4 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
-              />
-            </div>
+      {/* Controles superiores: buscador y acciones rápidas (como en proveedores) */}
+      <section className="space-y-6">
+        <div className="card flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white/95 px-6 py-4 shadow-lg shadow-slate-900/5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">Directorio de clientes</h2>
+            <p className="text-sm text-slate-500">Gestiona clientes con la misma estética y fluidez del dashboard.</p>
           </div>
+          <button
+            onClick={handleCreateCliente}
+            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Nuevo cliente
+          </button>
+        </div>
 
-          <div className="glass-card p-5">
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">Acciones rápidas</h3>
-            <div className="space-y-2">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="card p-5">
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">Buscar cliente</h2>
+            <input
+              type="text"
+              placeholder="Nombre, documento o email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input-field"
+            />
+          </div>
+          <div className="card p-5 text-sm text-slate-600">
+            <p className="font-medium text-slate-800">Acciones rápidas</p>
+            <div className="mt-3">
               <button
                 onClick={handleCreateCliente}
-                className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+                className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               >
                 <Plus className="h-4 w-4" /> Nuevo cliente
               </button>
             </div>
           </div>
-        </aside>
+        </div>
 
-        <div className="glass-card overflow-hidden">
+        <div className="card overflow-hidden relative">
+          <div className="overflow-x-auto -mx-6 px-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
               <LoadingSpinner />
@@ -249,30 +261,30 @@ function ClientesContent() {
             </div>
           ) : (
             <TableWrapper>
-              <table className="min-w-full">
-                <thead className="border-b border-slate-200/70 bg-slate-50/80">
+              <table className="min-w-full divide-y divide-slate-200" style={{ minWidth: '1000px' }}>
+                <thead className="bg-slate-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                       Cliente
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                       Documento
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                       Contacto
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                       Tipo
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-600">
                       Acciones
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200/70 bg-white/60">
+                <tbody className="divide-y divide-slate-100 bg-white">
                   {filteredClientes.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center">
+                      <td colSpan={5} className="px-6 py-16 text-center">
                         <Users className="mx-auto mb-3 h-12 w-12 text-slate-300" />
                         <p className="text-sm font-medium text-slate-600">No hay clientes registrados</p>
                         <p className="mt-1 text-xs text-slate-400">Crea tu primer cliente para comenzar</p>
@@ -280,7 +292,7 @@ function ClientesContent() {
                     </tr>
                   ) : (
                     filteredClientes.map((cliente) => (
-                      <tr key={cliente.id} className="transition hover:bg-slate-50/60">
+                      <tr key={cliente.id} className="transition hover:bg-slate-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 text-sm font-semibold text-white shadow-sm">
@@ -364,8 +376,9 @@ function ClientesContent() {
               </table>
             </TableWrapper>
           )}
+          </div>
         </div>
-      </div>
+      </section>
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
