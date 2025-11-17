@@ -87,8 +87,9 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
           >
             <option value="">Todos los estados</option>
             <option value="pendiente">Pendiente</option>
-            <option value="completada">Completada</option>
+            <option value="procesada">Procesada</option>
             <option value="cancelada">Cancelada</option>
+            <option value="anulada">Anulada</option>
           </select>
         </div>
         <div className="flex items-end gap-2">

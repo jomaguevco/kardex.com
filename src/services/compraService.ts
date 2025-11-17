@@ -81,6 +81,7 @@ class CompraService {
     search?: string;
     fecha_inicio?: string;
     fecha_fin?: string;
+    estado?: string;
     proveedor_id?: number;
   }): Promise<ComprasResponse> {
     const response = await apiService.get('/compras', { params });
