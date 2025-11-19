@@ -151,9 +151,9 @@ function AjustesInventarioContent() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-4xl rounded-3xl p-6 shadow-2xl">
-            <div className="mb-6 flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+            <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Nuevo ajuste
@@ -173,11 +173,13 @@ function AjustesInventarioContent() {
               </button>
             </div>
 
-            <AjusteInventarioForm 
-              tiposMovimiento={tiposMovimiento || []}
-              onSuccess={handleSuccess} 
-              onCancel={() => setIsModalOpen(false)} 
-            />
+            <div className="flex-1 overflow-y-auto pr-2">
+              <AjusteInventarioForm 
+                tiposMovimiento={tiposMovimiento || []}
+                onSuccess={handleSuccess} 
+                onCancel={() => setIsModalOpen(false)} 
+              />
+            </div>
           </div>
         </div>
       )}

@@ -100,16 +100,53 @@ export default function EditarCompraForm({ compra, onSuccess, onCancel }: Editar
   // Cargar productos de los detalles iniciales
   useEffect(() => {
     const cargarProductos = async () => {
-      const productosIds = (compra.detalles || []).map((d: any) => d.producto_id || d.producto?.id).filter(Boolean)
-      for (const productoId of productosIds) {
+      // Primero, agregar productos que ya vienen en los detalles originales
+      const productosIniciales: Record<number, Producto> = {}
+      if (compra.detalles) {
+        compra.detalles.forEach((detalle: any) => {
+          // Priorizar producto completo del detalle
+          if (detalle.producto && detalle.producto.id) {
+            productosIniciales[detalle.producto.id] = detalle.producto
+          }
+          // Si no hay producto completo pero hay producto_id y producto, usar ese
+          if (detalle.producto_id && detalle.producto && !productosIniciales[detalle.producto_id]) {
+            productosIniciales[detalle.producto_id] = detalle.producto
+          }
+        })
+        if (Object.keys(productosIniciales).length > 0) {
+          setProductosCache(prev => ({ ...prev, ...productosIniciales }))
+        }
+      }
+      
+      // Luego, cargar los productos que faltan del API
+      const productosIds = (compra.detalles || [])
+        .map((d: any) => d.producto_id || d.producto?.id)
+        .filter(Boolean)
+        .filter((id: number) => !productosIniciales[id]) // Solo cargar los que no tenemos
+      
+      // Cargar todos los productos faltantes en paralelo para mayor eficiencia
+      const promesasProductos = productosIds.map(async (productoId: number) => {
         try {
           const producto = await productoService.getProductoById(productoId)
           if (producto) {
-            setProductosCache(prev => ({ ...prev, [productoId]: producto }))
+            return { [productoId]: producto }
           }
         } catch (error) {
           console.error(`Error al cargar producto ${productoId}:`, error)
         }
+        return null
+      })
+      
+      const productosCargados = await Promise.all(promesasProductos)
+      const productosFinales = productosCargados.reduce((acc, curr) => {
+        if (curr) {
+          return { ...acc, ...curr }
+        }
+        return acc
+      }, {})
+      
+      if (Object.keys(productosFinales).length > 0) {
+        setProductosCache(prev => ({ ...prev, ...productosFinales }))
       }
     }
     cargarProductos()
@@ -311,15 +348,22 @@ export default function EditarCompraForm({ compra, onSuccess, onCancel }: Editar
         ) : (
           <div className="space-y-3">
             {fields.map((field, index) => {
-              const producto = productosCache[field.producto_id]
+              const detalleOriginal = compra.detalles?.[index]
+              const productoDelDetalle = detalleOriginal?.producto
+              const productoId = field.producto_id
+              const producto = productosCache[productoId] || productoDelDetalle
+              // Preferir el nombre del detalle original, luego del cache, luego mostrar mensaje apropiado
+              const nombreProducto = productoDelDetalle?.nombre || producto?.nombre || (productoId ? 'Cargando producto...' : 'Producto desconocido')
+              const codigoProducto = productoDelDetalle?.codigo_interno || producto?.codigo_interno || ''
+              
               return (
                 <div
                   key={field.id}
                   className="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
-                    <p className="font-semibold text-slate-900">{producto?.nombre || `Producto ${field.producto_id}`}</p>
-                    <p className="text-xs text-slate-500">ID: {field.producto_id}</p>
+                    <p className="font-semibold text-slate-900">{nombreProducto}</p>
+                    <p className="text-xs text-slate-500">{codigoProducto || `ID: ${productoId}`}</p>
                   </div>
 
                   <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">

@@ -178,13 +178,13 @@ export default function PagoModal({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-4 sm:py-10 overflow-y-auto">
         <div
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
+          className="relative w-full max-w-2xl max-h-[90vh] rounded-2xl bg-white shadow-2xl flex flex-col my-4 sm:my-8"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 text-white">
+          <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 text-white">
             <div>
               <h2 className="text-xl font-bold">Simular Pago</h2>
               <p className="text-sm text-white/80">
@@ -201,7 +201,8 @@ export default function PagoModal({
           </div>
 
           {/* Content */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto pr-2">
+            <form id="pago-form" onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Método de pago */}
             <div>
               <label className="mb-3 block text-sm font-semibold text-slate-900">
@@ -312,32 +313,35 @@ export default function PagoModal({
               </div>
             )}
 
-            {/* Botones */}
-            <div className="flex gap-3 border-t border-slate-200 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isProcesando}
-                className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isProcesando || !metodoPago}
-                className="flex-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isProcesando ? (
-                  <span className="flex items-center justify-center">
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Procesando...
-                  </span>
-                ) : (
-                  'Confirmar Pago'
-                )}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
+
+          {/* Footer con botones */}
+          <div className="flex-shrink-0 flex gap-3 border-t border-slate-200 bg-white p-6">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isProcesando}
+              className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              form="pago-form"
+              disabled={isProcesando || !metodoPago}
+              className="flex-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isProcesando ? (
+                <span className="flex items-center justify-center">
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Procesando...
+                </span>
+              ) : (
+                'Confirmar Pago'
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </>

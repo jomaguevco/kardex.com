@@ -262,9 +262,9 @@ export default function KardexTable() {
 
       {/* Modal de detalles del movimiento */}
       {selectedMovimiento && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto p-4">
+          <div className="bg-white rounded-lg max-w-md max-h-[90vh] w-full flex flex-col my-4 mx-4">
+            <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-200 p-6 pb-4">
               <h3 className="text-lg font-semibold text-gray-900">Detalles del Movimiento</h3>
               <button
                 onClick={() => setSelectedMovimiento(null)}
@@ -274,7 +274,7 @@ export default function KardexTable() {
               </button>
             </div>
             
-            <div className="space-y-3">
+            <div className="flex-1 overflow-y-auto pr-2 p-6 space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-500">Producto</label>
                 <p className="text-gray-900">{(selectedMovimiento as any).producto?.nombre || 'N/A'}</p>
@@ -309,6 +309,15 @@ export default function KardexTable() {
                   <p className="text-gray-900">{selectedMovimiento.observaciones}</p>
                 </div>
               )}
+            </div>
+            
+            <div className="flex-shrink-0 flex justify-end border-t border-gray-200 pt-4 p-6">
+              <button
+                onClick={() => setSelectedMovimiento(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>

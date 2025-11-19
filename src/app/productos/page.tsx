@@ -389,9 +389,9 @@ function ProductosContent() {
       </div>
 
       {isViewOpen && selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 px-4 py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-2xl rounded-3xl p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card w-full max-w-2xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+            <div className="flex-shrink-0 flex items-start justify-between gap-4">
               <div>
                 <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
                   <Package className="mr-1.5 h-3.5 w-3.5" />
@@ -413,61 +413,63 @@ function ProductosContent() {
               </button>
             </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
-                <p className="text-xs uppercase tracking-wide text-slate-400">Precio de venta</p>
-                <p className="mt-1 text-lg font-semibold text-slate-900">
-                  S/. {Number(selectedProduct.precio_venta ?? 0).toFixed(2)}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
-                <p className="text-xs uppercase tracking-wide text-slate-400">Stock actual</p>
-                <p className="mt-1 text-lg font-semibold text-slate-900">
-                  {selectedProduct.stock_actual ?? 0} unidades
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
-                <p className="text-xs uppercase tracking-wide text-slate-400">Stock mínimo</p>
-                <p className="mt-1 text-lg font-semibold text-slate-900">
-                  {selectedProduct.stock_minimo ?? 0}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
-                <p className="text-xs uppercase tracking-wide text-slate-400">Stock máximo</p>
-                <p className="mt-1 text-lg font-semibold text-slate-900">
-                  {selectedProduct.stock_maximo ?? 0}
-                </p>
-              </div>
-              {selectedProduct.codigo_barras && (
+            <div className="flex-1 overflow-y-auto pr-2 mt-6">
+              <div className="grid gap-4 sm:grid-cols-2 mb-6">
                 <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">Código de barras</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Precio de venta</p>
                   <p className="mt-1 text-lg font-semibold text-slate-900">
-                    {selectedProduct.codigo_barras}
+                    S/. {Number(selectedProduct.precio_venta ?? 0).toFixed(2)}
                   </p>
                 </div>
-              )}
-            </div>
+                <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Stock actual</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-900">
+                    {selectedProduct.stock_actual ?? 0} unidades
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Stock mínimo</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-900">
+                    {selectedProduct.stock_minimo ?? 0}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Stock máximo</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-900">
+                    {selectedProduct.stock_maximo ?? 0}
+                  </p>
+                </div>
+                {selectedProduct.codigo_barras && (
+                  <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">Código de barras</p>
+                    <p className="mt-1 text-lg font-semibold text-slate-900">
+                      {selectedProduct.codigo_barras}
+                    </p>
+                  </div>
+                )}
+              </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              {stockState && (
+              <div className="flex flex-wrap items-center gap-3">
+                {stockState && (
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${stockState.badgeClass}`}
+                  >
+                    {stockState.label}
+                  </span>
+                )}
                 <span
-                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${stockState.badgeClass}`}
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                    selectedProduct.activo
+                      ? 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30'
+                      : 'bg-rose-500/15 text-rose-600 border border-rose-500/30'
+                  }`}
                 >
-                  {stockState.label}
+                  {selectedProduct.activo ? 'Activo' : 'Inactivo'}
                 </span>
-              )}
-              <span
-                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                  selectedProduct.activo
-                    ? 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30'
-                    : 'bg-rose-500/15 text-rose-600 border border-rose-500/30'
-                }`}
-              >
-                {selectedProduct.activo ? 'Activo' : 'Inactivo'}
-              </span>
+              </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="flex-shrink-0 flex justify-end pt-6 border-t border-slate-200 mt-6">
               <button onClick={closeViewModal} className="btn-outline">
                 Cerrar
               </button>
@@ -477,9 +479,9 @@ function ProductosContent() {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 px-4 py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-3xl rounded-3xl p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card w-full max-w-3xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+            <div className="flex-shrink-0 flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   {editingProduct ? 'Editar producto' : 'Nuevo producto'}
@@ -502,188 +504,191 @@ function ProductosContent() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Código interno *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.codigo_interno}
-                    onChange={handleInputChange('codigo_interno')}
-                    className="input-field"
-                    placeholder="SKU interno"
-                    autoFocus={!editingProduct}
-                  />
+            <div className="flex-1 overflow-y-auto pr-2 mt-6">
+              <form id="producto-form" onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Código interno *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.codigo_interno}
+                      onChange={handleInputChange('codigo_interno')}
+                      className="input-field"
+                      placeholder="SKU interno"
+                      autoFocus={!editingProduct}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Código de barras
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.codigo_barras}
+                      onChange={handleInputChange('codigo_barras')}
+                      className="input-field"
+                      placeholder="EAN / UPC"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700">
+                      Nombre del producto *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.nombre}
+                      onChange={handleInputChange('nombre')}
+                      className="input-field"
+                      placeholder="Nombre comercial"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700">
+                      Descripción
+                    </label>
+                    <textarea
+                      value={formData.descripcion}
+                      onChange={handleInputChange('descripcion')}
+                      className="input-field min-h-[96px]"
+                      placeholder="Comparte características relevantes, presentaciones o notas internas"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Código de barras
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.codigo_barras}
-                    onChange={handleInputChange('codigo_barras')}
-                    className="input-field"
-                    placeholder="EAN / UPC"
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700">
-                    Nombre del producto *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.nombre}
-                    onChange={handleInputChange('nombre')}
-                    className="input-field"
-                    placeholder="Nombre comercial"
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700">
-                    Descripción
-                  </label>
-                  <textarea
-                    value={formData.descripcion}
-                    onChange={handleInputChange('descripcion')}
-                    className="input-field min-h-[96px]"
-                    placeholder="Comparte características relevantes, presentaciones o notas internas"
-                  />
-                </div>
-              </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Precio de venta *
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.precio_venta}
-                    onChange={handleInputChange('precio_venta')}
-                    className="input-field"
-                    placeholder="0.00"
-                  />
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Precio de venta *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.precio_venta}
+                      onChange={handleInputChange('precio_venta')}
+                      className="input-field"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Precio de compra
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.precio_compra}
+                      onChange={handleInputChange('precio_compra')}
+                      className="input-field"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Costo promedio
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.costo_promedio}
+                      onChange={handleInputChange('costo_promedio')}
+                      className="input-field"
+                      placeholder="0.00"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Precio de compra
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.precio_compra}
-                    onChange={handleInputChange('precio_compra')}
-                    className="input-field"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Costo promedio
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.costo_promedio}
-                    onChange={handleInputChange('costo_promedio')}
-                    className="input-field"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
 
-              <div className="grid gap-4 sm:grid-cols-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Stock actual
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={formData.stock_actual}
-                    onChange={handleInputChange('stock_actual')}
-                    className="input-field"
-                    placeholder="0"
-                  />
+                <div className="grid gap-4 sm:grid-cols-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Stock actual
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={formData.stock_actual}
+                      onChange={handleInputChange('stock_actual')}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Stock mínimo
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={formData.stock_minimo}
+                      onChange={handleInputChange('stock_minimo')}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Stock máximo
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={formData.stock_maximo}
+                      onChange={handleInputChange('stock_maximo')}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Punto de reorden
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={formData.punto_reorden}
+                      onChange={handleInputChange('punto_reorden')}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Stock mínimo
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={formData.stock_minimo}
-                    onChange={handleInputChange('stock_minimo')}
-                    className="input-field"
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Stock máximo
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={formData.stock_maximo}
-                    onChange={handleInputChange('stock_maximo')}
-                    className="input-field"
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Punto de reorden
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={formData.punto_reorden}
-                    onChange={handleInputChange('punto_reorden')}
-                    className="input-field"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
+              </form>
+            </div>
 
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="btn-outline sm:min-w-[160px]"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn-primary inline-flex items-center justify-center sm:min-w-[200px] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <LoadingSpinner size="sm" className="mr-2" />
-                      Guardando...
-                    </>
-                  ) : editingProduct ? (
-                    'Actualizar producto'
-                  ) : (
-                    'Crear producto'
-                  )}
-                </button>
-              </div>
-            </form>
+            <div className="flex-shrink-0 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-6 border-t border-slate-200 mt-6">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="btn-outline sm:min-w-[160px]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                form="producto-form"
+                disabled={isSubmitting}
+                className="btn-primary inline-flex items-center justify-center sm:min-w-[200px] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Guardando...
+                  </>
+                ) : editingProduct ? (
+                  'Actualizar producto'
+                ) : (
+                  'Crear producto'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

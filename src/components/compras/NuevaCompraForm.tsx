@@ -288,15 +288,19 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
         ) : (
           <div className="space-y-3">
             {fields.map((field, index) => {
-              const producto = productosCache[field.producto_id]
+              const productoId = field.producto_id
+              const producto = productosCache[productoId]
+              const nombreProducto = producto?.nombre || (productoId ? 'Cargando producto...' : 'Producto desconocido')
+              const codigoProducto = producto?.codigo_interno || ''
+              
               return (
                 <div
                   key={field.id}
                   className="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
-                    <p className="font-semibold text-slate-900">{producto?.nombre || `Producto ${field.producto_id}`}</p>
-                    <p className="text-xs text-slate-500">ID: {field.producto_id}</p>
+                    <p className="font-semibold text-slate-900">{nombreProducto}</p>
+                    <p className="text-xs text-slate-500">{codigoProducto || `ID: ${productoId}`}</p>
                   </div>
 
                   <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">

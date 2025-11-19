@@ -381,15 +381,16 @@ function ClientesContent() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-          <div className="glass-card relative w-full max-w-2xl animate-fade-in">
-            <div className="border-b border-slate-200/70 px-6 py-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card relative w-full max-w-2xl max-h-[90vh] animate-fade-in my-4 flex flex-col">
+            <div className="flex-shrink-0 border-b border-slate-200/70 px-6 py-4">
               <h2 className="text-lg font-semibold text-slate-900">
                 {editingCliente ? 'Editar cliente' : 'Nuevo cliente'}
               </h2>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6">
+            <div className="flex-1 overflow-y-auto pr-2">
+              <form id="cliente-form" onSubmit={handleSubmit} className="p-6">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700">Nombre completo *</label>
@@ -484,32 +485,35 @@ function ClientesContent() {
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="btn-outline"
-                  disabled={isSubmitting}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Guardando...' : editingCliente ? 'Actualizar' : 'Crear cliente'}
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
+
+            <div className="flex-shrink-0 flex justify-end gap-3 pt-6 border-t border-slate-200 px-6 pb-6">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="btn-outline"
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                form="cliente-form"
+                className="btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Guardando...' : editingCliente ? 'Actualizar' : 'Crear cliente'}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {isDetailOpen && selectedCliente && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-          <div className="glass-card relative w-full max-w-2xl animate-fade-in">
-            <div className="border-b border-slate-200/70 px-6 py-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card relative w-full max-w-2xl max-h-[90vh] animate-fade-in my-4 flex flex-col">
+            <div className="flex-shrink-0 border-b border-slate-200/70 px-6 py-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900">Detalles del cliente</h2>
                 <button
@@ -521,7 +525,7 @@ function ClientesContent() {
               </div>
             </div>
 
-            <div className="p-6">
+            <div className="flex-1 overflow-y-auto pr-2 p-6">
               <div className="mb-6 flex items-center gap-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 text-2xl font-bold text-white shadow-lg">
                   {selectedCliente.nombre.charAt(0).toUpperCase()}
@@ -549,11 +553,12 @@ function ClientesContent() {
                 />
               </div>
 
-              <div className="mt-6 flex justify-end">
-                <button onClick={() => setIsDetailOpen(false)} className="btn-outline">
-                  Cerrar
-                </button>
-              </div>
+            </div>
+
+            <div className="flex-shrink-0 flex justify-end pt-6 border-t border-slate-200 px-6 pb-6">
+              <button onClick={() => setIsDetailOpen(false)} className="btn-outline">
+                Cerrar
+              </button>
             </div>
           </div>
         </div>
@@ -561,8 +566,8 @@ function ClientesContent() {
 
       {/* Modal de confirmación de eliminación */}
       {isDeleteModalOpen && clienteToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-slate-950/50 p-4 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-md rounded-3xl p-6 shadow-2xl animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card w-full max-w-md max-h-[90vh] rounded-3xl p-6 shadow-2xl animate-fade-in my-4 mx-4">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100">
                 <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -96,13 +96,13 @@ export default function PedidoDetalleModalCliente({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-4 sm:py-10 overflow-y-auto">
         <div
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
+          className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl bg-white shadow-2xl flex flex-col my-4 sm:my-8"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-white">
+          <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-white">
             <div>
               <h2 className="text-xl font-bold">Detalle del Pedido</h2>
               <p className="text-sm text-white/80">{pedido.numero_pedido}</p>
@@ -116,7 +116,7 @@ export default function PedidoDetalleModalCliente({
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto pr-2 p-6 space-y-6">
             {/* Información general */}
             <div className="grid gap-6 md:grid-cols-2">
               <div className="glass-card rounded-xl p-4">
@@ -329,22 +329,34 @@ export default function PedidoDetalleModalCliente({
               </div>
             )}
 
-            {/* Acciones */}
-            {mostrarBotonPagar && (
-              <div className="space-y-4 border-t border-slate-200 pt-4">
-                <button
-                  onClick={() => setIsPagoModalOpen(true)}
-                  className="w-full rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 font-semibold text-white shadow-lg transition hover:shadow-xl flex items-center justify-center space-x-2"
-                >
-                  <CreditCard className="h-5 w-5" />
-                  <span>Proceder al Pago</span>
-                </button>
-                <p className="text-center text-xs text-slate-500">
-                  Tu pedido ha sido aprobado. Procede al pago para completar tu compra.
-                </p>
-              </div>
-            )}
           </div>
+
+          {/* Footer con acciones */}
+          {mostrarBotonPagar && (
+            <div className="flex-shrink-0 space-y-4 border-t border-slate-200 bg-white p-6">
+              <button
+                onClick={() => setIsPagoModalOpen(true)}
+                className="w-full rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 font-semibold text-white shadow-lg transition hover:shadow-xl flex items-center justify-center space-x-2"
+              >
+                <CreditCard className="h-5 w-5" />
+                <span>Proceder al Pago</span>
+              </button>
+              <p className="text-center text-xs text-slate-500">
+                Tu pedido ha sido aprobado. Procede al pago para completar tu compra.
+              </p>
+            </div>
+          )}
+
+          {!mostrarBotonPagar && (
+            <div className="flex-shrink-0 flex justify-end border-t border-slate-200 bg-white p-6">
+              <button
+                onClick={onClose}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Cerrar
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

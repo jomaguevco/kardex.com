@@ -111,13 +111,13 @@ export default function PedidoDetalleModal({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-4 sm:py-10 overflow-y-auto">
         <div
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
+          className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl bg-white shadow-2xl flex flex-col my-4 sm:my-8"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-white">
+          <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-white">
             <div>
               <h2 className="text-xl font-bold">Detalle del Pedido</h2>
               <p className="text-sm text-white/80">{pedido.numero_pedido}</p>
@@ -131,7 +131,7 @@ export default function PedidoDetalleModal({
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto pr-2 p-6 space-y-6">
             {/* Información general */}
             <div className="grid gap-6 md:grid-cols-2">
               <div className="glass-card rounded-xl p-4">
@@ -291,54 +291,66 @@ export default function PedidoDetalleModal({
               </div>
             )}
 
-            {/* Acciones */}
-            {pedido.estado === 'PENDIENTE' && (
-              <div className="space-y-4 border-t border-slate-200 pt-4">
-                {/* Motivo de rechazo */}
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">
-                    Motivo de rechazo (si aplica):
-                  </label>
-                  <textarea
-                    value={motivoRechazo}
-                    onChange={(e) => setMotivoRechazo(e.target.value)}
-                    placeholder="Ingrese el motivo del rechazo..."
-                    rows={3}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
-                  />
-                </div>
-
-                {/* Botones */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={onClose}
-                    className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleRechazar}
-                    disabled={isRechazando || !motivoRechazo.trim()}
-                    className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isRechazando ? 'Rechazando...' : 'Rechazar Pedido'}
-                  </button>
-                  <button
-                    onClick={handleAprobar}
-                    disabled={isAprobando}
-                    className="flex-1 rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isAprobando ? 'Aprobando...' : (
-                      <>
-                        <CheckCircle className="mr-2 inline h-5 w-5" />
-                        Aprobar Pedido
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
+
+          {/* Footer con acciones */}
+          {pedido.estado === 'PENDIENTE' && (
+            <div className="flex-shrink-0 space-y-4 border-t border-slate-200 bg-white p-6">
+              {/* Motivo de rechazo */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-900">
+                  Motivo de rechazo (si aplica):
+                </label>
+                <textarea
+                  value={motivoRechazo}
+                  onChange={(e) => setMotivoRechazo(e.target.value)}
+                  placeholder="Ingrese el motivo del rechazo..."
+                  rows={3}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                />
+              </div>
+
+              {/* Botones */}
+              <div className="flex gap-3">
+                <button
+                  onClick={onClose}
+                  className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleRechazar}
+                  disabled={isRechazando || !motivoRechazo.trim()}
+                  className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isRechazando ? 'Rechazando...' : 'Rechazar Pedido'}
+                </button>
+                <button
+                  onClick={handleAprobar}
+                  disabled={isAprobando}
+                  className="flex-1 rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isAprobando ? 'Aprobando...' : (
+                    <>
+                      <CheckCircle className="mr-2 inline h-5 w-5" />
+                      Aprobar Pedido
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {pedido.estado !== 'PENDIENTE' && (
+            <div className="flex-shrink-0 flex justify-end border-t border-slate-200 bg-white p-6">
+              <button
+                onClick={onClose}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Cerrar
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>

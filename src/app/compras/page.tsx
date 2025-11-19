@@ -161,9 +161,9 @@ function ComprasContent() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[65] flex items-center justify-center bg-slate-900/70 px-4 py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-4xl rounded-3xl p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-[65] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+            <div className="flex-shrink-0 flex items-start justify-between gap-4 mb-6">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Registrar compra</span>
                 <h2 className="mt-2 text-2xl font-semibold text-slate-900">Nuevo ingreso de mercadería</h2>
@@ -174,7 +174,7 @@ function ComprasContent() {
               </button>
             </div>
 
-            <div className="mt-6">
+            <div className="flex-1 overflow-y-auto pr-2">
               <NuevaCompraForm
                 onSuccess={() => {
                   setIsModalOpen(false)
@@ -189,9 +189,9 @@ function ComprasContent() {
       )}
 
       {selectedCompra && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 px-4 py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-4xl rounded-3xl p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+            <div className="flex-shrink-0 flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Detalle de compra</span>
                 <h2 className="mt-2 text-2xl font-semibold text-slate-900">{selectedCompra.numero_factura}</h2>
@@ -202,20 +202,21 @@ function ComprasContent() {
               </button>
             </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <DetalleCard label="Proveedor" value={selectedCompra.proveedor?.nombre || 'Proveedor no registrado'} />
-              <DetalleCard label="Fecha" value={new Date(selectedCompra.fecha_compra).toLocaleString()} />
-              <DetalleCard label="Subtotal" value={`$${Number((selectedCompra as any).subtotal ?? selectedCompra.total ?? 0).toFixed(2)}`} />
-              <DetalleCard label="Total" value={`$${Number(selectedCompra.total ?? 0).toFixed(2)}`} highlight />
-            </div>
-
-            {detallesError && (
-              <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
-                {detallesError}
+            <div className="flex-1 overflow-y-auto pr-2 mt-6">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+                <DetalleCard label="Proveedor" value={selectedCompra.proveedor?.nombre || 'Proveedor no registrado'} />
+                <DetalleCard label="Fecha" value={new Date(selectedCompra.fecha_compra).toLocaleString()} />
+                <DetalleCard label="Subtotal" value={`$${Number((selectedCompra as any).subtotal ?? selectedCompra.total ?? 0).toFixed(2)}`} />
+                <DetalleCard label="Total" value={`$${Number(selectedCompra.total ?? 0).toFixed(2)}`} highlight />
               </div>
-            )}
 
-            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-100">
+              {detallesError && (
+                <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+                  {detallesError}
+                </div>
+              )}
+
+              <div className="overflow-hidden rounded-2xl border border-slate-100">
               {detallesLoading ? (
                 <div className="flex items-center justify-center gap-2 px-6 py-8 text-sm text-slate-500">
                   <LoadingSpinner size="sm" /> Cargando detalles...
@@ -246,9 +247,10 @@ function ComprasContent() {
                   </tbody>
                 </table>
               )}
+              </div>
             </div>
 
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <div className="flex-shrink-0 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-6 border-t border-slate-200 mt-6">
               <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
                 Cerrar
               </button>
@@ -263,9 +265,9 @@ function ComprasContent() {
       )}
 
       {isEditModalOpen && compraEditando && (
-        <div className="fixed inset-0 z-[65] flex items-center justify-center bg-slate-900/70 px-4 py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-4xl rounded-3xl p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-[65] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
+          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+            <div className="flex-shrink-0 flex items-start justify-between gap-4 mb-6">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Editar compra</span>
                 <h2 className="mt-2 text-2xl font-semibold text-slate-900">{compraEditando.numero_factura}</h2>
@@ -276,7 +278,7 @@ function ComprasContent() {
               </button>
             </div>
 
-            <div className="mt-6">
+            <div className="flex-1 overflow-y-auto pr-2">
               <EditarCompraForm
                 compra={compraEditando}
                 onSuccess={handleEditSuccess}
