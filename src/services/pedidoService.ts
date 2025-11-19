@@ -163,20 +163,37 @@ class PedidoService {
    * Obtener pedidos pendientes (Vendedor/Admin)
    */
   async getPedidosPendientes(): Promise<PedidosResponse> {
-    const response = await apiService.get('/pedidos/pendientes');
-    // El backend retorna { success: true, data: {...}, pagination: {...} }
-    if (response && response.success) {
+    try {
+      console.log('getPedidosPendientes - Iniciando petición');
+      const response = await apiService.get('/pedidos/pendientes');
+      console.log('getPedidosPendientes - Respuesta recibida:', response);
+      
+      // El backend retorna { success: true, data: [...], pagination: {...} }
+      if (response && response.success) {
+        return {
+          success: true,
+          data: Array.isArray(response.data) ? response.data : [],
+          message: response.message,
+          pagination: response.pagination
+        };
+      }
+      
+      // Fallback si la estructura es diferente
+      console.warn('getPedidosPendientes - Respuesta sin success, usando fallback:', response);
       return {
         success: true,
-        data: response.data || [],
-        message: response.message
+        data: Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : []),
+        message: response?.message
       };
+    } catch (error: any) {
+      console.error('getPedidosPendientes - Error:', error);
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        console.error('getPedidosPendientes - Error del servidor:', errorData);
+        throw new Error(errorData.message || errorData.error || 'Error al obtener pedidos');
+      }
+      throw error instanceof Error ? error : new Error('Error al obtener pedidos');
     }
-    return {
-      success: true,
-      data: Array.isArray(response) ? response : response?.data || [],
-      message: response?.message
-    };
   }
 
   /**
