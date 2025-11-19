@@ -161,13 +161,13 @@ function ComprasContent() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[65] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 flex items-start justify-between gap-4 mb-6">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Registrar compra</span>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">Nuevo ingreso de mercadería</h2>
-                <p className="text-sm text-slate-500">Controla proveedores, costos y cantidades con el mismo flujo refinado que ventas.</p>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">Nuevo ingreso de mercadería</h2>
+                <p className="text-xs text-slate-500">Controla proveedores, costos y cantidades con el mismo flujo refinado que ventas.</p>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
                 ✕
@@ -189,13 +189,13 @@ function ComprasContent() {
       )}
 
       {selectedCompra && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Detalle de compra</span>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">{selectedCompra.numero_factura}</h2>
-                <p className="text-sm text-slate-500">Estado actual: <strong className="capitalize">{selectedCompra.estado}</strong></p>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">{selectedCompra.numero_factura}</h2>
+                <p className="text-xs text-slate-500">Estado actual: <strong className="capitalize">{selectedCompra.estado}</strong></p>
               </div>
               <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
                 ✕
@@ -265,13 +265,13 @@ function ComprasContent() {
       )}
 
       {isEditModalOpen && compraEditando && (
-        <div className="fixed inset-0 z-[65] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 flex items-start justify-between gap-4 mb-6">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Editar compra</span>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">{compraEditando.numero_factura}</h2>
-                <p className="text-sm text-slate-500">Modifica los detalles de la compra. Los cambios se reflejarán en el sistema.</p>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">{compraEditando.numero_factura}</h2>
+                <p className="text-xs text-slate-500">Modifica los detalles de la compra. Los cambios se reflejarán en el sistema.</p>
               </div>
               <button onClick={handleEditCancel} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
                 ✕

@@ -178,15 +178,15 @@ export default function PagoModal({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-4 sm:py-10 overflow-y-auto">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 py-4 sm:py-10">
         <div
-          className="relative w-full max-w-2xl max-h-[90vh] rounded-2xl bg-white shadow-2xl flex flex-col my-4 sm:my-8"
+          className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl bg-white shadow-2xl flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 text-white">
             <div>
-              <h2 className="text-xl font-bold">Simular Pago</h2>
+              <h2 className="text-lg font-bold">Simular Pago</h2>
               <p className="text-sm text-white/80">
                 Total a pagar: <span className="font-semibold">S/ {Number(total).toFixed(2)}</span>
               </p>

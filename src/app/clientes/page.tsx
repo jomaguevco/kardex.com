@@ -381,10 +381,10 @@ function ClientesContent() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card relative w-full max-w-2xl max-h-[90vh] animate-fade-in my-4 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="glass-card relative w-full max-w-4xl max-h-[90vh] animate-fade-in flex flex-col">
             <div className="flex-shrink-0 border-b border-slate-200/70 px-6 py-4">
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-base font-semibold text-slate-900">
                 {editingCliente ? 'Editar cliente' : 'Nuevo cliente'}
               </h2>
             </div>
@@ -511,11 +511,11 @@ function ClientesContent() {
       )}
 
       {isDetailOpen && selectedCliente && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card relative w-full max-w-2xl max-h-[90vh] animate-fade-in my-4 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="glass-card relative w-full max-w-4xl max-h-[90vh] animate-fade-in flex flex-col">
             <div className="flex-shrink-0 border-b border-slate-200/70 px-6 py-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900">Detalles del cliente</h2>
+                <h2 className="text-base font-semibold text-slate-900">Detalles del cliente</h2>
                 <button
                   onClick={() => setIsDetailOpen(false)}
                   className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
@@ -566,8 +566,8 @@ function ClientesContent() {
 
       {/* Modal de confirmación de eliminación */}
       {isDeleteModalOpen && clienteToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card w-full max-w-md max-h-[90vh] rounded-3xl p-6 shadow-2xl animate-fade-in my-4 mx-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-2xl max-h-[90vh] rounded-3xl p-6 shadow-2xl animate-fade-in">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100">
                 <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

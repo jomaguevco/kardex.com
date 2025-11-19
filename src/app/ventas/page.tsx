@@ -166,17 +166,17 @@ function VentasContent() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Nueva venta
                 </span>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">
                   Registra una venta y sincroniza el inventario automáticamente
                 </h2>
-                <p className="text-sm text-slate-500">
+                <p className="text-xs text-slate-500">
                   El dashboard se actualizará con las métricas más recientes cuando completes el registro.
                 </p>
               </div>
@@ -196,13 +196,13 @@ function VentasContent() {
       )}
 
       {selectedVenta && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Detalle de venta</span>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
-                <p className="text-sm text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
+                <p className="text-xs text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
               </div>
               <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
                 ✕
@@ -279,17 +279,17 @@ function VentasContent() {
       )}
 
       {isEditModalOpen && ventaEditando && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Editar venta
                 </span>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">
                   {ventaEditando.numero_factura}
                 </h2>
-                <p className="text-sm text-slate-500">
+                <p className="text-xs text-slate-500">
                   Modifica los detalles de la venta. Los cambios se reflejarán en el sistema.
                 </p>
               </div>

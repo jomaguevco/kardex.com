@@ -262,10 +262,10 @@ export default function KardexTable() {
 
       {/* Modal de detalles del movimiento */}
       {selectedMovimiento && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto p-4">
-          <div className="bg-white rounded-lg max-w-md max-h-[90vh] w-full flex flex-col my-4 mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white rounded-lg max-w-2xl max-h-[90vh] w-full flex flex-col">
             <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-200 p-6 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Detalles del Movimiento</h3>
+              <h3 className="text-base font-semibold text-gray-900">Detalles del Movimiento</h3>
               <button
                 onClick={() => setSelectedMovimiento(null)}
                 className="text-gray-400 hover:text-gray-600"

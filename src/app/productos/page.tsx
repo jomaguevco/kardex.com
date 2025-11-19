@@ -389,8 +389,8 @@ function ProductosContent() {
       </div>
 
       {isViewOpen && selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card w-full max-w-2xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 flex items-start justify-between gap-4">
               <div>
                 <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
@@ -479,19 +479,19 @@ function ProductosContent() {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm overflow-y-auto">
-          <div className="glass-card w-full max-w-3xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl my-4 sm:my-8 flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-5xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   {editingProduct ? 'Editar producto' : 'Nuevo producto'}
                 </span>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">
                   {editingProduct
                     ? 'Actualiza la información del producto'
                     : 'Registra un nuevo producto'}
                 </h2>
-                <p className="text-sm text-slate-500">
+                <p className="text-xs text-slate-500">
                   Completa la información básica para sincronizar el inventario con el dashboard.
                 </p>
               </div>
