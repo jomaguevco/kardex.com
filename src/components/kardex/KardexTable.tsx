@@ -262,19 +262,20 @@ export default function KardexTable() {
 
       {/* Modal de detalles del movimiento */}
       {selectedMovimiento && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
-          <div className="bg-white rounded-lg max-w-2xl max-h-[90vh] w-full flex flex-col">
-            <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-200 p-6 pb-4">
-              <h3 className="text-base font-semibold text-gray-900">Detalles del Movimiento</h3>
-              <button
-                onClick={() => setSelectedMovimiento(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto pr-2 p-6 space-y-3">
+        <div className="fixed inset-0 z-[9999] overflow-hidden bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="flex h-full w-full items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-2xl max-h-[90vh] w-full flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <h3 className="text-base font-semibold text-gray-900">Detalles del Movimiento</h3>
+                <button
+                  onClick={() => setSelectedMovimiento(null)}
+                  className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              
+              <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-500">Producto</label>
                 <p className="text-gray-900">{(selectedMovimiento as any).producto?.nombre || 'N/A'}</p>
@@ -309,15 +310,16 @@ export default function KardexTable() {
                   <p className="text-gray-900">{selectedMovimiento.observaciones}</p>
                 </div>
               )}
-            </div>
-            
-            <div className="flex-shrink-0 flex justify-end border-t border-gray-200 pt-4 p-6">
-              <button
-                onClick={() => setSelectedMovimiento(null)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-              >
-                Cerrar
-              </button>
+              </div>
+              
+              <div className="flex-shrink-0 flex justify-end border-t border-gray-200 px-6 py-4">
+                <button
+                  onClick={() => setSelectedMovimiento(null)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -161,129 +161,135 @@ function ComprasContent() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
-            <div className="flex-shrink-0 flex items-start justify-between gap-4 mb-6">
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Registrar compra</span>
-                <h2 className="mt-2 text-xl font-semibold text-slate-900">Nuevo ingreso de mercadería</h2>
-                <p className="text-xs text-slate-500">Controla proveedores, costos y cantidades con el mismo flujo refinado que ventas.</p>
+        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/70 backdrop-blur-sm">
+          <div className="flex h-full w-full items-center justify-center p-4 sm:p-10">
+            <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+                <div>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Registrar compra</span>
+                  <h2 className="mt-2 text-xl font-semibold text-slate-900">Nuevo ingreso de mercadería</h2>
+                  <p className="text-xs text-slate-500">Controla proveedores, costos y cantidades con el mismo flujo refinado que ventas.</p>
+                </div>
+                <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40 flex-shrink-0">
+                  ✕
+                </button>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
-                ✕
-              </button>
-            </div>
 
-            <div className="flex-1 overflow-y-auto pr-2">
-              <NuevaCompraForm
-                onSuccess={() => {
-                  setIsModalOpen(false)
-                  setShowHint(false)
-                  queryClient.invalidateQueries({ queryKey: ['compras'] })
-                }}
-                onCancel={() => setIsModalOpen(false)}
-              />
+              <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+                <NuevaCompraForm
+                  onSuccess={() => {
+                    setIsModalOpen(false)
+                    setShowHint(false)
+                    queryClient.invalidateQueries({ queryKey: ['compras'] })
+                  }}
+                  onCancel={() => setIsModalOpen(false)}
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {selectedCompra && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
-            <div className="flex-shrink-0 flex items-start justify-between gap-4">
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Detalle de compra</span>
-                <h2 className="mt-2 text-xl font-semibold text-slate-900">{selectedCompra.numero_factura}</h2>
-                <p className="text-xs text-slate-500">Estado actual: <strong className="capitalize">{selectedCompra.estado}</strong></p>
-              </div>
-              <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
-                ✕
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-2 mt-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-                <DetalleCard label="Proveedor" value={selectedCompra.proveedor?.nombre || 'Proveedor no registrado'} />
-                <DetalleCard label="Fecha" value={new Date(selectedCompra.fecha_compra).toLocaleString()} />
-                <DetalleCard label="Subtotal" value={`$${Number((selectedCompra as any).subtotal ?? selectedCompra.total ?? 0).toFixed(2)}`} />
-                <DetalleCard label="Total" value={`$${Number(selectedCompra.total ?? 0).toFixed(2)}`} highlight />
-              </div>
-
-              {detallesError && (
-                <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
-                  {detallesError}
+        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/70 backdrop-blur-sm">
+          <div className="flex h-full w-full items-center justify-center p-4 sm:p-10">
+            <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+                <div>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Detalle de compra</span>
+                  <h2 className="mt-2 text-xl font-semibold text-slate-900">{selectedCompra.numero_factura}</h2>
+                  <p className="text-xs text-slate-500">Estado actual: <strong className="capitalize">{selectedCompra.estado}</strong></p>
                 </div>
-              )}
-
-              <div className="overflow-hidden rounded-2xl border border-slate-100">
-              {detallesLoading ? (
-                <div className="flex items-center justify-center gap-2 px-6 py-8 text-sm text-slate-500">
-                  <LoadingSpinner size="sm" /> Cargando detalles...
-                </div>
-              ) : (selectedCompra.detalles || []).length === 0 ? (
-                <div className="px-6 py-8 text-center text-sm text-slate-500">
-                  Esta compra no tiene productos asociados.
-                </div>
-              ) : (
-                <table className="min-w-full divide-y divide-slate-200">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Precio unit.</th>
-                      <th>Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
-                    {(selectedCompra.detalles || []).map((detalle: any, index: number) => (
-                      <tr key={detalle.id || index}>
-                        <td className="text-sm text-slate-700">{detalle.producto?.nombre || 'Producto'}</td>
-                        <td className="text-sm text-slate-600">{detalle.cantidad}</td>
-                        <td className="text-sm text-slate-600">${Number(detalle.precio_unitario).toFixed(2)}</td>
-                        <td className="text-sm font-semibold text-slate-900">${Number(detalle.subtotal ?? detalle.cantidad * detalle.precio_unitario).toFixed(2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              </div>
-            </div>
-
-            <div className="flex-shrink-0 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-6 border-t border-slate-200 mt-6">
-              <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
-                Cerrar
-              </button>
-              {selectedCompra.estado?.toUpperCase() !== 'ANULADA' && (
-                <button onClick={() => handleCancelarCompra(selectedCompra)} className="btn-primary sm:min-w-[180px]">
-                  Cancelar compra
+                <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40 flex-shrink-0">
+                  ✕
                 </button>
-              )}
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+                  <DetalleCard label="Proveedor" value={selectedCompra.proveedor?.nombre || 'Proveedor no registrado'} />
+                  <DetalleCard label="Fecha" value={new Date(selectedCompra.fecha_compra).toLocaleString()} />
+                  <DetalleCard label="Subtotal" value={`$${Number((selectedCompra as any).subtotal ?? selectedCompra.total ?? 0).toFixed(2)}`} />
+                  <DetalleCard label="Total" value={`$${Number(selectedCompra.total ?? 0).toFixed(2)}`} highlight />
+                </div>
+
+                {detallesError && (
+                  <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+                    {detallesError}
+                  </div>
+                )}
+
+                <div className="overflow-hidden rounded-2xl border border-slate-100">
+                  {detallesLoading ? (
+                    <div className="flex items-center justify-center gap-2 px-6 py-8 text-sm text-slate-500">
+                      <LoadingSpinner size="sm" /> Cargando detalles...
+                    </div>
+                  ) : (selectedCompra.detalles || []).length === 0 ? (
+                    <div className="px-6 py-8 text-center text-sm text-slate-500">
+                      Esta compra no tiene productos asociados.
+                    </div>
+                  ) : (
+                    <table className="min-w-full divide-y divide-slate-200">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <th>Producto</th>
+                          <th>Cantidad</th>
+                          <th>Precio unit.</th>
+                          <th>Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white">
+                        {(selectedCompra.detalles || []).map((detalle: any, index: number) => (
+                          <tr key={detalle.id || index}>
+                            <td className="text-sm text-slate-700">{detalle.producto?.nombre || 'Producto'}</td>
+                            <td className="text-sm text-slate-600">{detalle.cantidad}</td>
+                            <td className="text-sm text-slate-600">${Number(detalle.precio_unitario).toFixed(2)}</td>
+                            <td className="text-sm font-semibold text-slate-900">${Number(detalle.subtotal ?? detalle.cantidad * detalle.precio_unitario).toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex-shrink-0 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end px-4 sm:px-6 py-4 border-t border-slate-200">
+                <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
+                  Cerrar
+                </button>
+                {selectedCompra.estado?.toUpperCase() !== 'ANULADA' && (
+                  <button onClick={() => handleCancelarCompra(selectedCompra)} className="btn-primary sm:min-w-[180px]">
+                    Cancelar compra
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {isEditModalOpen && compraEditando && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
-            <div className="flex-shrink-0 flex items-start justify-between gap-4 mb-6">
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Editar compra</span>
-                <h2 className="mt-2 text-xl font-semibold text-slate-900">{compraEditando.numero_factura}</h2>
-                <p className="text-xs text-slate-500">Modifica los detalles de la compra. Los cambios se reflejarán en el sistema.</p>
+        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/70 backdrop-blur-sm">
+          <div className="flex h-full w-full items-center justify-center p-4 sm:p-10">
+            <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+                <div>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Editar compra</span>
+                  <h2 className="mt-2 text-xl font-semibold text-slate-900">{compraEditando.numero_factura}</h2>
+                  <p className="text-xs text-slate-500">Modifica los detalles de la compra. Los cambios se reflejarán en el sistema.</p>
+                </div>
+                <button onClick={handleEditCancel} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40 flex-shrink-0">
+                  ✕
+                </button>
               </div>
-              <button onClick={handleEditCancel} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
-                ✕
-              </button>
-            </div>
 
-            <div className="flex-1 overflow-y-auto pr-2">
-              <EditarCompraForm
-                compra={compraEditando}
-                onSuccess={handleEditSuccess}
-                onCancel={handleEditCancel}
-              />
+              <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+                <EditarCompraForm
+                  compra={compraEditando}
+                  onSuccess={handleEditSuccess}
+                  onCancel={handleEditCancel}
+                />
+              </div>
             </div>
           </div>
         </div>

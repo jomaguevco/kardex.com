@@ -111,27 +111,28 @@ export default function PedidoDetalleModal({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 py-4 sm:py-10">
-        <div
-          className="relative w-full max-w-6xl max-h-[90vh] rounded-2xl bg-white shadow-2xl flex flex-col"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-white">
-            <div>
-              <h2 className="text-lg font-bold">Detalle del Pedido</h2>
-              <p className="text-sm text-white/80">{pedido.numero_pedido}</p>
+      <div className="fixed inset-0 z-[9999] overflow-hidden bg-black/50 backdrop-blur-sm">
+        <div className="flex h-full w-full items-center justify-center p-4 sm:p-10">
+          <div
+            className="relative w-full max-w-6xl max-h-[90vh] rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-white">
+              <div>
+                <h2 className="text-lg font-bold">Detalle del Pedido</h2>
+                <p className="text-sm text-white/80">{pedido.numero_pedido}</p>
+              </div>
+              <button
+                onClick={onClose}
+                className="rounded-full bg-white/20 p-2 transition hover:bg-white/30 flex-shrink-0"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="rounded-full bg-white/20 p-2 transition hover:bg-white/30"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto pr-2 p-6 space-y-6">
+            {/* Content */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6">
             {/* Información general */}
             <div className="grid gap-6 md:grid-cols-2">
               <div className="glass-card rounded-xl p-4">
@@ -341,16 +342,17 @@ export default function PedidoDetalleModal({
             </div>
           )}
 
-          {pedido.estado !== 'PENDIENTE' && (
-            <div className="flex-shrink-0 flex justify-end border-t border-slate-200 bg-white p-6">
-              <button
-                onClick={onClose}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
-              >
-                Cerrar
-              </button>
-            </div>
-          )}
+            {pedido.estado !== 'PENDIENTE' && (
+              <div className="flex-shrink-0 flex justify-end border-t border-slate-200 bg-white px-6 py-4">
+                <button
+                  onClick={onClose}
+                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Cerrar
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>

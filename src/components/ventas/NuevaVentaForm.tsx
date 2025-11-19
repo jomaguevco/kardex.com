@@ -240,8 +240,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
   }
 
   return (
-    <div className="max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Información básica */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div>
@@ -526,7 +525,6 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         </button>
       </div>
     </form>
-    </div>
   )
 }
 
