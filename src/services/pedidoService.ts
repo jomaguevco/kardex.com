@@ -72,6 +72,12 @@ export interface PedidosResponse {
   success: boolean;
   data: Pedido[];
   message?: string;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
 }
 
 class PedidoService {
