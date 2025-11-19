@@ -31,12 +31,11 @@ function PedidosContent() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['pedidos', 'pendientes', filtroEstado],
     queryFn: async () => {
-      const response = await pedidoService.getPedidosPendientes()
-      // Filtrar por estado si es necesario
-      if (filtroEstado === 'TODOS') {
-        return response.data || []
-      }
-      return (response.data || []).filter((p: Pedido) => p.estado === filtroEstado)
+      const response = await pedidoService.getPedidosPendientes({
+        estado: filtroEstado === 'TODOS' ? undefined : filtroEstado,
+        limit: 1000 // Obtener todos los pedidos
+      })
+      return response.data || []
     }
   })
 

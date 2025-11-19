@@ -162,10 +162,24 @@ class PedidoService {
   /**
    * Obtener pedidos pendientes (Vendedor/Admin)
    */
-  async getPedidosPendientes(): Promise<PedidosResponse> {
+  async getPedidosPendientes(params?: {
+    estado?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<PedidosResponse> {
     try {
-      console.log('getPedidosPendientes - Iniciando petición');
-      const response = await apiService.get('/pedidos/pendientes');
+      const queryParams = new URLSearchParams();
+      if (params?.estado) queryParams.append('estado', params.estado);
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      // Si no se especifica límite, usar 1000 para obtener todos los pedidos
+      else queryParams.append('limit', '1000');
+
+      const query = queryParams.toString();
+      const url = `/pedidos/pendientes${query ? `?${query}` : ''}`;
+      
+      console.log('getPedidosPendientes - Iniciando petición:', url);
+      const response = await apiService.get(url);
       console.log('getPedidosPendientes - Respuesta recibida:', response);
       
       // El backend retorna { success: true, data: [...], pagination: {...} }
