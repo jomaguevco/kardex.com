@@ -5,7 +5,7 @@ export interface Pedido {
   cliente_id: number;
   usuario_id: number;
   numero_pedido: string;
-  estado: 'PENDIENTE' | 'APROBADO' | 'PROCESADO' | 'CANCELADO' | 'RECHAZADO';
+  estado: 'PENDIENTE' | 'EN_PROCESO' | 'APROBADO' | 'PAGADO' | 'PROCESADO' | 'EN_CAMINO' | 'CANCELADO' | 'RECHAZADO';
   tipo_pedido: 'PEDIDO_APROBACION' | 'COMPRA_DIRECTA';
   subtotal: number;
   descuento: number;
@@ -17,6 +17,10 @@ export interface Pedido {
   fecha_aprobacion?: string;
   venta_id?: number;
   motivo_rechazo?: string;
+  metodo_pago?: string;
+  fecha_pago?: string;
+  comprobante_pago?: string;
+  fecha_envio?: string;
   detalles?: DetallePedido[];
   cliente?: any;
   usuario?: any;
@@ -51,6 +55,11 @@ export interface AprobarPedidoData {
 
 export interface RechazarPedidoData {
   motivo_rechazo: string;
+}
+
+export interface MarcarComoPagadoData {
+  metodo_pago: string;
+  comprobante_pago?: string;
 }
 
 export interface PedidoResponse {
@@ -189,25 +198,38 @@ class PedidoService {
    */
   async aprobarPedido(id: number, data?: AprobarPedidoData): Promise<PedidoResponse> {
     try {
+      console.log('aprobarPedido - Iniciando aprobación:', { id, data });
       const response = await apiService.put(`/pedidos/${id}/aprobar`, data || {});
+      console.log('aprobarPedido - Respuesta del servidor:', response);
+      
       // El backend retorna { success: true, data: {...}, message: "..." }
       if (response && response.success) {
         return {
           success: true,
-          data: response.data,
+          data: response.data?.pedido || response.data,
           message: response.message || 'Pedido aprobado exitosamente'
         };
       }
+      
       // Si no tiene success, podría ser un error
-      throw new Error(response?.message || 'Error al aprobar el pedido');
+      const errorMessage = response?.message || response?.error || 'Error al aprobar el pedido';
+      console.error('aprobarPedido - Respuesta sin success:', response);
+      throw new Error(errorMessage);
     } catch (error: any) {
+      console.error('aprobarPedido - Error capturado:', error);
+      
       // Si axios lanza un error (4xx, 5xx), extraer el mensaje del response
       if (error?.response?.data) {
         const errorData = error.response.data;
-        throw new Error(errorData.message || errorData.error || 'Error al aprobar el pedido');
+        const errorMessage = errorData.message || errorData.error || `Error ${error.response.status}: Error al aprobar el pedido`;
+        console.error('aprobarPedido - Error del servidor:', errorMessage);
+        throw new Error(errorMessage);
       }
+      
       // Si es un error de red u otro tipo, usar el mensaje del error
-      throw error instanceof Error ? error : new Error('Error al aprobar el pedido');
+      const finalError = error instanceof Error ? error : new Error('Error al aprobar el pedido');
+      console.error('aprobarPedido - Error final:', finalError.message);
+      throw finalError;
     }
   }
 
@@ -243,6 +265,66 @@ class PedidoService {
    */
   async cancelarPedido(id: number): Promise<PedidoResponse> {
     return await apiService.put(`/pedidos/${id}/cancelar`, {});
+  }
+
+  /**
+   * Marcar pedido como pagado (Cliente)
+   */
+  async marcarComoPagado(id: number, data: MarcarComoPagadoData): Promise<PedidoResponse> {
+    try {
+      console.log('marcarComoPagado - Enviando request:', { id, data });
+      const response = await apiService.post(`/pedidos/${id}/marcar-pagado`, data);
+      console.log('marcarComoPagado - Respuesta recibida:', response);
+      
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Pedido marcado como pagado exitosamente'
+        };
+      }
+      
+      throw new Error(response?.message || 'Error al marcar pedido como pagado');
+    } catch (error: any) {
+      console.error('marcarComoPagado - Error:', error);
+      
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al marcar pedido como pagado');
+      }
+      
+      throw error instanceof Error ? error : new Error('Error al marcar pedido como pagado');
+    }
+  }
+
+  /**
+   * Procesar envío de pedido - Crear venta y descontar stock (Vendedor/Admin)
+   */
+  async procesarEnvio(id: number): Promise<PedidoResponse> {
+    try {
+      console.log('procesarEnvio - Enviando request:', { id });
+      const response = await apiService.post(`/pedidos/${id}/procesar-envio`);
+      console.log('procesarEnvio - Respuesta recibida:', response);
+      
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Envío procesado exitosamente'
+        };
+      }
+      
+      throw new Error(response?.message || 'Error al procesar envío');
+    } catch (error: any) {
+      console.error('procesarEnvio - Error:', error);
+      
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al procesar envío');
+      }
+      
+      throw error instanceof Error ? error : new Error('Error al procesar envío');
+    }
   }
 
   /**

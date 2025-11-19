@@ -1,71 +1,34 @@
 'use client'
 
 import { useState } from 'react'
-import { X, CheckCircle, XCircle, Package, User, Calendar, DollarSign, AlertCircle } from 'lucide-react'
+import { X, Package, User, Calendar, DollarSign, CheckCircle, Truck, CreditCard } from 'lucide-react'
 import { Pedido } from '@/services/pedidoService'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import toast from 'react-hot-toast'
+import PagoModal from './PagoModal'
 
-interface PedidoDetalleModalProps {
+interface PedidoDetalleModalClienteProps {
   pedido: Pedido
   isOpen: boolean
   onClose: () => void
-  onAprobar: (pedidoId: number) => Promise<void>
-  onRechazar: (pedidoId: number, motivo: string) => Promise<void>
+  onRefresh?: () => void
 }
 
-export default function PedidoDetalleModal({
+export default function PedidoDetalleModalCliente({
   pedido,
   isOpen,
   onClose,
-  onAprobar,
-  onRechazar
-}: PedidoDetalleModalProps) {
-  const [motivoRechazo, setMotivoRechazo] = useState('')
-  const [isAprobando, setIsAprobando] = useState(false)
-  const [isRechazando, setIsRechazando] = useState(false)
+  onRefresh
+}: PedidoDetalleModalClienteProps) {
+  const [isPagoModalOpen, setIsPagoModalOpen] = useState(false)
 
   if (!isOpen) return null
 
-  const handleAprobar = async () => {
-    if (!confirm('¿Estás seguro de aprobar este pedido? El cliente podrá proceder al pago.')) {
-      return
-    }
-
-    try {
-      setIsAprobando(true)
-      await onAprobar(pedido.id)
-      toast.success('Pedido aprobado correctamente')
-      onClose()
-    } catch (error: any) {
-      toast.error(error?.message || 'Error al aprobar el pedido')
-    } finally {
-      setIsAprobando(false)
-    }
-  }
-
-  const handleRechazar = async () => {
-    if (!motivoRechazo.trim()) {
-      toast.error('Debes ingresar un motivo de rechazo')
-      return
-    }
-
-    try {
-      setIsRechazando(true)
-      await onRechazar(pedido.id, motivoRechazo.trim())
-      toast.success('Pedido rechazado correctamente')
-      setMotivoRechazo('')
-      onClose()
-    } catch (error: any) {
-      toast.error(error?.message || 'Error al rechazar el pedido')
-    } finally {
-      setIsRechazando(false)
-    }
-  }
-
   const getEstadoBadge = (estado: string) => {
-    switch (estado) {
+    // Si tiene fecha_envio, mostrar como EN_CAMINO para el cliente
+    const estadoParaCliente = pedido.fecha_envio ? 'EN_CAMINO' : estado
+
+    switch (estadoParaCliente) {
       case 'PENDIENTE':
         return (
           <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
@@ -75,20 +38,23 @@ export default function PedidoDetalleModal({
       case 'APROBADO':
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-            Aprobado
+            <CheckCircle className="mr-1 h-3 w-3" />
+            Aprobado - Listo para pagar
           </span>
         )
       case 'PAGADO':
         return (
           <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-800">
-            Pagado
+            <CreditCard className="mr-1 h-3 w-3" />
+            Pagado - En espera de envío
           </span>
         )
-      case 'PROCESADO':
       case 'EN_CAMINO':
+      case 'PROCESADO':
         return (
           <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-            {estado === 'EN_CAMINO' ? 'En Camino' : 'Procesado'}
+            <Truck className="mr-1 h-3 w-3" />
+            En camino
           </span>
         )
       case 'RECHAZADO':
@@ -97,10 +63,29 @@ export default function PedidoDetalleModal({
             Rechazado
           </span>
         )
+      case 'CANCELADO':
+        return (
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
+            Cancelado
+          </span>
+        )
       default:
         return <span className="text-sm text-slate-600">{estado}</span>
     }
   }
+
+  const handlePagoSuccess = () => {
+    setIsPagoModalOpen(false)
+    if (onRefresh) {
+      onRefresh()
+    }
+    // Cerrar modal después de un momento para que se vea el mensaje
+    setTimeout(() => {
+      onClose()
+    }, 1000)
+  }
+
+  const mostrarBotonPagar = pedido.estado === 'APROBADO'
 
   return (
     <>
@@ -197,6 +182,59 @@ export default function PedidoDetalleModal({
               </div>
             </div>
 
+            {/* Información de pago (si existe) */}
+            {pedido.metodo_pago && (
+              <div className="glass-card rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <h3 className="mb-3 text-sm font-semibold text-emerald-900">Información de Pago</h3>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-medium text-emerald-700">Método de pago</p>
+                    <p className="mt-1 text-sm font-semibold text-emerald-900">
+                      {pedido.metodo_pago}
+                    </p>
+                  </div>
+                  {pedido.fecha_pago && (
+                    <div>
+                      <p className="text-xs font-medium text-emerald-700">Fecha de pago</p>
+                      <p className="mt-1 text-sm font-semibold text-emerald-900">
+                        {format(new Date(pedido.fecha_pago), "dd 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                      </p>
+                    </div>
+                  )}
+                  {pedido.comprobante_pago && (
+                    <div className="md:col-span-2">
+                      <p className="text-xs font-medium text-emerald-700 mb-2">Comprobante</p>
+                      <img
+                        src={pedido.comprobante_pago}
+                        alt="Comprobante de pago"
+                        className="max-w-xs rounded-lg border border-emerald-200"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Información de envío (si existe) */}
+            {pedido.fecha_envio && (
+              <div className="glass-card rounded-xl border border-blue-200 bg-blue-50 p-4">
+                <div className="flex items-start space-x-3">
+                  <Truck className="mt-1 h-5 w-5 text-blue-600" />
+                  <div>
+                    <h3 className="text-sm font-semibold text-blue-900">Pedido en camino</h3>
+                    <p className="mt-1 text-sm text-blue-700">
+                      Tu pedido fue enviado el {format(new Date(pedido.fecha_envio), "dd 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                    </p>
+                    {pedido.venta?.numero_factura && (
+                      <p className="mt-1 text-xs text-blue-600">
+                        Factura: {pedido.venta.numero_factura}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Productos */}
             <div>
               <h3 className="mb-4 text-lg font-semibold text-slate-900">Productos</h3>
@@ -251,7 +289,7 @@ export default function PedidoDetalleModal({
                 )}
                 {pedido.impuesto > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Impuesto:</span>
+                    <span className="text-slate-600">IGV (18%):</span>
                     <span className="font-semibold text-slate-900">
                       S/. {Number(pedido.impuesto).toFixed(2)}
                     </span>
@@ -282,7 +320,7 @@ export default function PedidoDetalleModal({
             {pedido.estado === 'RECHAZADO' && pedido.motivo_rechazo && (
               <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                 <div className="flex items-start space-x-2">
-                  <AlertCircle className="h-5 w-5 text-red-600" />
+                  <X className="h-5 w-5 text-red-600" />
                   <div>
                     <p className="text-sm font-semibold text-red-900">Motivo de rechazo:</p>
                     <p className="mt-1 text-sm text-red-700">{pedido.motivo_rechazo}</p>
@@ -292,55 +330,34 @@ export default function PedidoDetalleModal({
             )}
 
             {/* Acciones */}
-            {pedido.estado === 'PENDIENTE' && (
+            {mostrarBotonPagar && (
               <div className="space-y-4 border-t border-slate-200 pt-4">
-                {/* Motivo de rechazo */}
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">
-                    Motivo de rechazo (si aplica):
-                  </label>
-                  <textarea
-                    value={motivoRechazo}
-                    onChange={(e) => setMotivoRechazo(e.target.value)}
-                    placeholder="Ingrese el motivo del rechazo..."
-                    rows={3}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
-                  />
-                </div>
-
-                {/* Botones */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={onClose}
-                    className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleRechazar}
-                    disabled={isRechazando || !motivoRechazo.trim()}
-                    className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isRechazando ? 'Rechazando...' : 'Rechazar Pedido'}
-                  </button>
-                  <button
-                    onClick={handleAprobar}
-                    disabled={isAprobando}
-                    className="flex-1 rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isAprobando ? 'Aprobando...' : (
-                      <>
-                        <CheckCircle className="mr-2 inline h-5 w-5" />
-                        Aprobar Pedido
-                      </>
-                    )}
-                  </button>
-                </div>
+                <button
+                  onClick={() => setIsPagoModalOpen(true)}
+                  className="w-full rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 font-semibold text-white shadow-lg transition hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <CreditCard className="h-5 w-5" />
+                  <span>Proceder al Pago</span>
+                </button>
+                <p className="text-center text-xs text-slate-500">
+                  Tu pedido ha sido aprobado. Procede al pago para completar tu compra.
+                </p>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Modal de pago */}
+      {isPagoModalOpen && (
+        <PagoModal
+          pedidoId={pedido.id}
+          total={Number(pedido.total)}
+          isOpen={isPagoModalOpen}
+          onClose={() => setIsPagoModalOpen(false)}
+          onSuccess={handlePagoSuccess}
+        />
+      )}
     </>
   )
 }

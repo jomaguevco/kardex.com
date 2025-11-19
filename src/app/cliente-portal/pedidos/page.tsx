@@ -4,13 +4,17 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
 import pedidoService from '@/services/pedidoService'
-import { ClipboardList, Loader2, Calendar, Package } from 'lucide-react'
+import { ClipboardList, Loader2, Calendar, Package, Eye } from 'lucide-react'
+import PedidoDetalleModalCliente from '@/components/pedidos/PedidoDetalleModalCliente'
+import { Pedido } from '@/services/pedidoService'
 
 export default function PedidosPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
-  const [pedidos, setPedidos] = useState<any[]>([])
+  const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null)
+  const [isDetalleOpen, setIsDetalleOpen] = useState(false)
 
   const fetchPedidos = async () => {
     try {
@@ -91,15 +95,49 @@ export default function PedidosPage() {
     }
   }, [isAuthenticated, user])
 
-  const getEstadoBadge = (estado: string) => {
+  const getEstadoBadge = (pedido: Pedido) => {
+    // Si tiene fecha_envio, mostrar como EN_CAMINO para el cliente
+    const estadoParaCliente = pedido.fecha_envio ? 'EN_CAMINO' : pedido.estado
+
     const badges: Record<string, string> = {
       PENDIENTE: 'bg-yellow-100 text-yellow-800',
-      APROBADO: 'bg-green-100 text-green-800',
-      PROCESADO: 'bg-blue-100 text-blue-800',
+      APROBADO: 'bg-blue-100 text-blue-800',
+      PAGADO: 'bg-purple-100 text-purple-800',
+      PROCESADO: 'bg-emerald-100 text-emerald-800',
+      EN_CAMINO: 'bg-emerald-100 text-emerald-800',
       CANCELADO: 'bg-gray-100 text-gray-800',
       RECHAZADO: 'bg-red-100 text-red-800'
     }
-    return badges[estado] || 'bg-slate-100 text-slate-800'
+    return badges[estadoParaCliente] || 'bg-slate-100 text-slate-800'
+  }
+
+  const getEstadoLabel = (pedido: Pedido) => {
+    // Si tiene fecha_envio, mostrar como EN_CAMINO para el cliente
+    if (pedido.fecha_envio) {
+      return 'En camino'
+    }
+
+    const labels: Record<string, string> = {
+      PENDIENTE: 'Pendiente',
+      APROBADO: 'Aprobado - Listo para pagar',
+      PAGADO: 'Pagado - En espera de envío',
+      PROCESADO: 'En camino',
+      EN_CAMINO: 'En camino',
+      CANCELADO: 'Cancelado',
+      RECHAZADO: 'Rechazado'
+    }
+    return labels[pedido.estado] || pedido.estado
+  }
+
+  const handleViewDetalle = (pedido: Pedido) => {
+    setSelectedPedido(pedido)
+    setIsDetalleOpen(true)
+  }
+
+  const handleCloseDetalle = () => {
+    setIsDetalleOpen(false)
+    setSelectedPedido(null)
+    fetchPedidos() // Refrescar pedidos después de cerrar
   }
 
   if (isLoading) {
@@ -157,8 +195,8 @@ export default function PedidosPage() {
                           <Calendar className="mr-1 h-4 w-4" />
                           {new Date(pedido.fecha_pedido).toLocaleDateString('es-ES')}
                         </span>
-                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getEstadoBadge(pedido.estado)}`}>
-                          {pedido.estado}
+                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getEstadoBadge(pedido)}`}>
+                          {getEstadoLabel(pedido)}
                         </span>
                       </div>
                     </div>
@@ -187,16 +225,35 @@ export default function PedidosPage() {
                   )}
                 </div>
 
-                <div className="ml-4 text-right">
-                  <p className="text-sm text-slate-600">Total</p>
-                  <p className="text-2xl font-bold text-primary-600">
-                    S/ {Number(pedido.total || 0).toFixed(2)}
-                  </p>
+                <div className="ml-4 flex flex-col items-end justify-between space-y-2">
+                  <div className="text-right">
+                    <p className="text-sm text-slate-600">Total</p>
+                    <p className="text-2xl font-bold text-primary-600">
+                      S/ {Number(pedido.total || 0).toFixed(2)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleViewDetalle(pedido)}
+                    className="rounded-lg bg-indigo-100 px-4 py-2 text-indigo-600 transition hover:bg-indigo-200 flex items-center space-x-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span className="text-sm font-semibold">Ver Detalle</span>
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Modal de detalle */}
+      {selectedPedido && (
+        <PedidoDetalleModalCliente
+          pedido={selectedPedido}
+          isOpen={isDetalleOpen}
+          onClose={handleCloseDetalle}
+          onRefresh={fetchPedidos}
+        />
       )}
     </div>
   )

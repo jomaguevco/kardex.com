@@ -100,6 +100,27 @@ function PedidosContent() {
     }
   }
 
+  const handleProcesarEnvio = async (pedidoId: number) => {
+    try {
+      console.log('Procesando envío de pedido:', pedidoId)
+      const response = await pedidoService.procesarEnvio(pedidoId)
+      console.log('Respuesta de procesar envío:', response)
+      
+      if (response && response.success) {
+        toast.success(response.message || 'Envío procesado exitosamente')
+        queryClient.invalidateQueries({ queryKey: ['pedidos'] })
+        refetch()
+        handleCloseDetalle()
+      } else {
+        throw new Error(response?.message || 'Error al procesar el envío')
+      }
+    } catch (error: any) {
+      console.error('Error al procesar envío:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al procesar el envío'
+      toast.error(errorMessage)
+    }
+  }
+
   return (
     <div className="space-y-10 animate-fade-in">
       {/* Header */}
@@ -207,11 +228,21 @@ function PedidosContent() {
               onClick={() => setFiltroEstado('APROBADO')}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
                 filtroEstado === 'APROBADO'
-                  ? 'bg-emerald-600 text-white'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
               Aprobados
+            </button>
+            <button
+              onClick={() => setFiltroEstado('PAGADO')}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                filtroEstado === 'PAGADO'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Pagados
             </button>
             <button
               onClick={() => setFiltroEstado('RECHAZADO')}
@@ -258,6 +289,7 @@ function PedidosContent() {
           onViewDetalle={handleViewDetalle}
           onAprobar={handleAprobar}
           onRechazar={handleRechazar}
+          onProcesarEnvio={handleProcesarEnvio}
         />
       )}
 

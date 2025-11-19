@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, CheckCircle, XCircle, Package, Calendar, User, DollarSign } from 'lucide-react'
+import { Eye, CheckCircle, XCircle, Package, Calendar, User, DollarSign, Truck, CreditCard } from 'lucide-react'
 import { Pedido } from '@/services/pedidoService'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -13,13 +13,15 @@ interface PedidosTableProps {
   onViewDetalle: (pedido: Pedido) => void
   onAprobar: (pedidoId: number) => void
   onRechazar: (pedidoId: number, motivo: string) => void
+  onProcesarEnvio?: (pedidoId: number) => void
 }
 
 export default function PedidosTable({
   pedidos,
   onViewDetalle,
   onAprobar,
-  onRechazar
+  onRechazar,
+  onProcesarEnvio
 }: PedidosTableProps) {
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
@@ -31,11 +33,25 @@ export default function PedidosTable({
           </span>
         )
       case 'APROBADO':
+        return (
+          <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+            <CheckCircle className="mr-1 h-3 w-3" />
+            Aprobado
+          </span>
+        )
+      case 'PAGADO':
+        return (
+          <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-800">
+            <CreditCard className="mr-1 h-3 w-3" />
+            Pagado
+          </span>
+        )
       case 'PROCESADO':
+      case 'EN_CAMINO':
         return (
           <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-            <CheckCircle className="mr-1 h-3 w-3" />
-            {estado === 'PROCESADO' ? 'Procesado' : 'Aprobado'}
+            <Truck className="mr-1 h-3 w-3" />
+            {estado === 'EN_CAMINO' ? 'En Camino' : 'Procesado'}
           </span>
         )
       case 'RECHAZADO':
@@ -148,7 +164,7 @@ export default function PedidosTable({
                       <>
                         <button
                           onClick={() => {
-                            if (confirm('¿Estás seguro de aprobar este pedido?')) {
+                            if (confirm('¿Estás seguro de aprobar este pedido? El cliente podrá proceder al pago.')) {
                               onAprobar(pedido.id)
                             }
                           }}
@@ -170,6 +186,19 @@ export default function PedidosTable({
                           <XCircle className="h-4 w-4" />
                         </button>
                       </>
+                    )}
+                    {pedido.estado === 'PAGADO' && onProcesarEnvio && (
+                      <button
+                        onClick={() => {
+                          if (confirm('¿Estás seguro de procesar el envío? Se creará la venta y se descontará el stock.')) {
+                            onProcesarEnvio(pedido.id)
+                          }
+                        }}
+                        className="rounded-lg bg-teal-100 p-2 text-teal-600 transition hover:bg-teal-200"
+                        title="Procesar Envío"
+                      >
+                        <Truck className="h-4 w-4" />
+                      </button>
                     )}
                   </div>
                 </td>
