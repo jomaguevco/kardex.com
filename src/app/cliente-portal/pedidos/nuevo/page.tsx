@@ -74,15 +74,16 @@ export default function NuevoPedidoPage() {
 
     setIsLoading(true)
     try {
-      const detalles = carrito.map(item => ({
+      const productos = carrito.map(item => ({
         producto_id: item.id,
         cantidad: item.cantidad,
-        precio_unitario: item.precio_venta
+        precio_unitario: item.precio_venta,
+        descuento: 0
       }))
 
       const response = await pedidoService.crearPedido({
         tipo_pedido: 'PEDIDO_APROBACION',
-        detalles,
+        productos,
         observaciones: observaciones || undefined
       })
 
@@ -91,9 +92,16 @@ export default function NuevoPedidoPage() {
         setCarrito([])
         localStorage.removeItem('carrito')
         
+        console.log('Pedido creado exitosamente:', response.data)
         alert('¡Pedido creado exitosamente! Un vendedor lo revisará pronto.')
+        // Forzar recarga de la página de pedidos para asegurar que se muestre
         router.push('/cliente-portal/pedidos')
+        // También refrescar después de un momento
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
       } else {
+        console.error('Error al crear pedido:', response)
         alert(response.message || 'Error al crear el pedido')
       }
     } catch (error: any) {

@@ -19,16 +19,50 @@ export default function PedidosPage() {
     }
 
     fetchPedidos()
-  }, [isAuthenticated, user, router])
+    
+    // Refrescar pedidos cada 5 segundos si no hay pedidos (para detectar nuevos)
+    const interval = setInterval(() => {
+      if (pedidos.length === 0) {
+        console.log('Refrescando pedidos automáticamente...')
+        fetchPedidos()
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [isAuthenticated, user, router, pedidos.length])
 
   const fetchPedidos = async () => {
     try {
+      setIsLoading(true)
+      console.log('🔍 Iniciando fetchPedidos...')
       const response = await pedidoService.getMisPedidos()
-      if (response.success) {
-        setPedidos(response.data)
+      console.log('📦 Respuesta completa de getMisPedidos:', response)
+      console.log('📦 response.success:', response?.success)
+      console.log('📦 response.data:', response?.data)
+      console.log('📦 response.data length:', response?.data?.length)
+      
+      if (response && response.success) {
+        const pedidosArray = Array.isArray(response.data) ? response.data : []
+        console.log('✅ Pedidos encontrados:', pedidosArray.length)
+        if (pedidosArray.length > 0) {
+          console.log('📋 Primer pedido:', {
+            id: pedidosArray[0].id,
+            numero: pedidosArray[0].numero_pedido,
+            estado: pedidosArray[0].estado,
+            cliente_id: pedidosArray[0].cliente_id,
+            usuario_id: pedidosArray[0].usuario_id
+          })
+        }
+        setPedidos(pedidosArray)
+      } else {
+        console.warn('⚠️ Respuesta sin success o sin data:', response)
+        setPedidos([])
       }
-    } catch (error) {
-      console.error('Error al cargar pedidos:', error)
+    } catch (error: any) {
+      console.error('❌ Error al cargar pedidos:', error)
+      console.error('❌ Error response:', error?.response)
+      console.error('❌ Error data:', error?.response?.data)
+      setPedidos([])
     } finally {
       setIsLoading(false)
     }

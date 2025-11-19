@@ -70,42 +70,143 @@ class PedidoService {
    * Crear un nuevo pedido (Cliente)
    */
   async crearPedido(data: CrearPedidoData): Promise<PedidoResponse> {
-    return await apiService.post('/pedidos', data);
+    // El backend espera 'detalles' pero el frontend envía 'productos'
+    // Convertir productos a detalles
+    const requestData = {
+      tipo_pedido: data.tipo_pedido,
+      detalles: data.productos.map(p => ({
+        producto_id: p.producto_id,
+        cantidad: p.cantidad,
+        precio_unitario: p.precio_unitario,
+        descuento: p.descuento || 0
+      })),
+      observaciones: data.observaciones
+    };
+    const response = await apiService.post('/pedidos', requestData);
+    // El backend retorna { success: true, data: {...}, message: "..." }
+    if (response && response.success) {
+      return {
+        success: true,
+        data: response.data,
+        message: response.message
+      };
+    }
+    return response;
   }
 
   /**
    * Obtener mis pedidos (Cliente)
    */
   async getMisPedidos(): Promise<PedidosResponse> {
-    return await apiService.get('/pedidos/mis-pedidos');
+    const response = await apiService.get('/pedidos/mis-pedidos');
+    // El backend retorna { success: true, data: [...] }
+    if (response && response.success) {
+      return {
+        success: true,
+        data: response.data || [],
+        message: response.message
+      };
+    }
+    // Fallback si la estructura es diferente
+    return {
+      success: true,
+      data: Array.isArray(response) ? response : response?.data || [],
+      message: response?.message
+    };
   }
 
   /**
    * Obtener pedidos pendientes (Vendedor/Admin)
    */
   async getPedidosPendientes(): Promise<PedidosResponse> {
-    return await apiService.get('/pedidos/pendientes');
+    const response = await apiService.get('/pedidos/pendientes');
+    // El backend retorna { success: true, data: {...}, pagination: {...} }
+    if (response && response.success) {
+      return {
+        success: true,
+        data: response.data || [],
+        message: response.message
+      };
+    }
+    return {
+      success: true,
+      data: Array.isArray(response) ? response : response?.data || [],
+      message: response?.message
+    };
   }
 
   /**
    * Obtener detalle de un pedido
    */
   async getPedidoDetalle(id: number): Promise<PedidoResponse> {
-    return await apiService.get(`/pedidos/${id}`);
+    const response = await apiService.get(`/pedidos/${id}`);
+    // El backend retorna { success: true, data: {...} }
+    if (response && response.success) {
+      return {
+        success: true,
+        data: response.data,
+        message: response.message
+      };
+    }
+    return {
+      success: true,
+      data: response.data || response,
+      message: response?.message
+    };
   }
 
   /**
    * Aprobar un pedido (Vendedor/Admin)
    */
   async aprobarPedido(id: number, data?: AprobarPedidoData): Promise<PedidoResponse> {
-    return await apiService.put(`/pedidos/${id}/aprobar`, data || {});
+    try {
+      const response = await apiService.put(`/pedidos/${id}/aprobar`, data || {});
+      // El backend retorna { success: true, data: {...}, message: "..." }
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Pedido aprobado exitosamente'
+        };
+      }
+      // Si no tiene success, podría ser un error
+      throw new Error(response?.message || 'Error al aprobar el pedido');
+    } catch (error: any) {
+      // Si axios lanza un error (4xx, 5xx), extraer el mensaje del response
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al aprobar el pedido');
+      }
+      // Si es un error de red u otro tipo, usar el mensaje del error
+      throw error instanceof Error ? error : new Error('Error al aprobar el pedido');
+    }
   }
 
   /**
    * Rechazar un pedido (Vendedor/Admin)
    */
   async rechazarPedido(id: number, data: RechazarPedidoData): Promise<PedidoResponse> {
-    return await apiService.put(`/pedidos/${id}/rechazar`, data);
+    try {
+      const response = await apiService.put(`/pedidos/${id}/rechazar`, data);
+      // El backend retorna { success: true, data: {...}, message: "..." }
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Pedido rechazado exitosamente'
+        };
+      }
+      // Si no tiene success, podría ser un error
+      throw new Error(response?.message || 'Error al rechazar el pedido');
+    } catch (error: any) {
+      // Si axios lanza un error (4xx, 5xx), extraer el mensaje del response
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al rechazar el pedido');
+      }
+      // Si es un error de red u otro tipo, usar el mensaje del error
+      throw error instanceof Error ? error : new Error('Error al rechazar el pedido');
+    }
   }
 
   /**

@@ -66,7 +66,11 @@ export interface AjustesResponse {
 class AjusteInventarioService {
   async getTiposMovimiento(): Promise<TipoMovimiento[]> {
     const response = await apiService.get('/ajustes-inventario/tipos-movimiento');
-    return response.data || [];
+    // El backend retorna { success: true, data: [...] }
+    if (response && response.success) {
+      return response.data || [];
+    }
+    return Array.isArray(response) ? response : [];
   }
 
   async getAjustes(params?: {
@@ -91,22 +95,58 @@ class AjusteInventarioService {
     if (params?.search) queryParams.append('search', params.search);
 
     const response = await apiService.get(`/ajustes-inventario?${queryParams.toString()}`);
-    return response.data!;
+    // El backend retorna { success: true, data: [...], pagination: {...} }
+    // Necesitamos retornar { data: [...], pagination: {...} }
+    if (response && response.success) {
+      return {
+        success: true,
+        data: response.data || [],
+        pagination: response.pagination || {
+          total: 0,
+          page: params?.page || 1,
+          limit: params?.limit || 10,
+          pages: 0
+        }
+      };
+    }
+    // Fallback si la estructura es diferente
+    return {
+      success: true,
+      data: Array.isArray(response) ? response : response?.data || [],
+      pagination: response?.pagination || {
+        total: 0,
+        page: params?.page || 1,
+        limit: params?.limit || 10,
+        pages: 0
+      }
+    };
   }
 
   async createAjuste(data: CreateAjusteData): Promise<AjusteInventario> {
     const response = await apiService.post('/ajustes-inventario', data);
-    return response.data!;
+    // El backend retorna { success: true, data: {...} }
+    if (response && response.success) {
+      return response.data;
+    }
+    return response.data || response;
   }
 
   async aprobarAjuste(id: number): Promise<AjusteInventario> {
     const response = await apiService.put(`/ajustes-inventario/${id}/aprobar`);
-    return response.data!;
+    // El backend retorna { success: true, data: {...} }
+    if (response && response.success) {
+      return response.data;
+    }
+    return response.data || response;
   }
 
   async rechazarAjuste(id: number, motivo_rechazo?: string): Promise<AjusteInventario> {
     const response = await apiService.put(`/ajustes-inventario/${id}/rechazar`, { motivo_rechazo });
-    return response.data!;
+    // El backend retorna { success: true, data: {...} }
+    if (response && response.success) {
+      return response.data;
+    }
+    return response.data || response;
   }
 }
 

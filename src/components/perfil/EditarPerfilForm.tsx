@@ -36,7 +36,7 @@ export default function EditarPerfilForm() {
   }
 
   return (
-    <div className="card p-6 animate-fade-in">
+    <div className="glass-card rounded-2xl p-6 animate-fade-in">
       <h3 className="text-lg font-semibold text-slate-900">Información personal</h3>
       <p className="mt-1 text-sm text-slate-500">Actualiza tus datos personales</p>
 

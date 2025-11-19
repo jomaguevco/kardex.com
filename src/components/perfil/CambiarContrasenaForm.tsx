@@ -56,7 +56,7 @@ export default function CambiarContrasenaForm() {
   }
 
   return (
-    <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+    <div className="glass-card rounded-2xl p-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
       <h3 className="text-lg font-semibold text-slate-900">Seguridad</h3>
       <p className="mt-1 text-sm text-slate-500">Cambia tu contraseña periódicamente</p>
 

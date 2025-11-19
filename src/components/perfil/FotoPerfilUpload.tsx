@@ -92,7 +92,7 @@ export default function FotoPerfilUpload() {
   const fotoUrl = getFotoUrl()
 
   return (
-    <div className="card p-6 animate-fade-in">
+    <div className="glass-card rounded-2xl p-6 animate-fade-in">
       <h3 className="text-lg font-semibold text-slate-900">Foto de perfil</h3>
       <p className="mt-1 text-sm text-slate-500">Personaliza tu imagen de perfil</p>
 

@@ -60,7 +60,7 @@ function PerfilContent() {
   }
 
   return (
-    <div className="space-y-10 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 px-6 py-8 text-white shadow-xl">
         <div className="absolute -right-12 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-3xl lg:block" />
@@ -102,7 +102,7 @@ function PerfilContent() {
       </div>
 
       {/* Preferencias (futuro) */}
-      <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+      <div className="glass-card rounded-2xl p-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
         <h3 className="text-lg font-semibold text-slate-900">Preferencias</h3>
         <p className="mt-1 text-sm text-slate-500">Personaliza tu experiencia en el sistema</p>
 

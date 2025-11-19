@@ -6,10 +6,11 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import PedidosTable from '@/components/pedidos/PedidosTable'
 import PedidoDetalleModal from '@/components/pedidos/PedidoDetalleModal'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import pedidoService from '@/services/pedidoService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { Pedido } from '@/services/pedidoService'
+import toast from 'react-hot-toast'
 
 export default function PedidosPage() {
   return (
@@ -22,6 +23,7 @@ export default function PedidosPage() {
 }
 
 function PedidosContent() {
+  const queryClient = useQueryClient()
   const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null)
   const [isDetalleOpen, setIsDetalleOpen] = useState(false)
   const [filtroEstado, setFiltroEstado] = useState<string>('PENDIENTE')
@@ -53,21 +55,48 @@ function PedidosContent() {
 
   const handleAprobar = async (pedidoId: number) => {
     try {
-      await pedidoService.aprobarPedido(pedidoId)
-      refetch()
-      handleCloseDetalle()
+      console.log('Aprobando pedido:', pedidoId)
+      const response = await pedidoService.aprobarPedido(pedidoId)
+      console.log('Respuesta de aprobar pedido:', response)
+      
+      if (response && response.success) {
+        toast.success(response.message || 'Pedido aprobado exitosamente')
+        queryClient.invalidateQueries({ queryKey: ['pedidos'] })
+        refetch()
+        handleCloseDetalle()
+      } else {
+        throw new Error(response?.message || 'Error al aprobar el pedido')
+      }
     } catch (error: any) {
       console.error('Error al aprobar pedido:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al aprobar el pedido'
+      toast.error(errorMessage)
     }
   }
 
   const handleRechazar = async (pedidoId: number, motivo: string) => {
+    if (!motivo || !motivo.trim()) {
+      toast.error('Debe proporcionar un motivo de rechazo')
+      return
+    }
+
     try {
-      await pedidoService.rechazarPedido(pedidoId, { motivo_rechazo: motivo })
-      refetch()
-      handleCloseDetalle()
+      console.log('Rechazando pedido:', pedidoId, 'Motivo:', motivo)
+      const response = await pedidoService.rechazarPedido(pedidoId, { motivo_rechazo: motivo.trim() })
+      console.log('Respuesta de rechazar pedido:', response)
+      
+      if (response && response.success) {
+        toast.success(response.message || 'Pedido rechazado exitosamente')
+        queryClient.invalidateQueries({ queryKey: ['pedidos'] })
+        refetch()
+        handleCloseDetalle()
+      } else {
+        throw new Error(response?.message || 'Error al rechazar el pedido')
+      }
     } catch (error: any) {
       console.error('Error al rechazar pedido:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al rechazar el pedido'
+      toast.error(errorMessage)
     }
   }
 
