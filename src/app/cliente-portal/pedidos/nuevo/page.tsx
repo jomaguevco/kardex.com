@@ -73,7 +73,11 @@ export default function NuevoPedidoPage() {
     }
 
     setIsLoading(true)
+    
     try {
+      console.log('handleCrearPedido - Iniciando creación de pedido...')
+      console.log('handleCrearPedido - Carrito:', carrito)
+      
       const productos = carrito.map(item => ({
         producto_id: item.id,
         cantidad: item.cantidad,
@@ -81,32 +85,44 @@ export default function NuevoPedidoPage() {
         descuento: 0
       }))
 
+      console.log('handleCrearPedido - Productos a enviar:', productos)
+
       const response = await pedidoService.crearPedido({
         tipo_pedido: 'PEDIDO_APROBACION',
         productos,
         observaciones: observaciones || undefined
       })
 
-      if (response.success) {
+      console.log('handleCrearPedido - Respuesta:', response)
+
+      if (response && response.success) {
         // Limpiar carrito
         setCarrito([])
         localStorage.removeItem('carrito')
         
         console.log('Pedido creado exitosamente:', response.data)
+        
+        // Mostrar mensaje de éxito
         alert('¡Pedido creado exitosamente! Un vendedor lo revisará pronto.')
-        // Forzar recarga de la página de pedidos para asegurar que se muestre
+        
+        // Redirigir a la página de pedidos sin recargar toda la página
         router.push('/cliente-portal/pedidos')
-        // También refrescar después de un momento
-        setTimeout(() => {
-          window.location.reload()
-        }, 1000)
+        
+        // No forzar reload - dejar que React maneje la navegación
       } else {
-        console.error('Error al crear pedido:', response)
-        alert(response.message || 'Error al crear el pedido')
+        console.error('Error al crear pedido - respuesta sin success:', response)
+        throw new Error(response?.message || 'Error al crear el pedido')
       }
     } catch (error: any) {
       console.error('Error al crear pedido:', error)
-      alert(error.response?.data?.message || 'Error al crear el pedido')
+      
+      // Extraer mensaje de error
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al crear el pedido'
+      
+      // Mostrar error al usuario
+      alert(`Error al crear el pedido: ${errorMessage}`)
+      
+      // NO cerrar sesión automáticamente aquí - dejar que el interceptor maneje solo errores críticos
     } finally {
       setIsLoading(false)
     }

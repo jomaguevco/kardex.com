@@ -70,28 +70,57 @@ class PedidoService {
    * Crear un nuevo pedido (Cliente)
    */
   async crearPedido(data: CrearPedidoData): Promise<PedidoResponse> {
-    // El backend espera 'detalles' pero el frontend envía 'productos'
-    // Convertir productos a detalles
-    const requestData = {
-      tipo_pedido: data.tipo_pedido,
-      detalles: data.productos.map(p => ({
-        producto_id: p.producto_id,
-        cantidad: p.cantidad,
-        precio_unitario: p.precio_unitario,
-        descuento: p.descuento || 0
-      })),
-      observaciones: data.observaciones
-    };
-    const response = await apiService.post('/pedidos', requestData);
-    // El backend retorna { success: true, data: {...}, message: "..." }
-    if (response && response.success) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.message
+    try {
+      // El backend espera 'detalles' pero el frontend envía 'productos'
+      // Convertir productos a detalles
+      const requestData = {
+        tipo_pedido: data.tipo_pedido,
+        detalles: data.productos.map(p => ({
+          producto_id: p.producto_id,
+          cantidad: p.cantidad,
+          precio_unitario: p.precio_unitario,
+          descuento: p.descuento || 0
+        })),
+        observaciones: data.observaciones
       };
+      
+      console.log('crearPedido - Enviando request:', requestData);
+      
+      const response = await apiService.post('/pedidos', requestData);
+      
+      console.log('crearPedido - Respuesta recibida:', response);
+      
+      // El backend retorna { success: true, data: {...}, message: "..." }
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Pedido creado exitosamente'
+        };
+      }
+      
+      // Si no tiene success, podría ser un error
+      throw new Error(response?.message || 'Error al crear el pedido');
+    } catch (error: any) {
+      console.error('crearPedido - Error:', error);
+      
+      // Si axios lanza un error (4xx, 5xx), extraer el mensaje del response
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        const errorMessage = errorData.message || errorData.error || 'Error al crear el pedido';
+        
+        // Si es un error de autenticación, loguearlo pero no lanzar error de cierre de sesión
+        if (error.response.status === 401 || error.response.status === 403) {
+          console.error('Error de autenticación al crear pedido:', errorMessage);
+          // No cerrar sesión automáticamente, solo mostrar el error
+        }
+        
+        throw new Error(errorMessage);
+      }
+      
+      // Si es un error de red u otro tipo, usar el mensaje del error
+      throw error instanceof Error ? error : new Error('Error al crear el pedido');
     }
-    return response;
   }
 
   /**

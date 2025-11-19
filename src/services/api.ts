@@ -39,11 +39,50 @@ class ApiService {
         return response;
       },
       (error) => {
-        if (error.response?.status === 401 && typeof window !== 'undefined') {
-          // Token expirado o inválido
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/';
+        // Solo cerrar sesión si es un 401/403 y no es un error de validación
+        // Evitar cerrar sesión en errores temporales o de validación
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          const errorMessage = error.response?.data?.message || '';
+          
+          // No cerrar sesión si es un error de validación o datos inválidos
+          const esErrorValidacion = 
+            errorMessage.includes('requerido') ||
+            (errorMessage.includes('inválido') && !errorMessage.includes('Token')) ||
+            errorMessage.includes('insuficiente') ||
+            errorMessage.includes('stock') ||
+            errorMessage.includes('Producto') ||
+            errorMessage.includes('No encontrado') ||
+            (error.response?.status === 403 && errorMessage.includes('Permisos'));
+          
+          if (esErrorValidacion) {
+            // Solo mostrar el error sin cerrar sesión
+            return Promise.reject(error);
+          }
+          
+          // Solo cerrar sesión si es un problema de token claramente identificado
+          const esErrorToken = 
+            errorMessage.includes('Token') ||
+            errorMessage.includes('acceso requerido') ||
+            errorMessage.includes('Autenticación requerida') ||
+            (error.response?.status === 401 && !esErrorValidacion);
+          
+          if (esErrorToken) {
+            console.error('Error de autenticación:', errorMessage);
+            
+            // Dar un pequeño delay para evitar cerrar sesión inmediatamente
+            setTimeout(() => {
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('permisos');
+                
+                // Solo redirigir si no estamos ya en la página de login
+                if (window.location.pathname !== '/') {
+                  window.location.href = '/';
+                }
+              }
+            }, 100);
+          }
         }
         return Promise.reject(error);
       }

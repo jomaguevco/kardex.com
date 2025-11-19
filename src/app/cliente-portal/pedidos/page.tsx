@@ -12,25 +12,6 @@ export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    if (!isAuthenticated || user?.rol !== 'CLIENTE') {
-      router.push('/')
-      return
-    }
-
-    fetchPedidos()
-    
-    // Refrescar pedidos cada 5 segundos si no hay pedidos (para detectar nuevos)
-    const interval = setInterval(() => {
-      if (pedidos.length === 0) {
-        console.log('Refrescando pedidos automáticamente...')
-        fetchPedidos()
-      }
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [isAuthenticated, user, router, pedidos.length])
-
   const fetchPedidos = async () => {
     try {
       setIsLoading(true)
@@ -67,6 +48,48 @@ export default function PedidosPage() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.rol !== 'CLIENTE') {
+      router.push('/')
+      return
+    }
+
+    fetchPedidos()
+    
+    // Refrescar pedidos cada 5 segundos si no hay pedidos (para detectar nuevos)
+    const interval = setInterval(() => {
+      if (pedidos.length === 0) {
+        console.log('Refrescando pedidos automáticamente...')
+        fetchPedidos()
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [isAuthenticated, user, router, pedidos.length])
+
+  // Refrescar cuando la página vuelva a estar visible (después de crear un pedido)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Página visible - refrescando pedidos...')
+        fetchPedidos()
+      }
+    }
+
+    const handleFocus = () => {
+      console.log('Ventana enfocada - refrescando pedidos...')
+      fetchPedidos()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [isAuthenticated, user])
 
   const getEstadoBadge = (estado: string) => {
     const badges: Record<string, string> = {
