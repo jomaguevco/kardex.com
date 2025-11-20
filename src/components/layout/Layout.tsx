@@ -16,19 +16,18 @@ export default function Layout({ children }: LayoutProps) {
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
 
   return (
-    <div style={{ margin: 0, padding: 0, top: 0, position: 'relative' }}>
+    <>
       <BackgroundDecorations />
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={0} />
       <Header onMenuToggle={toggleSidebar} />
-      <div className="relative min-h-screen bg-slate-950/95 transition-all duration-500 lg:pl-64" style={{ paddingTop: `${HEADER_HEIGHT}px`, marginTop: 0, margin: 0 }}>
+      <div className="relative min-h-screen bg-slate-950/95 transition-all duration-500 lg:pl-64" style={{ paddingTop: `${HEADER_HEIGHT}px`, marginTop: 0 }}>
         <main
           className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8 pt-6"
-          style={{ marginTop: 0, paddingTop: '1.5rem' }}
         >
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
       </div>
-    </div>
+    </>
   )
 }
 
