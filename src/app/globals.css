@@ -120,6 +120,12 @@ body > * > header.header-fixed {
     padding-right: 2rem !important;
     width: 100% !important;
   }
+  
+  /* Modal alineado con el contenido de fondo */
+  .modal-container {
+    padding-left: calc(13rem + 3rem + 1rem) !important; /* Sidebar(13rem) + margen adicional(3rem) + padding(1rem) */
+    padding-right: 1rem !important;
+  }
 }
 
 /* En pantallas pequeñas, el contenido ocupa todo el ancho */
