@@ -112,7 +112,7 @@ export default function PedidoDetalleModal({
 
       {/* Modal */}
       <div className="fixed inset-0 z-[9999] overflow-hidden bg-black/50 backdrop-blur-sm">
-        <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
+        <div className="flex h-full w-full items-start justify-start pt-8 sm:pt-12 pb-4 sm:pb-6 pl-8 sm:pl-16 pr-4 sm:pr-6">
           <div
             className="relative w-full max-w-6xl max-h-[85vh] ml-auto rounded-3xl bg-white shadow-2xl flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}

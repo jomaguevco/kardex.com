@@ -32,6 +32,17 @@ function VentasContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [ventaEditando, setVentaEditando] = useState<Venta | null>(null)
   const [selectedVenta, setSelectedVenta] = useState<Venta | null>(null)
+
+  // Bloquear scroll cuando cualquier modal está abierto
+  useEffect(() => {
+    if (isModalOpen || isEditModalOpen || selectedVenta) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [isModalOpen, isEditModalOpen, selectedVenta])
   const [detallesLoading, setDetallesLoading] = useState(false)
   const [detallesError, setDetallesError] = useState<string | null>(null)
 
@@ -167,7 +178,7 @@ function VentasContent() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm">
-          <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
+          <div className="flex h-full w-full items-start justify-start pt-8 sm:pt-12 pb-4 sm:pb-6 pl-8 sm:pl-16 pr-4 sm:pr-6">
             <div className="glass-card w-full max-w-6xl max-h-[85vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
               <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
@@ -283,7 +294,7 @@ function VentasContent() {
 
       {isEditModalOpen && ventaEditando && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm">
-          <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
+          <div className="flex h-full w-full items-start justify-start pt-8 sm:pt-12 pb-4 sm:pb-6 pl-8 sm:pl-16 pr-4 sm:pr-6">
             <div className="glass-card w-full max-w-6xl max-h-[85vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
               <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>

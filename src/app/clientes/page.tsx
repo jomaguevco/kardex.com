@@ -382,7 +382,7 @@ function ClientesContent() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm">
-          <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4">
+          <div className="flex h-full w-full items-start justify-start pt-8 sm:pt-12 pb-4 sm:pb-6 pl-8 sm:pl-16 pr-4 sm:pr-6">
             <div className="glass-card relative w-full max-w-4xl max-h-[85vh] ml-auto rounded-3xl animate-fade-in flex flex-col overflow-hidden">
               <div className="flex-shrink-0 border-b border-slate-200/70 px-6 pt-3 pb-3">
                 <h2 className="text-sm font-semibold text-slate-900">
@@ -514,7 +514,7 @@ function ClientesContent() {
 
       {isDetailOpen && selectedCliente && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm">
-          <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4">
+          <div className="flex h-full w-full items-start justify-start pt-8 sm:pt-12 pb-4 sm:pb-6 pl-8 sm:pl-16 pr-4 sm:pr-6">
             <div className="glass-card relative w-full max-w-4xl max-h-[85vh] ml-auto rounded-3xl animate-fade-in flex flex-col overflow-hidden">
               <div className="flex-shrink-0 border-b border-slate-200/70 px-6 pt-3 pb-3">
                 <div className="flex items-center justify-between">
@@ -570,7 +570,7 @@ function ClientesContent() {
       {/* Modal de confirmación de eliminación */}
       {isDeleteModalOpen && clienteToDelete && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm">
-          <div className="flex h-full w-full items-center justify-center p-4">
+          <div className="flex h-full w-full items-start justify-start pt-8 sm:pt-12 pb-4 sm:pb-6 pl-8 sm:pl-16 pr-4 sm:pr-6">
             <div className="glass-card w-full max-w-2xl max-h-[85vh] rounded-3xl p-6 shadow-2xl animate-fade-in overflow-hidden">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100">

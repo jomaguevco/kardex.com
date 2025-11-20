@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Eye, Calendar, Package, ArrowUp, ArrowDown, Minus, X } from 'lucide-react'
 import { KardexFilters, MovimientoKardex } from '@/types'
@@ -263,7 +263,7 @@ export default function KardexTable() {
       {/* Modal de detalles del movimiento */}
       {selectedMovimiento && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="flex h-full w-full items-center justify-center p-4">
+          <div className="flex h-full w-full items-start justify-start pt-8 sm:pt-12 pb-4 sm:pb-6 pl-8 sm:pl-16 pr-4 sm:pr-6">
             <div className="bg-white rounded-3xl max-w-2xl max-h-[85vh] w-full mx-auto flex flex-col overflow-hidden">
               <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-200 px-6 pt-3 pb-3">
                 <h3 className="text-sm font-semibold text-gray-900">Detalles del Movimiento</h3>
