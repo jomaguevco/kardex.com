@@ -18,21 +18,35 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <>
       <BackgroundDecorations />
+      {/* Sidebar independiente - toda la parte izquierda */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={0} />
+      
+      {/* Header independiente - arriba a la derecha del sidebar */}
       <Header onMenuToggle={toggleSidebar} />
+      
+      {/* Contenido independiente - centrado, debajo del header y a la derecha del sidebar */}
       <div 
-        className="relative min-h-screen bg-slate-950/95 transition-all duration-500 lg:pl-52" 
+        className="relative min-h-screen bg-slate-950/95 transition-all duration-500 content-area" 
         style={{ 
           paddingTop: `${HEADER_HEIGHT}px`, 
           marginTop: 0,
           paddingLeft: 0,
-          paddingRight: 0
+          paddingRight: 0,
+          marginLeft: 0
         }}
       >
         <main
-          className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8 pt-6"
+          className="relative z-10 pb-12 pt-6 content-main"
+          style={{
+            marginLeft: 0,
+            paddingLeft: 0,
+            paddingRight: 0
+          }}
         >
-          <div className="mx-auto w-full max-w-7xl">{children}</div>
+          {/* Contenido centrado independientemente del sidebar */}
+          <div className="content-wrapper">
+            {children}
+          </div>
         </main>
       </div>
     </>
