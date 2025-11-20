@@ -26,23 +26,12 @@ export default function VentasPage() {
   )
 }
 
-const VentasContent = () => {
+function VentasContent() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [ventaEditando, setVentaEditando] = useState<Venta | null>(null)
   const [selectedVenta, setSelectedVenta] = useState<Venta | null>(null)
-
-  // Bloquear scroll cuando cualquier modal está abierto
-  useEffect(() => {
-    if (isModalOpen || isEditModalOpen || selectedVenta) {
-      const originalOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = originalOverflow || ''
-      }
-    }
-  }, [isModalOpen, isEditModalOpen, selectedVenta])
   const [detallesLoading, setDetallesLoading] = useState(false)
   const [detallesError, setDetallesError] = useState<string | null>(null)
 
@@ -177,53 +166,50 @@ const VentasContent = () => {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm p-8 sm:p-12">
-          <div className="h-full w-full flex items-start justify-start">
-            <div className="glass-card w-full max-w-6xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
-                <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                    Nueva venta
-                  </span>
-                  <h2 className="mt-1 text-sm font-semibold text-slate-900">
-                    Registra una venta y sincroniza el inventario automáticamente
-                  </h2>
-                  <p className="text-[10px] text-slate-500">
-                    El dashboard se actualizará con las métricas más recientes cuando completes el registro.
-                  </p>
-                </div>
-                <button
-                  onClick={handleCancel}
-                  className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40 flex-shrink-0"
-                >
-                  ✕
-                </button>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
+            <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Nueva venta
+                </span>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                  Registra una venta y sincroniza el inventario automáticamente
+                </h2>
+                <p className="text-xs text-slate-500">
+                  El dashboard se actualizará con las métricas más recientes cuando completes el registro.
+                </p>
               </div>
+              <button
+                onClick={handleCancel}
+                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40"
+              >
+                ✕
+              </button>
+            </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
-                <NuevaVentaForm onSuccess={handleSuccess} onCancel={handleCancel} />
-              </div>
+            <div className="flex-1 overflow-y-auto pr-2">
+              <NuevaVentaForm onSuccess={handleSuccess} onCancel={handleCancel} />
             </div>
           </div>
         </div>
       )}
 
       {selectedVenta && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/70 backdrop-blur-sm p-8 sm:p-12">
-          <div className="h-full w-full flex items-start justify-start">
-            <div className="glass-card w-full max-w-6xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
-                <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Detalle de venta</span>
-                  <h2 className="mt-1 text-sm font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
-                  <p className="text-[10px] text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
-                </div>
-                <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40 flex-shrink-0">
-                  ✕
-                </button>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
+            <div className="flex-shrink-0 flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Detalle de venta</span>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
+                <p className="text-xs text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
               </div>
+              <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
+                ✕
+              </button>
+            </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
+            <div className="flex-1 overflow-y-auto pr-2 mt-6">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
                 <DetalleCard label="Cliente" value={selectedVenta.cliente?.nombre || 'Cliente no registrado'} />
                 <DetalleCard label="Fecha" value={new Date(selectedVenta.fecha_venta).toLocaleString()} />
@@ -269,56 +255,54 @@ const VentasContent = () => {
                   </table>
                 )}
               </div>
+            </div>
 
-              <div className="flex-shrink-0 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end px-4 sm:px-6 py-4 border-t border-slate-200">
-                <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
-                  Cerrar
+            <div className="flex-shrink-0 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-6 border-t border-slate-200 mt-6">
+              <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
+                Cerrar
+              </button>
+              <button 
+                onClick={() => handleDownloadPDF(selectedVenta)} 
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <Download className="h-4 w-4" />
+                Descargar PDF
+              </button>
+              {selectedVenta.estado?.toUpperCase() !== 'ANULADA' && (
+                <button onClick={() => handleCancelarVenta(selectedVenta)} className="btn-primary sm:min-w-[180px]">
+                  Cancelar venta
                 </button>
-                <button 
-                  onClick={() => handleDownloadPDF(selectedVenta)} 
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                >
-                  <Download className="h-4 w-4" />
-                  Descargar PDF
-                </button>
-                {selectedVenta.estado?.toUpperCase() !== 'ANULADA' && (
-                  <button onClick={() => handleCancelarVenta(selectedVenta)} className="btn-primary sm:min-w-[180px]">
-                    Cancelar venta
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
       {isEditModalOpen && ventaEditando && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm p-8 sm:p-12">
-          <div className="h-full w-full flex items-start justify-start">
-            <div className="glass-card w-full max-w-6xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
-                <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                    Editar venta
-                  </span>
-                  <h2 className="mt-1 text-sm font-semibold text-slate-900">
-                    {ventaEditando.numero_factura}
-                  </h2>
-                  <p className="text-[10px] text-slate-500">
-                    Modifica los detalles de la venta. Los cambios se reflejarán en el sistema.
-                  </p>
-                </div>
-                <button
-                  onClick={handleEditCancel}
-                  className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40 flex-shrink-0"
-                >
-                  ✕
-                </button>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 px-4 py-4 sm:py-10 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
+            <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Editar venta
+                </span>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                  {ventaEditando.numero_factura}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Modifica los detalles de la venta. Los cambios se reflejarán en el sistema.
+                </p>
               </div>
+              <button
+                onClick={handleEditCancel}
+                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40"
+              >
+                ✕
+              </button>
+            </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
-                <EditarVentaForm venta={ventaEditando} onSuccess={handleEditSuccess} onCancel={handleEditCancel} />
-              </div>
+            <div className="flex-1 overflow-y-auto pr-2">
+              <EditarVentaForm venta={ventaEditando} onSuccess={handleEditSuccess} onCancel={handleEditCancel} />
             </div>
           </div>
         </div>

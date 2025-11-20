@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, ChangeEvent, FormEvent, useEffect } from 'react'
+import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { Sparkles, Users, Plus, Phone, Mail, Building2, MapPin, X } from 'lucide-react'
@@ -43,7 +43,7 @@ export default function ClientesPage() {
   )
 }
 
-const ClientesContent = () => {
+function ClientesContent() {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,17 +54,6 @@ const ClientesContent = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [clienteToDelete, setClienteToDelete] = useState<Cliente | null>(null)
-
-  // Bloquear scroll cuando cualquier modal está abierto
-  useEffect(() => {
-    if (isModalOpen || isDetailOpen || clienteToDelete) {
-      const originalOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = originalOverflow || ''
-      }
-    }
-  }, [isModalOpen, isDetailOpen, clienteToDelete])
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['clientes', searchTerm],
@@ -392,17 +381,16 @@ const ClientesContent = () => {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm p-8 sm:p-12">
-          <div className="h-full w-full flex items-start justify-start">
-            <div className="glass-card relative w-full max-w-4xl max-h-[85vh] rounded-3xl animate-fade-in flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 border-b border-slate-200/70 px-6 pt-3 pb-3">
-                <h2 className="text-sm font-semibold text-slate-900">
-                  {editingCliente ? 'Editar cliente' : 'Nuevo cliente'}
-                </h2>
-              </div>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="glass-card relative w-full max-w-4xl max-h-[90vh] animate-fade-in flex flex-col">
+            <div className="flex-shrink-0 border-b border-slate-200/70 px-6 py-4">
+              <h2 className="text-base font-semibold text-slate-900">
+                {editingCliente ? 'Editar cliente' : 'Nuevo cliente'}
+              </h2>
+            </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6">
-                <form id="cliente-form" onSubmit={handleSubmit} className="py-6">
+            <div className="flex-1 overflow-y-auto pr-2">
+              <form id="cliente-form" onSubmit={handleSubmit} className="p-6">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700">Nombre completo *</label>
@@ -497,49 +485,47 @@ const ClientesContent = () => {
                 </div>
               </div>
 
-                </form>
-              </div>
+              </form>
+            </div>
 
-              <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="btn-outline"
-                  disabled={isSubmitting}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  form="cliente-form"
-                  className="btn-primary"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Guardando...' : editingCliente ? 'Actualizar' : 'Crear cliente'}
-                </button>
-              </div>
+            <div className="flex-shrink-0 flex justify-end gap-3 pt-6 border-t border-slate-200 px-6 pb-6">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="btn-outline"
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                form="cliente-form"
+                className="btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Guardando...' : editingCliente ? 'Actualizar' : 'Crear cliente'}
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {isDetailOpen && selectedCliente && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm p-8 sm:p-12">
-          <div className="h-full w-full flex items-start justify-start">
-            <div className="glass-card relative w-full max-w-4xl max-h-[85vh] rounded-3xl animate-fade-in flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 border-b border-slate-200/70 px-6 pt-3 pb-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-slate-900">Detalles del cliente</h2>
-                  <button
-                    onClick={() => setIsDetailOpen(false)}
-                    className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="glass-card relative w-full max-w-4xl max-h-[90vh] animate-fade-in flex flex-col">
+            <div className="flex-shrink-0 border-b border-slate-200/70 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-semibold text-slate-900">Detalles del cliente</h2>
+                <button
+                  onClick={() => setIsDetailOpen(false)}
+                  className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
+            </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-6">
+            <div className="flex-1 overflow-y-auto pr-2 p-6">
               <div className="mb-6 flex items-center gap-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 text-2xl font-bold text-white shadow-lg">
                   {selectedCliente.nombre.charAt(0).toUpperCase()}
@@ -580,9 +566,8 @@ const ClientesContent = () => {
 
       {/* Modal de confirmación de eliminación */}
       {isDeleteModalOpen && clienteToDelete && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm p-8 sm:p-12">
-          <div className="h-full w-full flex items-start justify-start">
-            <div className="glass-card w-full max-w-2xl max-h-[85vh] rounded-3xl p-6 shadow-2xl animate-fade-in overflow-hidden">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="glass-card w-full max-w-2xl max-h-[90vh] rounded-3xl p-6 shadow-2xl animate-fade-in">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100">
                 <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -590,8 +575,8 @@ const ClientesContent = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-slate-900">Confirmar eliminación</h2>
-                <p className="text-[10px] text-slate-500">Esta acción no se puede deshacer</p>
+                <h2 className="text-xl font-semibold text-slate-900">Confirmar eliminación</h2>
+                <p className="text-sm text-slate-500">Esta acción no se puede deshacer</p>
               </div>
             </div>
             
