@@ -21,6 +21,17 @@ export default function KardexTable() {
 
   const [selectedMovimiento, setSelectedMovimiento] = useState<MovimientoKardex | null>(null)
 
+  // Bloquear scroll cuando el modal está abierto
+  useEffect(() => {
+    if (selectedMovimiento) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [selectedMovimiento])
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['kardex', filters],
     queryFn: () => kardexService.getMovimientos(filters)

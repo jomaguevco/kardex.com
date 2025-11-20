@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { X, CreditCard, Wallet, Building2, Smartphone, Upload, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -55,6 +55,17 @@ export default function PagoModal({
   onSuccess
 }: PagoModalProps) {
   const [metodoPago, setMetodoPago] = useState<MetodoPago | ''>('')
+
+  // Bloquear scroll cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [isOpen])
   const [comprobante, setComprobante] = useState<File | null>(null)
   const [previewComprobante, setPreviewComprobante] = useState<string | null>(null)
   const [isProcesando, setIsProcesando] = useState(false)

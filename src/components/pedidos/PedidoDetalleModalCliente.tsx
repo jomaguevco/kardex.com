@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Package, User, Calendar, DollarSign, CheckCircle, Truck, CreditCard } from 'lucide-react'
 import { Pedido } from '@/services/pedidoService'
 import { format } from 'date-fns'
