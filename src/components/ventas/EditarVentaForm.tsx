@@ -16,7 +16,7 @@ import { cn } from '@/utils/cn'
 
 const detalleVentaSchema = z.object({
   producto_id: z.number().positive('Selecciona un producto'),
-  cantidad: z.number().positive('La cantidad debe ser mayor a 0'),
+  cantidad: z.number().int('La cantidad debe ser un número entero').positive('La cantidad debe ser mayor a 0'),
   precio_unitario: z.number().positive('El precio debe ser mayor a 0'),
   descuento: z.number().min(0).optional(),
   subtotal: z.number().positive('El subtotal debe ser mayor a 0')
@@ -471,11 +471,18 @@ export default function EditarVentaForm({ venta, onSuccess, onCancel }: EditarVe
                       </label>
                       <input
                         type="number"
+                        step="1"
                         min="1"
                         value={watchedDetalles[index]?.cantidad || 0}
                         onChange={(e) => {
-                          const val = parseInt(e.target.value)
-                          actualizarDetalle(index, 'cantidad', isNaN(val) ? 1 : val)
+                          const val = parseInt(e.target.value, 10)
+                          actualizarDetalle(index, 'cantidad', isNaN(val) || val < 1 ? 1 : Math.floor(val))
+                        }}
+                        onKeyDown={(e) => {
+                          // Prevenir teclas de punto decimal y coma
+                          if (e.key === '.' || e.key === ',' || e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+                            e.preventDefault()
+                          }
                         }}
                         className="input-field text-sm"
                       />

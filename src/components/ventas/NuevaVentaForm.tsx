@@ -16,7 +16,7 @@ import { cn } from '@/utils/cn'
 
 const detalleVentaSchema = z.object({
   producto_id: z.number().positive('Selecciona un producto'),
-  cantidad: z.number().positive('La cantidad debe ser mayor a 0'),
+  cantidad: z.number().int('La cantidad debe ser un número entero').positive('La cantidad debe ser mayor a 0'),
   precio_unitario: z.number().positive('El precio debe ser mayor a 0'),
   descuento: z.number().min(0).optional(),
   subtotal: z.number().positive('El subtotal debe ser mayor a 0')
@@ -259,40 +259,40 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       {/* Información básica */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-base font-medium text-gray-700 mb-1">
             Número de Factura
           </label>
           <input
             {...register('numero_factura')}
-            className="input-field"
+            className="input-field text-base"
             placeholder="FAC-001"
           />
           {errors.numero_factura && (
-            <p className="text-sm text-red-600 mt-1">{errors.numero_factura.message}</p>
+            <p className="text-base text-red-600 mt-1">{errors.numero_factura.message}</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-base font-medium text-gray-700 mb-1">
             Fecha
           </label>
           <input
             {...register('fecha')}
             type="datetime-local"
-            className="input-field"
+            className="input-field text-base"
           />
           {errors.fecha && (
-            <p className="text-sm text-red-600 mt-1">{errors.fecha.message}</p>
+            <p className="text-base text-red-600 mt-1">{errors.fecha.message}</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-base font-medium text-gray-700 mb-1">
             Cliente
           </label>
           <select
             {...register('cliente_id', { valueAsNumber: true })}
-            className="input-field"
+            className="input-field text-base"
             disabled={loadingClientes}
           >
             <option value={0}>Selecciona un cliente</option>
@@ -303,14 +303,14 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
             ))}
           </select>
           {errors.cliente_id && (
-            <p className="text-sm text-red-600 mt-1">{errors.cliente_id.message}</p>
+            <p className="text-base text-red-600 mt-1">{errors.cliente_id.message}</p>
           )}
         </div>
       </div>
 
       {/* Búsqueda de productos */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-base font-medium text-gray-700 mb-1">
           Agregar Producto
         </label>
         <div className="flex space-x-2">
@@ -319,7 +319,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
               type="text"
               value={busquedaProducto}
               onChange={(e) => setBusquedaProducto(e.target.value)}
-              className="input-field"
+              className="input-field text-base"
               placeholder="Buscar producto por nombre o código..."
             />
           </div>
@@ -327,9 +327,9 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
             type="button"
             onClick={agregarProducto}
             disabled={!productoSeleccionado}
-            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed text-base"
           >
-            <Plus className="h-4 w-4 mr-1" />
+            <Plus className="h-5 w-5 mr-1" />
             Agregar
           </button>
         </div>
@@ -353,12 +353,12 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="font-medium text-gray-900">{producto.nombre}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-gray-900 text-base">{producto.nombre}</p>
+                      <p className="text-base text-gray-500">
                         {producto.codigo_interno} - Stock: {producto.stock_actual}
                       </p>
                     </div>
-                    <p className="font-semibold text-primary-600">
+                    <p className="font-semibold text-primary-600 text-base">
                       ${Number(producto.precio_venta).toFixed(2)}
                     </p>
                   </div>
@@ -371,11 +371,11 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
 
       {/* Detalles de la venta */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Productos</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Productos</h3>
         {fields.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <p>No hay productos agregados</p>
-            <p className="text-sm">Busca y agrega productos para continuar</p>
+            <p className="text-base">No hay productos agregados</p>
+            <p className="text-base">Busca y agrega productos para continuar</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -385,28 +385,35 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                 <div key={field.id} className="card p-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-2 sm:gap-4 items-center">
                     <div className="md:col-span-2">
-                      <p className="font-medium text-gray-900">{producto?.nombre}</p>
-                      <p className="text-sm text-gray-500">{producto?.codigo_interno}</p>
+                      <p className="font-medium text-gray-900 text-base">{producto?.nombre}</p>
+                      <p className="text-base text-gray-500">{producto?.codigo_interno}</p>
                     </div>
                     
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                      <label className="block text-sm font-medium text-gray-500 mb-1">
                         Cantidad
                       </label>
                       <input
                         type="number"
+                        step="1"
                         min="1"
                         value={watchedDetalles[index]?.cantidad || 0}
                         onChange={(e) => {
-                          const val = parseInt(e.target.value) || 1
-                          actualizarDetalle(index, 'cantidad', isNaN(val) ? 1 : val)
+                          const val = parseInt(e.target.value, 10) || 1
+                          actualizarDetalle(index, 'cantidad', isNaN(val) || val < 1 ? 1 : Math.floor(val))
                         }}
-                        className="input-field text-sm"
+                        onKeyDown={(e) => {
+                          // Prevenir teclas de punto decimal y coma
+                          if (e.key === '.' || e.key === ',' || e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+                            e.preventDefault()
+                          }
+                        }}
+                        className="input-field text-base"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                      <label className="block text-sm font-medium text-gray-500 mb-1">
                         Precio
                       </label>
                       <input
@@ -418,12 +425,12 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                           const val = parseFloat(e.target.value) || 0
                           actualizarDetalle(index, 'precio_unitario', isNaN(val) ? 0 : val)
                         }}
-                        className="input-field text-sm"
+                        className="input-field text-base"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                      <label className="block text-sm font-medium text-gray-500 mb-1">
                         Descuento
                       </label>
                       <input
@@ -435,15 +442,15 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                           const val = parseFloat(e.target.value) || 0
                           actualizarDetalle(index, 'descuento', isNaN(val) ? 0 : val)
                         }}
-                        className="input-field text-sm"
+                        className="input-field text-base"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                      <label className="block text-sm font-medium text-gray-500 mb-1">
                         Subtotal
                       </label>
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-gray-900 text-base">
                         ${(Number(watchedDetalles[index]?.subtotal) || 0).toFixed(2)}
                       </p>
                     </div>
@@ -454,7 +461,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         onClick={() => remove(index)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -467,41 +474,41 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
 
       {/* Totales */}
       <div className="card p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <Calculator className="h-5 w-5 mr-2" />
+        <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+          <Calculator className="h-6 w-6 mr-2" />
           Totales
         </h3>
         
         <div className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-gray-600">Subtotal:</span>
-            <span className="font-semibold">${(Number(watchedSubtotal) || 0).toFixed(2)}</span>
+            <span className="text-gray-600 text-base">Subtotal:</span>
+            <span className="font-semibold text-base">${(Number(watchedSubtotal) || 0).toFixed(2)}</span>
           </div>
           
           <div className="flex justify-between">
-            <span className="text-gray-600">Descuento:</span>
+            <span className="text-gray-600 text-base">Descuento:</span>
             <input
               {...register('descuento', { valueAsNumber: true })}
               type="number"
               step="0.01"
               min="0"
-              className="w-24 text-right font-semibold border-b border-gray-300 focus:border-primary-500 focus:outline-none"
+              className="w-24 text-right font-semibold text-base border-b border-gray-300 focus:border-primary-500 focus:outline-none"
             />
           </div>
           
           <div className="flex justify-between">
-            <span className="text-gray-600">Impuesto:</span>
+            <span className="text-gray-600 text-base">Impuesto:</span>
             <input
               {...register('impuesto', { valueAsNumber: true })}
               type="number"
               step="0.01"
               min="0"
-              className="w-24 text-right font-semibold border-b border-gray-300 focus:border-primary-500 focus:outline-none"
+              className="w-24 text-right font-semibold text-base border-b border-gray-300 focus:border-primary-500 focus:outline-none"
             />
           </div>
           
           <div className="border-t border-gray-200 pt-3">
-            <div className="flex justify-between text-lg font-bold">
+            <div className="flex justify-between text-xl font-bold">
               <span>Total:</span>
               <span className="text-primary-600">
                 ${(Number(watch('total')) || 0).toFixed(2)}
@@ -513,13 +520,13 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
 
       {/* Observaciones */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-base font-medium text-gray-700 mb-1">
           Observaciones
         </label>
         <textarea
           {...register('observaciones')}
           rows={3}
-          className="input-field"
+          className="input-field text-base"
           placeholder="Observaciones adicionales..."
         />
       </div>
@@ -529,14 +536,14 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         <button
           type="button"
           onClick={onCancel}
-          className="btn-outline"
+          className="btn-outline text-base"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={isSubmitting || fields.length === 0}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed text-base"
         >
           {isSubmitting ? (
             <>

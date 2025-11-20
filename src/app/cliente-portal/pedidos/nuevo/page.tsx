@@ -36,14 +36,17 @@ export default function NuevoPedidoPage() {
   }, [carrito])
 
   const actualizarCantidad = (productoId: number, nuevaCantidad: number) => {
-    if (nuevaCantidad <= 0) {
+    // Asegurar que la cantidad sea un entero
+    const cantidadEntera = Math.floor(Math.max(1, nuevaCantidad))
+    
+    if (cantidadEntera <= 0) {
       eliminarDelCarrito(productoId)
       return
     }
 
     setCarrito(carrito.map(item =>
       item.id === productoId
-        ? { ...item, cantidad: Math.min(nuevaCantidad, item.stock_actual) }
+        ? { ...item, cantidad: Math.min(cantidadEntera, Math.floor(item.stock_actual || 0)) }
         : item
     ))
   }

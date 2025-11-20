@@ -170,19 +170,22 @@ function VentasContent() {
           <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <span className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                   Nueva venta
                 </span>
-                <h2 className="mt-2 text-xl font-semibold text-slate-900">
-                  Registra una venta y sincroniza el inventario automáticamente
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+                  NUEVA VENTA
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-base text-slate-500 mt-1">
+                  Registra una venta y sincroniza el inventario automáticamente
+                </p>
+                <p className="text-sm text-slate-500 mt-1">
                   El dashboard se actualizará con las métricas más recientes cuando completes el registro.
                 </p>
               </div>
               <button
                 onClick={handleCancel}
-                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40"
+                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40 text-xl"
               >
                 ✕
               </button>
@@ -200,9 +203,9 @@ function VentasContent() {
           <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 flex items-start justify-between gap-4">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Detalle de venta</span>
-                <h2 className="mt-2 text-xl font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
-                <p className="text-xs text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
+                <span className="text-sm font-semibold uppercase tracking-wide text-slate-400">Detalle de venta</span>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
+                <p className="text-base text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
               </div>
               <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
                 ✕
@@ -218,37 +221,37 @@ function VentasContent() {
               </div>
 
               {detallesError && (
-                <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+                <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-base text-rose-600">
                   {detallesError}
                 </div>
               )}
 
               <div className="overflow-hidden rounded-2xl border border-slate-100">
                 {detallesLoading ? (
-                  <div className="flex items-center justify-center gap-2 px-6 py-8 text-sm text-slate-500">
+                  <div className="flex items-center justify-center gap-2 px-6 py-8 text-base text-slate-500">
                     <LoadingSpinner size="sm" /> Cargando detalles...
                   </div>
                 ) : (selectedVenta.detalles || []).length === 0 ? (
-                  <div className="px-6 py-8 text-center text-sm text-slate-500">
+                  <div className="px-6 py-8 text-center text-base text-slate-500">
                     Esta venta no tiene productos asociados.
                   </div>
                 ) : (
                   <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50">
                       <tr>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Precio unit.</th>
-                        <th>Subtotal</th>
+                        <th className="text-base">Producto</th>
+                        <th className="text-base">Cantidad</th>
+                        <th className="text-base">Precio unit.</th>
+                        <th className="text-base">Subtotal</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
                       {(selectedVenta.detalles || []).map((detalle: any, index: number) => (
                         <tr key={detalle.id || index}>
-                          <td className="text-sm text-slate-700">{detalle.producto?.nombre || 'Producto'}</td>
-                          <td className="text-sm text-slate-600">{detalle.cantidad}</td>
-                          <td className="text-sm text-slate-600">${Number(detalle.precio_unitario).toFixed(2)}</td>
-                          <td className="text-sm font-semibold text-slate-900">${Number(detalle.subtotal ?? detalle.cantidad * detalle.precio_unitario).toFixed(2)}</td>
+                          <td className="text-base text-slate-700">{detalle.producto?.nombre || 'Producto'}</td>
+                          <td className="text-base text-slate-600">{detalle.cantidad}</td>
+                          <td className="text-base text-slate-600">${Number(detalle.precio_unitario).toFixed(2)}</td>
+                          <td className="text-base font-semibold text-slate-900">${Number(detalle.subtotal ?? detalle.cantidad * detalle.precio_unitario).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -283,13 +286,13 @@ function VentasContent() {
           <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <span className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                   Editar venta
                 </span>
-                <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
                   {ventaEditando.numero_factura}
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-base text-slate-500">
                   Modifica los detalles de la venta. Los cambios se reflejarán en el sistema.
                 </p>
               </div>
@@ -324,8 +327,8 @@ function MetricCard({ titulo, valor, subtitulo }: { titulo: string; valor: strin
 function DetalleCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className={cn('rounded-2xl border border-slate-100 px-4 py-3', highlight ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-600')}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-slate-900">{value}</p>
+      <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-2 text-base font-semibold text-slate-900">{value}</p>
     </div>
   )
 }

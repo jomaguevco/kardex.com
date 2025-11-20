@@ -15,7 +15,7 @@ import { cn } from '@/utils/cn'
 const ajusteSchema = z.object({
   producto_id: z.number().positive('Selecciona un producto'),
   tipo_movimiento: z.string().min(1, 'Selecciona un tipo de movimiento'),
-  cantidad: z.number().positive('La cantidad debe ser mayor a 0'),
+  cantidad: z.number().int('La cantidad debe ser un número entero').positive('La cantidad debe ser mayor a 0'),
   precio_unitario: z.number().min(0).optional(),
   motivo_movimiento: z.string().optional(),
   observaciones: z.string().optional(),
@@ -242,10 +242,23 @@ export default function AjusteInventarioForm({ tiposMovimiento, onSuccess, onCan
           <input
             {...register('cantidad', { valueAsNumber: true })}
             type="number"
-            step="0.01"
-            min="0.01"
+            step="1"
+            min="1"
             className="input-field"
-            placeholder="0.00"
+            placeholder="1"
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10) || 1
+              const intValue = isNaN(val) || val < 1 ? 1 : Math.floor(val)
+              setValue('cantidad', intValue, { shouldValidate: true })
+              // Actualizar el valor visual del input
+              e.target.value = intValue.toString()
+            }}
+            onKeyDown={(e) => {
+              // Prevenir teclas de punto decimal y coma
+              if (e.key === '.' || e.key === ',' || e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+                e.preventDefault()
+              }
+            }}
           />
           {errors.cantidad && (
             <p className="text-sm text-red-600 mt-1">{errors.cantidad.message}</p>
