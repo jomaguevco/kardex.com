@@ -71,12 +71,13 @@ function ProductosContent() {
 
   // Bloquear scroll cuando cualquier modal está abierto
   useEffect(() => {
-    if (isModalOpen || isViewOpen || selectedProduct) {
-      const originalOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = originalOverflow || ''
-      }
+    if (!isModalOpen && !isViewOpen && !selectedProduct) {
+      return
+    }
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalOverflow || ''
     }
   }, [isModalOpen, isViewOpen, selectedProduct])
 
