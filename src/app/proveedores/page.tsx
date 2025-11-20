@@ -42,7 +42,7 @@ export default function ProveedoresPage() {
   )
 }
 
-function ProveedoresContent() {
+const ProveedoresContent = () => {
   const queryClient = useQueryClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')

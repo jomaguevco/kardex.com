@@ -26,7 +26,7 @@ export default function VentasPage() {
   )
 }
 
-function VentasContent() {
+const VentasContent = () => {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)

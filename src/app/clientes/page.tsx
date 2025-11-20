@@ -43,7 +43,7 @@ export default function ClientesPage() {
   )
 }
 
-function ClientesContent() {
+const ClientesContent = () => {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)

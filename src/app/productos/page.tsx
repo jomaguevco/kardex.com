@@ -59,7 +59,7 @@ export default function ProductosPage() {
   )
 }
 
-function ProductosContent() {
+const ProductosContent = () => {
   const queryClient = useQueryClient()
   const [filters, setFilters] = useState<ProductoFilters>(DEFAULT_FILTERS)
   const [formData, setFormData] = useState<ProductoFormState>(initialFormState)
