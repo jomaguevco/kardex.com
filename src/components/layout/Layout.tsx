@@ -9,8 +9,6 @@ type LayoutProps = {
 }
 
 const HEADER_HEIGHT = 73
-const TOP_OFFSET = 24
-const CONTENT_TOP_PADDING = 24
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -18,14 +16,13 @@ export default function Layout({ children }: LayoutProps) {
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
 
   return (
-    <div className="relative min-h-screen bg-slate-950/95" style={{ paddingTop: `${TOP_OFFSET}px` }}>
+    <div className="relative min-h-screen bg-slate-950/95">
       <BackgroundDecorations />
-      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={TOP_OFFSET} />
-      <div className="relative min-h-screen transition-all duration-500 lg:pl-64">
+      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={0} />
+      <div className="relative min-h-screen transition-all duration-500 lg:pl-64" style={{ paddingTop: `${HEADER_HEIGHT}px` }}>
         <Header onMenuToggle={toggleSidebar} />
         <main
-          className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8"
-          style={{ paddingTop: CONTENT_TOP_PADDING }}
+          className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8 pt-6"
         >
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
