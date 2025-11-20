@@ -189,7 +189,7 @@ function VentasContent() {
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
                 <NuevaVentaForm onSuccess={handleSuccess} onCancel={handleCancel} />
               </div>
             </div>
@@ -212,7 +212,7 @@ function VentasContent() {
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
                 <DetalleCard label="Cliente" value={selectedVenta.cliente?.nombre || 'Cliente no registrado'} />
                 <DetalleCard label="Fecha" value={new Date(selectedVenta.fecha_venta).toLocaleString()} />
@@ -305,7 +305,7 @@ function VentasContent() {
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
                 <EditarVentaForm venta={ventaEditando} onSuccess={handleEditSuccess} onCancel={handleEditCancel} />
               </div>
             </div>

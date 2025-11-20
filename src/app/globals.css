@@ -178,34 +178,54 @@ a {
   background: #a8a8a8;
 }
 
-/* Ocultar scrollbar horizontal en modales y formularios */
-.modal-content-scroll,
-.overflow-y-auto {
+/* Ocultar scrollbar completamente en modales y formularios */
+.overflow-y-auto,
+[class*="overflow-y-auto"],
+div[class*="overflow-y-auto"] {
   overflow-x: hidden !important;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
 }
 
-.modal-content-scroll::-webkit-scrollbar,
-.overflow-y-auto::-webkit-scrollbar {
-  width: 8px;
-  height: 0px;
+.overflow-y-auto::-webkit-scrollbar,
+[class*="overflow-y-auto"]::-webkit-scrollbar,
+div[class*="overflow-y-auto"]::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
-.modal-content-scroll::-webkit-scrollbar-track,
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: transparent;
+/* Reducir tamaños de fuente en formularios */
+form,
+form input,
+form select,
+form textarea,
+form label,
+form button,
+.form-input,
+.input-field {
+  font-size: 0.75rem !important; /* 12px */
 }
 
-.modal-content-scroll::-webkit-scrollbar-thumb,
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+form label,
+.form-label {
+  font-size: 0.6875rem !important; /* 11px */
+  font-weight: 500 !important;
 }
 
-.modal-content-scroll::-webkit-scrollbar-thumb:hover,
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+form input,
+form select,
+form textarea,
+.input-field {
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+}
+
+form button:not(.btn-primary):not(.btn-outline) {
+  font-size: 0.75rem !important;
+  padding: 0.5rem 1rem !important;
 }
 
 /* Horizontal scrollbar for tables */

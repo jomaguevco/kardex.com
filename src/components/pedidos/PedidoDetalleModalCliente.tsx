@@ -117,7 +117,7 @@ export default function PedidoDetalleModalCliente({
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-6 space-y-6">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-6 space-y-6">
             {/* Información general */}
             <div className="grid gap-6 md:grid-cols-2">
               <div className="glass-card rounded-xl p-4">

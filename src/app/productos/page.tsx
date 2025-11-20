@@ -414,7 +414,7 @@ function ProductosContent() {
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
               <div className="grid gap-4 sm:grid-cols-2 mb-6">
                 <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-inner">
                   <p className="text-xs uppercase tracking-wide text-slate-400">Precio de venta</p>
@@ -506,7 +506,7 @@ function ProductosContent() {
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
               <form id="producto-form" onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>

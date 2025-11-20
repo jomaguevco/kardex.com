@@ -390,8 +390,8 @@ function ClientesContent() {
                 </h2>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-                <form id="cliente-form" onSubmit={handleSubmit} className="p-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6">
+                <form id="cliente-form" onSubmit={handleSubmit} className="py-6">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700">Nombre completo *</label>
@@ -528,7 +528,7 @@ function ClientesContent() {
                 </div>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto p-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-6">
               <div className="mb-6 flex items-center gap-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 text-2xl font-bold text-white shadow-lg">
                   {selectedCliente.nombre.charAt(0).toUpperCase()}
