@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ChangeEvent, FormEvent } from 'react'
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
@@ -68,6 +68,17 @@ function ProductosContent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Producto | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
+
+  // Bloquear scroll cuando cualquier modal está abierto
+  useEffect(() => {
+    if (isModalOpen || isViewOpen || selectedProduct) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [isModalOpen, isViewOpen, selectedProduct])
 
   const handleFiltersChange = (nextFilters: ProductoFilters) => {
     setFilters(prev => {
@@ -299,6 +310,8 @@ function ProductosContent() {
     }
   }
 
+  const stockState = selectedProduct ? getStockState(selectedProduct) : null
+
   return (
     <div className="space-y-10 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-emerald-500 px-6 py-8 text-white shadow-xl">
@@ -391,26 +404,26 @@ function ProductosContent() {
           <div className="h-full w-full flex items-start justify-start">
             <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
               <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
-              <div>
+                <div>
                   <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
-                  <Package className="mr-1.5 h-3.5 w-3.5" />
-                  {selectedProduct.codigo_interno || 'Sin código'}
-                </span>
+                    <Package className="mr-1.5 h-3.5 w-3.5" />
+                    {selectedProduct.codigo_interno || 'Sin código'}
+                  </span>
                   <h2 className="mt-2 text-sm font-semibold text-slate-900">
-                  {selectedProduct.nombre}
-                </h2>
+                    {selectedProduct.nombre}
+                  </h2>
                   <p className="text-[10px] text-slate-500">
-                  {selectedProduct.descripcion || 'Sin descripción registrada'}
-                </p>
-              </div>
+                    {selectedProduct.descripcion || 'Sin descripción registrada'}
+                  </p>
+                </div>
 
-              <button
-                onClick={closeViewModal}
+                <button
+                  onClick={closeViewModal}
                   className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40 flex-shrink-0"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
               <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
               <div className="grid gap-4 sm:grid-cols-2 mb-6">
@@ -449,16 +462,13 @@ function ProductosContent() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                {selectedProduct && (() => {
-                  const stockState = getStockState(selectedProduct)
-                  return (
-                    <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${stockState.badgeClass}`}
-                    >
-                      {stockState.label}
-                    </span>
-                  )
-                })()}
+                {stockState && (
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${stockState.badgeClass}`}
+                  >
+                    {stockState.label}
+                  </span>
+                )}
                 <span
                   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                     selectedProduct.activo
@@ -468,12 +478,12 @@ function ProductosContent() {
                 >
                   {selectedProduct.activo ? 'Activo' : 'Inactivo'}
                 </span>
-            </div>
+              </div>
 
               <div className="flex-shrink-0 flex justify-end px-4 sm:px-6 py-4 border-t border-slate-200">
-              <button onClick={closeViewModal} className="btn-outline">
-                Cerrar
-              </button>
+                <button onClick={closeViewModal} className="btn-outline">
+                  Cerrar
+                </button>
               </div>
             </div>
           </div>
@@ -485,27 +495,27 @@ function ProductosContent() {
           <div className="h-full w-full flex items-start justify-start">
             <div className="glass-card w-full max-w-5xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
               <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
-              <div>
+                <div>
                   <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                  {editingProduct ? 'Editar producto' : 'Nuevo producto'}
-                </span>
+                    {editingProduct ? 'Editar producto' : 'Nuevo producto'}
+                  </span>
                   <h2 className="mt-1 text-sm font-semibold text-slate-900">
-                  {editingProduct
-                    ? 'Actualiza la información del producto'
-                    : 'Registra un nuevo producto'}
-                </h2>
+                    {editingProduct
+                      ? 'Actualiza la información del producto'
+                      : 'Registra un nuevo producto'}
+                  </h2>
                   <p className="text-[10px] text-slate-500">
-                  Completa la información básica para sincronizar el inventario con el dashboard.
-                </p>
-              </div>
+                    Completa la información básica para sincronizar el inventario con el dashboard.
+                  </p>
+                </div>
 
-              <button
-                onClick={closeModal}
+                <button
+                  onClick={closeModal}
                   className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40 flex-shrink-0"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
               <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
               <form id="producto-form" onSubmit={handleSubmit} className="space-y-6">

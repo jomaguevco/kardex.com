@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
+import { useMemo, useState, ChangeEvent, FormEvent, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { Sparkles, Users, Plus, Phone, Mail, Building2, MapPin, X } from 'lucide-react'
@@ -54,6 +54,17 @@ function ClientesContent() {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [clienteToDelete, setClienteToDelete] = useState<Cliente | null>(null)
+
+  // Bloquear scroll cuando cualquier modal está abierto
+  useEffect(() => {
+    if (isModalOpen || isDetailOpen || clienteToDelete) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [isModalOpen, isDetailOpen, clienteToDelete])
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['clientes', searchTerm],
@@ -158,6 +169,8 @@ function ClientesContent() {
     setEditingCliente(null)
     setFormData(initialFormState)
   }
+
+  const filteredClientes = clientes
 
   return (
     <div className="space-y-10 animate-fade-in">
@@ -280,7 +293,7 @@ function ClientesContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {clientes.length === 0 ? (
+                  {filteredClientes.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-16 text-center">
                         <Users className="mx-auto mb-3 h-12 w-12 text-slate-300" />
@@ -289,7 +302,7 @@ function ClientesContent() {
                       </td>
                     </tr>
                   ) : (
-                    clientes.map((cliente) => (
+                    filteredClientes.map((cliente) => (
                       <tr key={cliente.id} className="transition hover:bg-slate-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -554,11 +567,12 @@ function ClientesContent() {
                 />
               </div>
 
-              <div className="flex-shrink-0 flex justify-end pt-6 border-t border-slate-200 px-6 pb-6">
-                <button onClick={() => setIsDetailOpen(false)} className="btn-outline">
-                  Cerrar
-                </button>
-              </div>
+            </div>
+
+            <div className="flex-shrink-0 flex justify-end pt-6 border-t border-slate-200 px-6 pb-6">
+              <button onClick={() => setIsDetailOpen(false)} className="btn-outline">
+                Cerrar
+              </button>
             </div>
           </div>
         </div>
@@ -606,7 +620,6 @@ function ClientesContent() {
               >
                 Eliminar
               </button>
-            </div>
             </div>
           </div>
         </div>

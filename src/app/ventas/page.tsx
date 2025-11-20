@@ -32,6 +32,17 @@ function VentasContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [ventaEditando, setVentaEditando] = useState<Venta | null>(null)
   const [selectedVenta, setSelectedVenta] = useState<Venta | null>(null)
+
+  // Bloquear scroll cuando cualquier modal está abierto
+  useEffect(() => {
+    if (isModalOpen || isEditModalOpen || selectedVenta) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [isModalOpen, isEditModalOpen, selectedVenta])
   const [detallesLoading, setDetallesLoading] = useState(false)
   const [detallesError, setDetallesError] = useState<string | null>(null)
 
@@ -257,7 +268,6 @@ function VentasContent() {
                     </tbody>
                   </table>
                 )}
-              </div>
               </div>
 
               <div className="flex-shrink-0 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end px-4 sm:px-6 py-4 border-t border-slate-200">
