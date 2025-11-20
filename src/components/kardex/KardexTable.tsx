@@ -275,7 +275,7 @@ export default function KardexTable() {
                 </button>
               </div>
               
-              <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-3">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-6 space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-500">Producto</label>
                 <p className="text-gray-900">{(selectedMovimiento as any).producto?.nombre || 'N/A'}</p>

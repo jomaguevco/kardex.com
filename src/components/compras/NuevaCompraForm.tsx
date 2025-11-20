@@ -113,17 +113,27 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
 
   const actualizarDetalle = (index: number, campo: keyof (typeof detalles)[number], valor: number) => {
     const detalle = detalles[index]
-    const cantidad = campo === 'cantidad' ? Math.max(1, valor) : detalle.cantidad
-    const precio = campo === 'precio_unitario' ? Math.max(0, valor) : detalle.precio_unitario
-    const descuentoDetalle = campo === 'descuento' ? Math.max(0, valor) : detalle.descuento || 0
-    const subtotal = Math.max(0, cantidad * precio - descuentoDetalle)
+    if (!detalle) return
+    
+    // Asegurar que el valor sea un número válido, si no usar el valor actual o 0
+    const valorNum = isNaN(valor) || !isFinite(valor) ? (campo === 'cantidad' ? 1 : 0) : valor
+    
+    const cantidad = campo === 'cantidad' ? Math.max(1, valorNum || detalle.cantidad || 1) : (Number(detalle.cantidad) || 1)
+    const precio = campo === 'precio_unitario' ? Math.max(0, valorNum || detalle.precio_unitario || 0) : (Number(detalle.precio_unitario) || 0)
+    const descuentoDetalle = campo === 'descuento' ? Math.max(0, valorNum || 0) : (Number(detalle.descuento) || 0)
+    
+    // Calcular subtotal asegurándonos de que todos los valores sean números válidos
+    const cantidadValida = Number(cantidad) || 0
+    const precioValido = Number(precio) || 0
+    const descuentoValido = Number(descuentoDetalle) || 0
+    const subtotal = Math.max(0, (cantidadValida * precioValido) - descuentoValido)
 
     if (campo === 'cantidad') {
-      setValue(`detalles.${index}.cantidad`, cantidad)
+      setValue(`detalles.${index}.cantidad`, cantidadValida)
     } else if (campo === 'precio_unitario') {
-      setValue(`detalles.${index}.precio_unitario`, precio)
+      setValue(`detalles.${index}.precio_unitario`, precioValido)
     } else if (campo === 'descuento') {
-      setValue(`detalles.${index}.descuento`, descuentoDetalle)
+      setValue(`detalles.${index}.descuento`, descuentoValido)
     }
     setValue(`detalles.${index}.subtotal`, subtotal)
   }
@@ -310,7 +320,10 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
                         type="number"
                         min={1}
                         value={detalles[index]?.cantidad || 0}
-                        onChange={(event) => actualizarDetalle(index, 'cantidad', parseInt(event.target.value, 10) || 0)}
+                        onChange={(event) => {
+                          const val = parseInt(event.target.value, 10)
+                          actualizarDetalle(index, 'cantidad', isNaN(val) ? 1 : val)
+                        }}
                         className="input-field"
                       />
                     </div>
@@ -321,7 +334,10 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
                         step="0.01"
                         min={0}
                         value={detalles[index]?.precio_unitario || 0}
-                        onChange={(event) => actualizarDetalle(index, 'precio_unitario', parseFloat(event.target.value) || 0)}
+                        onChange={(event) => {
+                          const val = parseFloat(event.target.value)
+                          actualizarDetalle(index, 'precio_unitario', isNaN(val) ? 0 : val)
+                        }}
                         className="input-field"
                       />
                     </div>
@@ -332,7 +348,10 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
                         step="0.01"
                         min={0}
                         value={detalles[index]?.descuento || 0}
-                        onChange={(event) => actualizarDetalle(index, 'descuento', parseFloat(event.target.value) || 0)}
+                        onChange={(event) => {
+                          const val = parseFloat(event.target.value)
+                          actualizarDetalle(index, 'descuento', isNaN(val) ? 0 : val)
+                        }}
                         className="input-field"
                       />
                     </div>
@@ -341,7 +360,7 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
                   <div className="flex items-center gap-3">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Subtotal</p>
-                      <p className="text-sm font-semibold text-slate-900">${Number(detalles[index]?.subtotal || 0).toFixed(2)}</p>
+                      <p className="text-sm font-semibold text-slate-900">${(Number(detalles[index]?.subtotal) || 0).toFixed(2)}</p>
                     </div>
                     <button
                       type="button"
@@ -367,7 +386,7 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
         <div className="space-y-3 text-sm">
           <div className="flex items-center justify-between text-slate-600">
             <span>Subtotal:</span>
-            <span className="font-semibold text-slate-900">${Number(watch('subtotal') || 0).toFixed(2)}</span>
+            <span className="font-semibold text-slate-900">${(Number(watch('subtotal')) || 0).toFixed(2)}</span>
           </div>
           <div className="flex items-center justify-between text-slate-600">
             <span>Descuento:</span>
@@ -391,7 +410,7 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
           </div>
           <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-base font-semibold text-indigo-600">
             <span>Total:</span>
-            <span>${Number(watch('total') || 0).toFixed(2)}</span>
+            <span>${(Number(watch('total')) || 0).toFixed(2)}</span>
           </div>
         </div>
       </div>

@@ -202,7 +202,7 @@ export default function PagoModal({
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
               <form id="pago-form" onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Método de pago */}
             <div>

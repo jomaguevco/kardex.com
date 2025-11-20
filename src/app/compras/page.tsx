@@ -175,7 +175,7 @@ function ComprasContent() {
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 sm:py-6">
                 <NuevaCompraForm
                   onSuccess={() => {
                     setIsModalOpen(false)
@@ -205,7 +205,7 @@ function ComprasContent() {
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 sm:py-6">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
                   <DetalleCard label="Proveedor" value={selectedCompra.proveedor?.nombre || 'Proveedor no registrado'} />
                   <DetalleCard label="Fecha" value={new Date(selectedCompra.fecha_compra).toLocaleString()} />
@@ -283,7 +283,7 @@ function ComprasContent() {
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 sm:py-6">
                 <EditarCompraForm
                   compra={compraEditando}
                   onSuccess={handleEditSuccess}

@@ -101,8 +101,13 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
 
   // Calcular totales automáticamente
   useEffect(() => {
-    const subtotal = watchedDetalles.reduce((sum, detalle) => sum + (detalle.subtotal || 0), 0)
-    const total = subtotal - watchedDescuento + watchedImpuesto
+    const subtotal = watchedDetalles.reduce((sum, detalle) => {
+      const subtotalDetalle = Number(detalle.subtotal) || 0
+      return sum + (isNaN(subtotalDetalle) ? 0 : subtotalDetalle)
+    }, 0)
+    const descuentoValido = Number(watchedDescuento) || 0
+    const impuestoValido = Number(watchedImpuesto) || 0
+    const total = Math.max(0, subtotal - descuentoValido + impuestoValido)
     setValue('subtotal', subtotal)
     setValue('total', total)
   }, [watchedDetalles, watchedDescuento, watchedImpuesto, setValue])
@@ -152,17 +157,27 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
 
   const actualizarDetalle = (index: number, campo: 'cantidad' | 'precio_unitario' | 'descuento', valor: number) => {
     const detalle = watchedDetalles[index]
-    const cantidad = campo === 'cantidad' ? Math.max(1, valor) : detalle.cantidad
-    const precio = campo === 'precio_unitario' ? Math.max(0, valor) : detalle.precio_unitario
-    const descuento = campo === 'descuento' ? Math.max(0, valor) : detalle.descuento || 0
-    const subtotal = Math.max(0, cantidad * precio - descuento)
+    if (!detalle) return
+    
+    // Asegurar que el valor sea un número válido, si no usar el valor actual o 0
+    const valorNum = isNaN(valor) || !isFinite(valor) ? (campo === 'cantidad' ? 1 : 0) : valor
+    
+    const cantidad = campo === 'cantidad' ? Math.max(1, valorNum || detalle.cantidad || 1) : (Number(detalle.cantidad) || 1)
+    const precio = campo === 'precio_unitario' ? Math.max(0, valorNum || detalle.precio_unitario || 0) : (Number(detalle.precio_unitario) || 0)
+    const descuento = campo === 'descuento' ? Math.max(0, valorNum || 0) : (Number(detalle.descuento) || 0)
+    
+    // Calcular subtotal asegurándonos de que todos los valores sean números válidos
+    const cantidadValida = Number(cantidad) || 0
+    const precioValido = Number(precio) || 0
+    const descuentoValido = Number(descuento) || 0
+    const subtotal = Math.max(0, (cantidadValida * precioValido) - descuentoValido)
 
     if (campo === 'cantidad') {
-      setValue(`detalles.${index}.cantidad`, cantidad)
+      setValue(`detalles.${index}.cantidad`, cantidadValida)
     } else if (campo === 'precio_unitario') {
-      setValue(`detalles.${index}.precio_unitario`, precio)
+      setValue(`detalles.${index}.precio_unitario`, precioValido)
     } else {
-      setValue(`detalles.${index}.descuento`, descuento)
+      setValue(`detalles.${index}.descuento`, descuentoValido)
     }
     setValue(`detalles.${index}.subtotal`, subtotal)
   }
@@ -382,7 +397,10 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         type="number"
                         min="1"
                         value={watchedDetalles[index]?.cantidad || 0}
-                        onChange={(e) => actualizarDetalle(index, 'cantidad', parseInt(e.target.value))}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 1
+                          actualizarDetalle(index, 'cantidad', isNaN(val) ? 1 : val)
+                        }}
                         className="input-field text-sm"
                       />
                     </div>
@@ -396,7 +414,10 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         step="0.01"
                         min="0"
                         value={watchedDetalles[index]?.precio_unitario || 0}
-                        onChange={(e) => actualizarDetalle(index, 'precio_unitario', parseFloat(e.target.value))}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value) || 0
+                          actualizarDetalle(index, 'precio_unitario', isNaN(val) ? 0 : val)
+                        }}
                         className="input-field text-sm"
                       />
                     </div>
@@ -410,7 +431,10 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         step="0.01"
                         min="0"
                         value={watchedDetalles[index]?.descuento || 0}
-                        onChange={(e) => actualizarDetalle(index, 'descuento', parseFloat(e.target.value))}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value) || 0
+                          actualizarDetalle(index, 'descuento', isNaN(val) ? 0 : val)
+                        }}
                         className="input-field text-sm"
                       />
                     </div>
@@ -420,7 +444,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         Subtotal
                       </label>
                       <p className="font-semibold text-gray-900">
-                        ${Number(watchedDetalles[index]?.subtotal || 0).toFixed(2)}
+                        ${(Number(watchedDetalles[index]?.subtotal) || 0).toFixed(2)}
                       </p>
                     </div>
                     
@@ -451,7 +475,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-gray-600">Subtotal:</span>
-            <span className="font-semibold">${Number(watchedSubtotal || 0).toFixed(2)}</span>
+            <span className="font-semibold">${(Number(watchedSubtotal) || 0).toFixed(2)}</span>
           </div>
           
           <div className="flex justify-between">
@@ -480,7 +504,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
             <div className="flex justify-between text-lg font-bold">
               <span>Total:</span>
               <span className="text-primary-600">
-                ${Number(watch('total') || 0).toFixed(2)}
+                ${(Number(watch('total')) || 0).toFixed(2)}
               </span>
             </div>
           </div>

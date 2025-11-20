@@ -390,7 +390,7 @@ function ClientesContent() {
                 </h2>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
                 <form id="cliente-form" onSubmit={handleSubmit} className="p-6">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
