@@ -72,7 +72,9 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         left: '0', 
         right: '0', 
         zIndex: 60,
-        width: '100%'
+        width: '100%',
+        transform: 'translateZ(0)',
+        willChange: 'transform'
       }}
     >
       <div className="flex h-full items-center justify-between px-4 lg:px-8">
