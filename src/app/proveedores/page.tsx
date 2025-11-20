@@ -63,6 +63,7 @@ function ProveedoresContent() {
         document.body.style.overflow = originalOverflow || ''
       }
     }
+    return undefined
   }, [isModalOpen, isDetailOpen, proveedorToDelete])
 
   const { data, isLoading, error } = useQuery({
@@ -380,27 +381,27 @@ function ProveedoresContent() {
           <div className="h-full w-full flex items-start justify-start">
             <div className="glass-card w-full max-w-5xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
               <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
-                <div>
+              <div>
                   <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                    {editingProveedor ? 'Editar proveedor' : 'Nuevo proveedor'}
-                  </span>
+                  {editingProveedor ? 'Editar proveedor' : 'Nuevo proveedor'}
+                </span>
                   <h2 className="mt-1 text-sm font-semibold text-slate-900">
-                    {editingProveedor ? 'Actualiza la información comercial' : 'Registra un nuevo aliado comercial'}
-                  </h2>
+                  {editingProveedor ? 'Actualiza la información comercial' : 'Registra un nuevo aliado comercial'}
+                </h2>
                   <p className="text-[10px] text-slate-500">
-                    Mantén tu cartera de proveedores sincronizada para agilizar compras y logística.
-                  </p>
-                </div>
-                <button
-                  onClick={closeModal}
-                  className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40 flex-shrink-0"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+                  Mantén tu cartera de proveedores sincronizada para agilizar compras y logística.
+                </p>
               </div>
+              <button
+                onClick={closeModal}
+                  className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40 flex-shrink-0"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
               <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
-                <form id="proveedor-form" onSubmit={handleSubmit} className="space-y-6">
+              <form id="proveedor-form" onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-slate-700">Nombre *</label>
@@ -487,21 +488,21 @@ function ProveedoresContent() {
                 </div>
               </div>
 
-                </form>
-              </div>
+              </form>
+            </div>
 
               <div className="flex-shrink-0 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end px-4 sm:px-6 py-4 border-t border-slate-200">
-                <button type="button" onClick={closeModal} className="btn-outline sm:min-w-[150px]">
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  form="proveedor-form"
-                  disabled={isSubmitting}
-                  className="btn-primary inline-flex items-center justify-center sm:min-w-[180px] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSubmitting ? 'Guardando...' : editingProveedor ? 'Actualizar proveedor' : 'Crear proveedor'}
-                </button>
+              <button type="button" onClick={closeModal} className="btn-outline sm:min-w-[150px]">
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                form="proveedor-form"
+                disabled={isSubmitting}
+                className="btn-primary inline-flex items-center justify-center sm:min-w-[180px] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? 'Guardando...' : editingProveedor ? 'Actualizar proveedor' : 'Crear proveedor'}
+              </button>
               </div>
             </div>
           </div>
@@ -513,38 +514,38 @@ function ProveedoresContent() {
           <div className="h-full w-full flex items-start justify-start">
             <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
               <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
-                <div>
+              <div>
                   <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
-                    {selectedProveedor.tipo_proveedor === 'INTERNACIONAL' ? 'Proveedor internacional' : 'Proveedor nacional'}
-                  </span>
+                  {selectedProveedor.tipo_proveedor === 'INTERNACIONAL' ? 'Proveedor internacional' : 'Proveedor nacional'}
+                </span>
                   <h2 className="mt-2 text-sm font-semibold text-slate-900">{selectedProveedor.nombre}</h2>
                   <p className="text-[10px] text-slate-500">
-                    {selectedProveedor.direccion || 'Sin dirección registrada'}
-                  </p>
-                </div>
+                  {selectedProveedor.direccion || 'Sin dirección registrada'}
+                </p>
+              </div>
                 <button onClick={() => setIsDetailOpen(false)} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40 flex-shrink-0">
                   ✕
-                </button>
-              </div>
+              </button>
+            </div>
 
               <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <DetalleItem label="Documento" value={`${selectedProveedor.tipo_documento}: ${selectedProveedor.numero_documento}`} />
-                  <DetalleItem label="Estado" value={selectedProveedor.activo ? 'Activo' : 'Inactivo'} />
-                  <DetalleItem label="Teléfono" value={selectedProveedor.telefono || 'No registrado'} />
-                  <DetalleItem label="Email" value={selectedProveedor.email || 'No registrado'} />
-                  <DetalleItem label="Contacto" value={selectedProveedor.contacto || 'No asignado'} />
-                  <DetalleItem
-                    label="Fecha de creación"
-                    value={new Date(selectedProveedor.fecha_creacion).toLocaleString()}
-                  />
-                </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <DetalleItem label="Documento" value={`${selectedProveedor.tipo_documento}: ${selectedProveedor.numero_documento}`} />
+                <DetalleItem label="Estado" value={selectedProveedor.activo ? 'Activo' : 'Inactivo'} />
+                <DetalleItem label="Teléfono" value={selectedProveedor.telefono || 'No registrado'} />
+                <DetalleItem label="Email" value={selectedProveedor.email || 'No registrado'} />
+                <DetalleItem label="Contacto" value={selectedProveedor.contacto || 'No asignado'} />
+                <DetalleItem
+                  label="Fecha de creación"
+                  value={new Date(selectedProveedor.fecha_creacion).toLocaleString()}
+                />
               </div>
+            </div>
 
               <div className="flex-shrink-0 flex justify-end px-4 sm:px-6 py-4 border-t border-slate-200">
-                <button onClick={() => setIsDetailOpen(false)} className="btn-outline">
-                  Cerrar
-                </button>
+              <button onClick={() => setIsDetailOpen(false)} className="btn-outline">
+                Cerrar
+              </button>
               </div>
             </div>
           </div>

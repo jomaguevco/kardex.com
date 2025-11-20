@@ -64,6 +64,7 @@ function ClientesContent() {
         document.body.style.overflow = originalOverflow || ''
       }
     }
+    return undefined
   }, [isModalOpen, isDetailOpen, clienteToDelete])
 
   const { data, isLoading, error } = useQuery({
