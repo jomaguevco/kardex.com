@@ -111,11 +111,11 @@ body > * > header.header-fixed {
     width: 100% !important;
   }
   
-  /* Contenedor de contenido centrado - independiente del sidebar */
+  /* Contenedor de contenido centrado - independiente del sidebar, desplazado a la derecha */
   .content-wrapper {
-    margin-left: auto !important;
+    margin-left: calc(13rem + 3rem) !important; /* Sidebar(13rem) + margen adicional(3rem) */
     margin-right: auto !important;
-    max-width: calc(100vw - 17rem) !important; /* 100vw - sidebar(13rem) - padding lateral(4rem) */
+    max-width: calc(100vw - 13rem - 6rem) !important; /* 100vw - sidebar(13rem) - margen izquierdo(3rem) - padding lateral(3rem) */
     padding-left: 2rem !important;
     padding-right: 2rem !important;
     width: 100% !important;
