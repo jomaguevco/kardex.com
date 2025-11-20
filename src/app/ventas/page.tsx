@@ -44,7 +44,6 @@ function VentasContent() {
         document.body.style.overflow = originalOverflow || ''
       }
     }
-    return undefined
   }, [isModalOpen, isEditModalOpen, selectedVenta])
 
   const handleNuevaVenta = () => {
