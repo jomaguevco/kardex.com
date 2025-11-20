@@ -71,7 +71,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         top: '0', 
         left: '0', 
         right: '0', 
-        zIndex: 60,
+        zIndex: 9999,
         width: '100%',
         height: '73px',
         borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
@@ -79,10 +79,11 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         boxShadow: '0 1px 2px 0 rgba(2, 6, 23, 0.1)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
-        transform: 'translateZ(0)',
+        transform: 'translate3d(0, 0, 0)',
         willChange: 'transform',
         margin: 0,
-        padding: 0
+        padding: 0,
+        boxSizing: 'border-box'
       }}
     >
       <div className="flex h-full items-center justify-between px-4 lg:px-8">

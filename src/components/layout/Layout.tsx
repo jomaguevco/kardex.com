@@ -16,7 +16,7 @@ export default function Layout({ children }: LayoutProps) {
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
 
   return (
-    <div style={{ margin: 0, padding: 0, marginTop: 0, paddingTop: 0, position: 'relative', minHeight: '100vh', overflow: 'visible' }}>
+    <>
       <BackgroundDecorations />
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={0} />
       <Header onMenuToggle={toggleSidebar} />
@@ -25,19 +25,17 @@ export default function Layout({ children }: LayoutProps) {
         style={{ 
           paddingTop: `${HEADER_HEIGHT}px`, 
           marginTop: 0,
-          margin: 0,
-          padding: 0,
-          overflow: 'visible'
+          paddingLeft: 0,
+          paddingRight: 0
         }}
       >
         <main
           className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8 pt-6"
-          style={{ marginTop: 0, paddingTop: '1.5rem' }}
         >
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
       </div>
-    </div>
+    </>
   )
 }
 

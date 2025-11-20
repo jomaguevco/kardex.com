@@ -52,14 +52,16 @@ header.header-fixed {
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  z-index: 60 !important;
+  z-index: 9999 !important;
   width: 100% !important;
-  transform: translateZ(0) !important;
+  transform: translate3d(0, 0, 0) !important;
   will-change: transform !important;
   margin: 0 !important;
   padding: 0 !important;
   max-width: 100% !important;
   height: 73px !important;
+  border: none !important;
+  box-sizing: border-box !important;
 }
 
 @media (min-width: 1024px) {
@@ -76,6 +78,8 @@ html {
   padding: 0 !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
+  height: 100% !important;
+  overflow-x: hidden !important;
 }
 
 body {
@@ -83,6 +87,9 @@ body {
   padding: 0 !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
+  height: 100% !important;
+  overflow-x: hidden !important;
+  position: relative !important;
 }
 
 body > *:first-child {
@@ -90,18 +97,20 @@ body > *:first-child {
   padding-top: 0 !important;
 }
 
-/* Asegurar que ningún contenedor interfiera con el header */
-div[style*="padding-top"],
-div[style*="margin-top"] {
-  padding-top: 0 !important;
+/* Eliminar cualquier espacio antes del header */
+body > div:first-child,
+body > *:first-child > *:first-child {
   margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
-div:has(> header) {
+/* Asegurar que ningún contenedor interfiera con el header */
+div:has(> header.header-fixed) {
   margin: 0 !important;
   padding: 0 !important;
   padding-top: 0 !important;
   margin-top: 0 !important;
+  position: static !important;
 }
 
 body {
