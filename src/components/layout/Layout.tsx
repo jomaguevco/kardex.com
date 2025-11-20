@@ -8,7 +8,7 @@ type LayoutProps = {
   children: React.ReactNode
 }
 
-const HEADER_HEIGHT = 73
+const HEADER_HEIGHT = 56
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -21,7 +21,7 @@ export default function Layout({ children }: LayoutProps) {
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={0} />
       <Header onMenuToggle={toggleSidebar} />
       <div 
-        className="relative min-h-screen bg-slate-950/95 transition-all duration-500 lg:pl-64" 
+        className="relative min-h-screen bg-slate-950/95 transition-all duration-500 lg:pl-52" 
         style={{ 
           paddingTop: `${HEADER_HEIGHT}px`, 
           marginTop: 0,

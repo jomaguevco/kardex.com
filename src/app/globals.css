@@ -72,7 +72,7 @@ header.header-fixed {
   padding-top: 0 !important;
   margin-top: 0 !important;
   max-width: 100% !important;
-  height: 73px !important;
+  height: 56px !important;
   border: none !important;
   box-sizing: border-box !important;
   overflow: visible !important;
@@ -89,9 +89,9 @@ body > * > header.header-fixed {
 
 @media (min-width: 1024px) {
   header.header-fixed {
-    left: 16rem !important;
-    width: calc(100% - 16rem) !important;
-    max-width: calc(100% - 16rem) !important;
+    left: 13rem !important;
+    width: calc(100% - 13rem) !important;
+    max-width: calc(100% - 13rem) !important;
   }
 }
 

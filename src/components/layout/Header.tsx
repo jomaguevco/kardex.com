@@ -73,7 +73,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         right: '0', 
         zIndex: 9999,
         width: '100%',
-        height: '73px',
+        height: '56px',
         borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
         backgroundColor: 'rgba(255, 255, 255, 0.6)',
         boxShadow: '0 1px 2px 0 rgba(2, 6, 23, 0.1)',
@@ -86,27 +86,27 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         boxSizing: 'border-box'
       }}
     >
-      <div className="flex h-full items-center justify-between px-4 lg:px-8">
+      <div className="flex h-full items-center justify-between px-3 lg:px-6">
         <div className="flex items-center">
           <button
             onClick={onMenuToggle}
-            className="rounded-xl border border-white/40 bg-white/70 p-2 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/70 hover:shadow-lg lg:hidden"
+            className="rounded-lg border border-white/40 bg-white/70 p-1.5 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/70 hover:shadow-lg lg:hidden"
           >
-            <Menu className="h-5 w-5 text-slate-600" />
+            <Menu className="h-4 w-4 text-slate-600" />
           </button>
-          <div className="ml-3 flex items-center gap-2 rounded-xl border border-white/30 bg-white/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-500" /> Sistema de ventas KARDEX
+          <div className="ml-2 flex items-center gap-1.5 rounded-lg border border-white/30 bg-white/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+            <Sparkles className="h-3 w-3 text-indigo-500" /> Sistema de ventas KARDEX
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <button 
             onClick={() => setShowNotifications(true)}
-            className="relative rounded-xl border border-white/30 bg-white/70 p-2 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/60 hover:shadow-lg"
+            className="relative rounded-lg border border-white/30 bg-white/70 p-1.5 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/60 hover:shadow-lg"
           >
-            <Bell className="h-5 w-5 text-slate-600" />
+            <Bell className="h-4 w-4 text-slate-600" />
             {notificationCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-xs font-semibold text-white">
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-semibold text-white">
                 {notificationCount > 9 ? '9+' : notificationCount}
               </span>
             )}
@@ -115,25 +115,25 @@ export default function Header({ onMenuToggle }: HeaderProps) {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu((prev) => !prev)}
-              className="flex items-center gap-3 rounded-xl border border-white/30 bg-white/70 px-2 py-1.5 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/60 hover:shadow-lg"
+              className="flex items-center gap-2 rounded-lg border border-white/30 bg-white/70 px-1.5 py-1 shadow-sm shadow-slate-900/10 transition hover:-translate-y-0.5 hover:border-white/60 hover:shadow-lg"
             >
               {getFotoUrl() ? (
                 <img
                   src={getFotoUrl() || ''}
                   alt={user?.nombre_completo || 'Usuario'}
-                  className="h-10 w-10 rounded-xl object-cover border border-white/50"
+                  className="h-8 w-8 rounded-lg object-cover border border-white/50"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none'
                   }}
                 />
               ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500 text-white shadow-lg shadow-indigo-500/40">
-                  <User className="h-5 w-5" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-emerald-500 text-white shadow-lg shadow-indigo-500/40">
+                  <User className="h-4 w-4" />
                 </div>
               )}
               <div className="hidden text-left sm:block">
-                <p className="text-sm font-semibold text-slate-800">{user?.nombre_completo}</p>
-                <p className="text-xs font-medium capitalize text-slate-500">{user?.rol}</p>
+                <p className="text-xs font-semibold text-slate-800">{user?.nombre_completo}</p>
+                <p className="text-[10px] font-medium capitalize text-slate-500">{user?.rol}</p>
               </div>
             </button>
 
