@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ChangeEvent, FormEvent, useEffect } from 'react'
+import { useState, ChangeEvent, FormEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
@@ -68,19 +68,6 @@ function ProductosContent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Producto | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
-
-  // Bloquear scroll cuando cualquier modal está abierto
-  useEffect(() => {
-    const shouldBlock = isModalOpen || isViewOpen || selectedProduct
-    if (!shouldBlock) {
-      return undefined
-    }
-    const originalOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = originalOverflow || ''
-    }
-  }, [isModalOpen, isViewOpen, selectedProduct])
 
   const handleFiltersChange = (nextFilters: ProductoFilters) => {
     setFilters(prev => {
