@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
+import { useMemo, useState, ChangeEvent, FormEvent, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { Sparkles, Users, Plus, Phone, Mail, Building2, MapPin, X } from 'lucide-react'
@@ -55,6 +55,17 @@ function ClientesContent() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [clienteToDelete, setClienteToDelete] = useState<Cliente | null>(null)
 
+  // Bloquear scroll cuando cualquier modal está abierto
+  useEffect(() => {
+    if (isModalOpen || isDetailOpen || clienteToDelete) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [isModalOpen, isDetailOpen, clienteToDelete])
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['clientes', searchTerm],
     queryFn: () =>
@@ -73,11 +84,11 @@ function ClientesContent() {
     return { total, activos, juridicos }
   }, [clientes])
 
-  const handleInputChange = (field: keyof CreateClienteData) => {
-    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const value = event.target.value
-      setFormData((prev) => ({ ...prev, [field]: value }))
-    }
+  const handleInputChange = (field: keyof CreateClienteData) => (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const value = event.target.value
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleCreateCliente = () => {
@@ -159,10 +170,10 @@ function ClientesContent() {
     setFormData(initialFormState)
   }
 
-  // Render component
+  const filteredClientes = clientes
+
   return (
-    <>
-      <div className="space-y-10 animate-fade-in">
+    <div className="space-y-10 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 via-sky-500 to-blue-600 px-6 py-8 text-white shadow-xl">
         <div className="absolute -right-12 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-3xl lg:block" />
         <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
@@ -282,7 +293,7 @@ function ClientesContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {clientes.length === 0 ? (
+                  {filteredClientes.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-16 text-center">
                         <Users className="mx-auto mb-3 h-12 w-12 text-slate-300" />
@@ -291,7 +302,7 @@ function ClientesContent() {
                       </td>
                     </tr>
                   ) : (
-                    clientes.map((cliente) => (
+                    filteredClientes.map((cliente) => (
                       <tr key={cliente.id} className="transition hover:bg-slate-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -610,12 +621,10 @@ function ClientesContent() {
                 Eliminar
               </button>
             </div>
-            </div>
           </div>
         </div>
       )}
-      </div>
-    </>
+    </div>
   )
 }
 

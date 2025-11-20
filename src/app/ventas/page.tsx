@@ -32,6 +32,17 @@ function VentasContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [ventaEditando, setVentaEditando] = useState<Venta | null>(null)
   const [selectedVenta, setSelectedVenta] = useState<Venta | null>(null)
+
+  // Bloquear scroll cuando cualquier modal está abierto
+  useEffect(() => {
+    if (isModalOpen || isEditModalOpen || selectedVenta) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [isModalOpen, isEditModalOpen, selectedVenta])
   const [detallesLoading, setDetallesLoading] = useState(false)
   const [detallesError, setDetallesError] = useState<string | null>(null)
 
@@ -111,10 +122,8 @@ function VentasContent() {
     }
   }
 
-  // Render component
   return (
-    <>
-      <div className="space-y-10 animate-fade-in">
+    <div className="space-y-10 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-500 px-6 py-8 text-white shadow-xl">
         <div className="absolute -right-12 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-3xl lg:block" />
         <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
@@ -314,8 +323,7 @@ function VentasContent() {
           </div>
         </div>
       )}
-      </div>
-    </>
+    </div>
   )
 }
 

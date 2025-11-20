@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
+import { useMemo, useState, ChangeEvent, FormEvent, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Building2, Sparkles, Factory, Plus, Phone, Mail, MapPin, Globe2, Home, X } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -54,6 +54,17 @@ function ProveedoresContent() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [proveedorToDelete, setProveedorToDelete] = useState<Proveedor | null>(null)
 
+  // Bloquear scroll cuando cualquier modal está abierto
+  useEffect(() => {
+    if (isModalOpen || isDetailOpen || proveedorToDelete) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [isModalOpen, isDetailOpen, proveedorToDelete])
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['proveedores', searchTerm],
     queryFn: () =>
@@ -74,11 +85,11 @@ function ProveedoresContent() {
     return { total, internacionales, activos }
   }, [proveedores])
 
-  const handleInputChange = (field: keyof CreateProveedorData) => {
-    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const value = event.target.value
-      setFormData((prev) => ({ ...prev, [field]: value }))
-    }
+  const handleInputChange = (field: keyof CreateProveedorData) => (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const value = event.target.value
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleCreateProveedor = () => {
@@ -160,10 +171,8 @@ function ProveedoresContent() {
     setFormData(initialFormState)
   }
 
-  // Render component
   return (
-    <>
-      <div className="space-y-10 animate-fade-in">
+    <div className="space-y-10 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-600 px-6 py-8 text-white shadow-xl">
         <div className="absolute -right-12 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-3xl lg:block" />
         <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
@@ -588,8 +597,7 @@ function ProveedoresContent() {
           </div>
         </div>
       )}
-      </div>
-    </>
+    </div>
   )
 }
 

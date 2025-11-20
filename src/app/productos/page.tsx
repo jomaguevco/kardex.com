@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ChangeEvent, FormEvent } from 'react'
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
@@ -69,6 +69,17 @@ function ProductosContent() {
   const [editingProduct, setEditingProduct] = useState<Producto | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
 
+  // Bloquear scroll cuando cualquier modal está abierto
+  useEffect(() => {
+    if (isModalOpen || isViewOpen || selectedProduct) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || ''
+      }
+    }
+  }, [isModalOpen, isViewOpen, selectedProduct])
+
   const handleFiltersChange = (nextFilters: ProductoFilters) => {
     setFilters(prev => {
       const merged = { ...prev, ...nextFilters }
@@ -93,11 +104,11 @@ function ProductosContent() {
     })
   }
 
-  const handleInputChange = (field: keyof ProductoFormState) => {
-    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value = event.target.value
-      setFormData(prev => ({ ...prev, [field]: value }))
-    }
+  const handleInputChange = (field: keyof ProductoFormState) => (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const value = event.target.value
+    setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const mapProductToForm = (producto: Producto): ProductoFormState => ({
@@ -299,10 +310,10 @@ function ProductosContent() {
     }
   }
 
-  // Render component
+  const stockState = selectedProduct ? getStockState(selectedProduct) : null
+
   return (
-    <>
-      <div className="space-y-10 animate-fade-in">
+    <div className="space-y-10 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-emerald-500 px-6 py-8 text-white shadow-xl">
         <div className="absolute -right-12 top-1/2 hidden h-64 w-64 -translate-y-1/2 rounded-full bg-white/15 blur-3xl lg:block" />
         <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
@@ -451,16 +462,13 @@ function ProductosContent() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                {selectedProduct && (() => {
-                  const stockState = getStockState(selectedProduct)
-                  return (
-                    <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${stockState.badgeClass}`}
-                    >
-                      {stockState.label}
-                    </span>
-                  )
-                })()}
+                {stockState && (
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${stockState.badgeClass}`}
+                  >
+                    {stockState.label}
+                  </span>
+                )}
                 <span
                   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                     selectedProduct.activo
@@ -697,7 +705,6 @@ function ProductosContent() {
           </div>
         </div>
       )}
-      </div>
-    </>
+    </div>
   )
 }
