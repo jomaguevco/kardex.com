@@ -21,6 +21,17 @@
   margin: 0;
 }
 
+/* RESET AGRESIVO PARA HEADER */
+html,
+body,
+body > div:first-child,
+body > div:first-child > *:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 html {
   position: relative !important;
   padding: 0 !important;
@@ -58,10 +69,22 @@ header.header-fixed {
   will-change: transform !important;
   margin: 0 !important;
   padding: 0 !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
   max-width: 100% !important;
   height: 73px !important;
   border: none !important;
   box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+/* Eliminar cualquier espacio ANTES del header */
+body > header.header-fixed,
+body > div > header.header-fixed,
+body > * > header.header-fixed {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  top: 0 !important;
 }
 
 @media (min-width: 1024px) {
