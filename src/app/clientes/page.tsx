@@ -171,8 +171,6 @@ function ClientesContent() {
     setFormData(initialFormState)
   }
 
-  const filteredClientes = clientes
-
   return (
     <div className="space-y-10 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 via-sky-500 to-blue-600 px-6 py-8 text-white shadow-xl">
