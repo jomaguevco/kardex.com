@@ -310,8 +310,6 @@ function ProductosContent() {
     }
   }
 
-  const stockState = selectedProduct ? getStockState(selectedProduct) : null
-
   return (
     <div className="space-y-10 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-emerald-500 px-6 py-8 text-white shadow-xl">
@@ -462,13 +460,16 @@ function ProductosContent() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                {stockState && (
-                  <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${stockState.badgeClass}`}
-                  >
-                    {stockState.label}
-                  </span>
-                )}
+                {selectedProduct && (() => {
+                  const stockState = getStockState(selectedProduct)
+                  return (
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${stockState.badgeClass}`}
+                    >
+                      {stockState.label}
+                    </span>
+                  )
+                })()}
                 <span
                   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                     selectedProduct.activo
