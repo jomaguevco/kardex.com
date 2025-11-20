@@ -32,8 +32,6 @@ function VentasContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [ventaEditando, setVentaEditando] = useState<Venta | null>(null)
   const [selectedVenta, setSelectedVenta] = useState<Venta | null>(null)
-  const [detallesLoading, setDetallesLoading] = useState(false)
-  const [detallesError, setDetallesError] = useState<string | null>(null)
 
   // Bloquear scroll cuando cualquier modal está abierto
   useEffect(() => {
@@ -44,8 +42,9 @@ function VentasContent() {
         document.body.style.overflow = originalOverflow || ''
       }
     }
-    return undefined
   }, [isModalOpen, isEditModalOpen, selectedVenta])
+  const [detallesLoading, setDetallesLoading] = useState(false)
+  const [detallesError, setDetallesError] = useState<string | null>(null)
 
   const handleNuevaVenta = () => {
     setIsModalOpen(true)

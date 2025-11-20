@@ -64,7 +64,6 @@ function ClientesContent() {
         document.body.style.overflow = originalOverflow || ''
       }
     }
-    return undefined
   }, [isModalOpen, isDetailOpen, clienteToDelete])
 
   const { data, isLoading, error } = useQuery({
@@ -567,13 +566,13 @@ function ClientesContent() {
                   value={selectedCliente.contacto || 'No especificado'}
                 />
               </div>
-              </div>
 
-              <div className="flex-shrink-0 flex justify-end pt-6 border-t border-slate-200 px-6 pb-6">
-                <button onClick={() => setIsDetailOpen(false)} className="btn-outline">
-                  Cerrar
-                </button>
-              </div>
+            </div>
+
+            <div className="flex-shrink-0 flex justify-end pt-6 border-t border-slate-200 px-6 pb-6">
+              <button onClick={() => setIsDetailOpen(false)} className="btn-outline">
+                Cerrar
+              </button>
             </div>
           </div>
         </div>

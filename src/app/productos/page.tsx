@@ -78,7 +78,6 @@ function ProductosContent() {
         document.body.style.overflow = originalOverflow || ''
       }
     }
-    return undefined
   }, [isModalOpen, isViewOpen, selectedProduct])
 
   const handleFiltersChange = (nextFilters: ProductoFilters) => {
