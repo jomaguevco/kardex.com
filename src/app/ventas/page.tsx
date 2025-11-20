@@ -269,6 +269,7 @@ function VentasContent() {
                   </table>
                 )}
               </div>
+              </div>
 
               <div className="flex-shrink-0 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end px-4 sm:px-6 py-4 border-t border-slate-200">
                 <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
