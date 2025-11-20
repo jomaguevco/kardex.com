@@ -367,16 +367,16 @@ function ProveedoresContent() {
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
-            <div className="glass-card w-full max-w-5xl max-h-[90vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+            <div className="glass-card w-full max-w-5xl max-h-[85vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     {editingProveedor ? 'Editar proveedor' : 'Nuevo proveedor'}
                   </span>
-                  <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                  <h2 className="mt-1 text-sm font-semibold text-slate-900">
                     {editingProveedor ? 'Actualiza la información comercial' : 'Registra un nuevo aliado comercial'}
                   </h2>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-[10px] text-slate-500">
                     Mantén tu cartera de proveedores sincronizada para agilizar compras y logística.
                   </p>
                 </div>
@@ -500,7 +500,7 @@ function ProveedoresContent() {
       {isDetailOpen && selectedProveedor && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center p-4 sm:p-10">
-            <div className="glass-card w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
               <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
                   <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
@@ -551,7 +551,7 @@ function ProveedoresContent() {
       {isDeleteModalOpen && proveedorToDelete && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center p-4">
-            <div className="glass-card w-full max-w-2xl max-h-[90vh] rounded-3xl p-6 shadow-2xl animate-fade-in overflow-hidden">
+            <div className="glass-card w-full max-w-2xl max-h-[85vh] rounded-3xl p-6 shadow-2xl animate-fade-in overflow-hidden">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100">
                 <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

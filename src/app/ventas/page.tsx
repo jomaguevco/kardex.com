@@ -168,16 +168,16 @@ function VentasContent() {
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
-            <div className="glass-card w-full max-w-6xl max-h-[90vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+            <div className="glass-card w-full max-w-6xl max-h-[85vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     Nueva venta
                   </span>
-                  <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                  <h2 className="mt-1 text-sm font-semibold text-slate-900">
                     Registra una venta y sincroniza el inventario automáticamente
                   </h2>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-[10px] text-slate-500">
                     El dashboard se actualizará con las métricas más recientes cuando completes el registro.
                   </p>
                 </div>
@@ -200,12 +200,12 @@ function VentasContent() {
       {selectedVenta && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/70 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center p-4 sm:p-10">
-            <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+            <div className="glass-card w-full max-w-6xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Detalle de venta</span>
-                  <h2 className="mt-2 text-xl font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
-                  <p className="text-xs text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Detalle de venta</span>
+                  <h2 className="mt-1 text-sm font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
+                  <p className="text-[10px] text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
                 </div>
                 <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40 flex-shrink-0">
                   ✕
@@ -284,16 +284,16 @@ function VentasContent() {
       {isEditModalOpen && ventaEditando && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
-            <div className="glass-card w-full max-w-6xl max-h-[90vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+            <div className="glass-card w-full max-w-6xl max-h-[85vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     Editar venta
                   </span>
-                  <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                  <h2 className="mt-1 text-sm font-semibold text-slate-900">
                     {ventaEditando.numero_factura}
                   </h2>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-[10px] text-slate-500">
                     Modifica los detalles de la venta. Los cambios se reflejarán en el sistema.
                   </p>
                 </div>

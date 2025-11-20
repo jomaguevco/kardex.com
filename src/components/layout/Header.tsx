@@ -79,11 +79,11 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         boxShadow: '0 1px 2px 0 rgba(2, 6, 23, 0.1)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
-        transform: 'translate3d(0, 0, 0)',
-        willChange: 'transform',
+        transform: 'none', /* Eliminar transform para evitar movimiento */
         margin: 0,
         padding: 0,
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        transition: 'none' /* Eliminar transiciones */
       }}
     >
       <div className="flex h-full items-center justify-between px-3 lg:px-6">

@@ -391,17 +391,17 @@ function ProductosContent() {
       {isViewOpen && selectedProduct && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/70 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
-            <div className="glass-card w-full max-w-4xl max-h-[90vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+            <div className="glass-card w-full max-w-4xl max-h-[85vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
-                  <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                  <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
                     <Package className="mr-1.5 h-3.5 w-3.5" />
                     {selectedProduct.codigo_interno || 'Sin código'}
                   </span>
-                  <h2 className="mt-3 text-xl font-semibold text-slate-900">
+                  <h2 className="mt-2 text-sm font-semibold text-slate-900">
                     {selectedProduct.nombre}
                   </h2>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-[10px] text-slate-500">
                     {selectedProduct.descripcion || 'Sin descripción registrada'}
                   </p>
                 </div>
@@ -482,18 +482,18 @@ function ProductosContent() {
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/70 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
-            <div className="glass-card w-full max-w-5xl max-h-[90vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+            <div className="glass-card w-full max-w-5xl max-h-[85vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     {editingProduct ? 'Editar producto' : 'Nuevo producto'}
                   </span>
-                  <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                  <h2 className="mt-1 text-sm font-semibold text-slate-900">
                     {editingProduct
                       ? 'Actualiza la información del producto'
                       : 'Registra un nuevo producto'}
                   </h2>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-[10px] text-slate-500">
                     Completa la información básica para sincronizar el inventario con el dashboard.
                   </p>
                 </div>
