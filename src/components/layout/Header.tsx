@@ -65,7 +65,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
 
   return (
     <header 
-      className="fixed top-0 left-0 right-0 z-[60] h-[73px] border-b border-white/30 bg-white/60 shadow-sm shadow-slate-950/10 backdrop-blur-xl transition-all duration-300 header-fixed"
+      className="header-fixed"
       style={{ 
         position: 'fixed', 
         top: '0', 
@@ -73,8 +73,16 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         right: '0', 
         zIndex: 60,
         width: '100%',
+        height: '73px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
+        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+        boxShadow: '0 1px 2px 0 rgba(2, 6, 23, 0.1)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
         transform: 'translateZ(0)',
-        willChange: 'transform'
+        willChange: 'transform',
+        margin: 0,
+        padding: 0
       }}
     >
       <div className="flex h-full items-center justify-between px-4 lg:px-8">
