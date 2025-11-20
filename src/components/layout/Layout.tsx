@@ -19,8 +19,8 @@ export default function Layout({ children }: LayoutProps) {
     <div className="relative min-h-screen bg-slate-950/95">
       <BackgroundDecorations />
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} topOffset={0} />
+      <Header onMenuToggle={toggleSidebar} />
       <div className="relative min-h-screen transition-all duration-500 lg:pl-64" style={{ paddingTop: `${HEADER_HEIGHT}px` }}>
-        <Header onMenuToggle={toggleSidebar} />
         <main
           className="relative z-10 px-4 pb-12 sm:px-6 lg:px-8 pt-6"
         >
