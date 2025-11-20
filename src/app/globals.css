@@ -123,7 +123,7 @@ body > * > header.header-fixed {
   
   /* Modal alineado con el contenido de fondo */
   .modal-container {
-    padding-left: calc(13rem + 3rem + 2rem) !important; /* Sidebar(13rem) + margen adicional(3rem) + padding adicional(2rem) */
+    padding-left: calc(13rem + 3rem + 4rem) !important; /* Sidebar(13rem) + margen adicional(3rem) + padding adicional(4rem) */
     padding-right: 1rem !important;
   }
 }
