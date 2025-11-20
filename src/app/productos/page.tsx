@@ -93,11 +93,11 @@ function ProductosContent() {
     })
   }
 
-  const handleInputChange = (field: keyof ProductoFormState) => (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const value = event.target.value
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const handleInputChange = (field: keyof ProductoFormState) => {
+    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const value = event.target.value
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
   }
 
   const mapProductToForm = (producto: Producto): ProductoFormState => ({

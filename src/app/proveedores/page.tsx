@@ -74,11 +74,11 @@ function ProveedoresContent() {
     return { total, internacionales, activos }
   }, [proveedores])
 
-  const handleInputChange = (field: keyof CreateProveedorData) => (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const value = event.target.value
-    setFormData((prev) => ({ ...prev, [field]: value }))
+  const handleInputChange = (field: keyof CreateProveedorData) => {
+    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const value = event.target.value
+      setFormData((prev) => ({ ...prev, [field]: value }))
+    }
   }
 
   const handleCreateProveedor = () => {

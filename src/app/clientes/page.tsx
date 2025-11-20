@@ -73,11 +73,11 @@ function ClientesContent() {
     return { total, activos, juridicos }
   }, [clientes])
 
-  const handleInputChange = (field: keyof CreateClienteData) => (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const value = event.target.value
-    setFormData((prev) => ({ ...prev, [field]: value }))
+  const handleInputChange = (field: keyof CreateClienteData) => {
+    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const value = event.target.value
+      setFormData((prev) => ({ ...prev, [field]: value }))
+    }
   }
 
   const handleCreateCliente = () => {
