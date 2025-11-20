@@ -553,7 +553,7 @@ function ProveedoresContent() {
               </div>
               <div>
                 <h2 className="text-sm font-semibold text-slate-900">Confirmar eliminación</h2>
-                <p className="text-sm text-slate-500">Esta acción no se puede deshacer</p>
+                <p className="text-[10px] text-slate-500">Esta acción no se puede deshacer</p>
               </div>
             </div>
             
