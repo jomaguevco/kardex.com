@@ -57,8 +57,9 @@ function ClientesContent() {
 
   // Bloquear scroll cuando cualquier modal está abierto
   useEffect(() => {
-    if (!isModalOpen && !isDetailOpen && !clienteToDelete) {
-      return
+    const shouldBlock = isModalOpen || isDetailOpen || clienteToDelete
+    if (!shouldBlock) {
+      return undefined
     }
     const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'

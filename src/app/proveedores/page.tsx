@@ -56,8 +56,9 @@ function ProveedoresContent() {
 
   // Bloquear scroll cuando cualquier modal está abierto
   useEffect(() => {
-    if (!isModalOpen && !isDetailOpen && !proveedorToDelete) {
-      return
+    const shouldBlock = isModalOpen || isDetailOpen || proveedorToDelete
+    if (!shouldBlock) {
+      return undefined
     }
     const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'

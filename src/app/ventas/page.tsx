@@ -37,8 +37,9 @@ function VentasContent() {
 
   // Bloquear scroll cuando cualquier modal está abierto
   useEffect(() => {
-    if (!isModalOpen && !isEditModalOpen && !selectedVenta) {
-      return
+    const shouldBlock = isModalOpen || isEditModalOpen || selectedVenta
+    if (!shouldBlock) {
+      return undefined
     }
     const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
