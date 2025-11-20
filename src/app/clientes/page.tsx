@@ -292,7 +292,7 @@ function ClientesContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {filteredClientes.length === 0 ? (
+                  {clientes.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-16 text-center">
                         <Users className="mx-auto mb-3 h-12 w-12 text-slate-300" />
@@ -301,7 +301,7 @@ function ClientesContent() {
                       </td>
                     </tr>
                   ) : (
-                    filteredClientes.map((cliente) => (
+                    clientes.map((cliente) => (
                       <tr key={cliente.id} className="transition hover:bg-slate-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
