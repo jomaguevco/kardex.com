@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, ChangeEvent, FormEvent, useEffect } from 'react'
+import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { Sparkles, Users, Plus, Phone, Mail, Building2, MapPin, X } from 'lucide-react'
@@ -54,19 +54,6 @@ function ClientesContent() {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [clienteToDelete, setClienteToDelete] = useState<Cliente | null>(null)
-
-  // Bloquear scroll cuando cualquier modal está abierto
-  useEffect(() => {
-    if (isModalOpen || isDetailOpen || clienteToDelete) {
-      const originalOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = originalOverflow || ''
-      }
-    } else {
-      return () => {}
-    }
-  }, [isModalOpen, isDetailOpen, clienteToDelete])
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['clientes', searchTerm],

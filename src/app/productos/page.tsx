@@ -69,19 +69,6 @@ function ProductosContent() {
   const [editingProduct, setEditingProduct] = useState<Producto | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
 
-  // Bloquear scroll cuando cualquier modal está abierto
-  useEffect(() => {
-    if (isModalOpen || isViewOpen || selectedProduct) {
-      const originalOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = originalOverflow || ''
-      }
-    } else {
-      return () => {}
-    }
-  }, [isModalOpen, isViewOpen, selectedProduct])
-
   const handleFiltersChange = (nextFilters: ProductoFilters) => {
     setFilters(prev => {
       const merged = { ...prev, ...nextFilters }

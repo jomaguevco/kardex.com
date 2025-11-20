@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, ChangeEvent, FormEvent, useEffect } from 'react'
+import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Building2, Sparkles, Factory, Plus, Phone, Mail, MapPin, Globe2, Home, X } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -53,19 +53,6 @@ function ProveedoresContent() {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [proveedorToDelete, setProveedorToDelete] = useState<Proveedor | null>(null)
-
-  // Bloquear scroll cuando cualquier modal está abierto
-  useEffect(() => {
-    if (isModalOpen || isDetailOpen || proveedorToDelete) {
-      const originalOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = originalOverflow || ''
-      }
-    } else {
-      return () => {}
-    }
-  }, [isModalOpen, isDetailOpen, proveedorToDelete])
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['proveedores', searchTerm],
