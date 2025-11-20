@@ -43,6 +43,8 @@ function VentasContent() {
       return () => {
         document.body.style.overflow = originalOverflow || ''
       }
+    } else {
+      return () => {}
     }
   }, [isModalOpen, isEditModalOpen, selectedVenta])
 

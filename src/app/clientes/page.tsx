@@ -63,6 +63,8 @@ function ClientesContent() {
       return () => {
         document.body.style.overflow = originalOverflow || ''
       }
+    } else {
+      return () => {}
     }
   }, [isModalOpen, isDetailOpen, clienteToDelete])
 

@@ -62,6 +62,8 @@ function ProveedoresContent() {
       return () => {
         document.body.style.overflow = originalOverflow || ''
       }
+    } else {
+      return () => {}
     }
   }, [isModalOpen, isDetailOpen, proveedorToDelete])
 
