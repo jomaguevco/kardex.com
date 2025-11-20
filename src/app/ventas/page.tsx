@@ -166,8 +166,8 @@ function VentasContent() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-start justify-start bg-slate-900/60 py-4 sm:py-10 backdrop-blur-sm modal-container">
-          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
+        <div className="fixed inset-0 z-[9999] flex items-start justify-end bg-slate-900/60 py-4 sm:py-10 backdrop-blur-sm modal-container">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col mr-4 sm:mr-6">
             <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
               <div>
                 <span className="text-sm font-semibold uppercase tracking-wide text-slate-400">
@@ -199,20 +199,20 @@ function VentasContent() {
       )}
 
       {selectedVenta && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 px-4 py-4 sm:py-10 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-start justify-start bg-slate-900/60 py-4 sm:py-10 backdrop-blur-sm modal-container">
           <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
-            <div className="flex-shrink-0 flex items-start justify-between gap-4">
+            <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
               <div>
                 <span className="text-sm font-semibold uppercase tracking-wide text-slate-400">Detalle de venta</span>
                 <h2 className="mt-2 text-2xl font-semibold text-slate-900">{selectedVenta.numero_factura}</h2>
                 <p className="text-base text-slate-500">Estado actual: <strong className="capitalize">{selectedVenta.estado}</strong></p>
               </div>
-              <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40">
+              <button onClick={handleCloseDetalle} className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40 text-xl">
                 ✕
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-2 mt-6">
+            <div className="flex-1 overflow-y-auto pr-2">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
                 <DetalleCard label="Cliente" value={selectedVenta.cliente?.nombre || 'Cliente no registrado'} />
                 <DetalleCard label="Fecha" value={new Date(selectedVenta.fecha_venta).toLocaleString()} />
@@ -282,7 +282,7 @@ function VentasContent() {
       )}
 
       {isEditModalOpen && ventaEditando && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 px-4 py-4 sm:py-10 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-start justify-start bg-slate-900/60 py-4 sm:py-10 backdrop-blur-sm modal-container">
           <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
             <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
               <div>
@@ -298,7 +298,7 @@ function VentasContent() {
               </div>
               <button
                 onClick={handleEditCancel}
-                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40"
+                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40 text-xl"
               >
                 ✕
               </button>
