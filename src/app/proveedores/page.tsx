@@ -366,8 +366,8 @@ function ProveedoresContent() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm">
-          <div className="flex h-full w-full items-center justify-center p-4 sm:p-10">
-            <div className="glass-card w-full max-w-5xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+          <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
+            <div className="glass-card w-full max-w-5xl max-h-[90vh] ml-auto rounded-3xl shadow-2xl flex flex-col overflow-hidden">
               <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
                   <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">

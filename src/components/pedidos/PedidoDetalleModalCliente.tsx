@@ -97,9 +97,9 @@ export default function PedidoDetalleModalCliente({
 
       {/* Modal */}
       <div className="fixed inset-0 z-[9999] overflow-hidden bg-black/50 backdrop-blur-sm">
-        <div className="flex h-full w-full items-center justify-center p-4 sm:p-10">
+        <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4 sm:py-10">
           <div
-            className="relative w-full max-w-6xl max-h-[90vh] rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden"
+            className="relative w-full max-w-6xl max-h-[90vh] ml-auto rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
