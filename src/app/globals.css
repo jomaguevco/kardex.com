@@ -28,6 +28,15 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
 }
 
+/* Asegurar que el header se mantenga fijo */
+header[class*="fixed"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 60 !important;
+}
+
 body {
   color: #0f172a;
   background: radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.08), transparent 55%),
