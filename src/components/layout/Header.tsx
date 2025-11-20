@@ -65,7 +65,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
 
   return (
     <header 
-      className="fixed top-0 left-0 right-0 z-[60] h-[73px] border-b border-white/30 bg-white/60 shadow-sm shadow-slate-950/10 backdrop-blur-xl transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-[60] h-[73px] border-b border-white/30 bg-white/60 shadow-sm shadow-slate-950/10 backdrop-blur-xl transition-all duration-300 header-fixed"
       style={{ 
         position: 'fixed', 
         top: '0', 

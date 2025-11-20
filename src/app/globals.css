@@ -29,12 +29,22 @@ body {
 }
 
 /* Asegurar que el header se mantenga fijo */
+header.header-fixed,
 header[class*="fixed"] {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
   z-index: 60 !important;
+  width: 100% !important;
+}
+
+@media (min-width: 1024px) {
+  header.header-fixed,
+  header[class*="fixed"] {
+    left: 16rem !important;
+    width: calc(100% - 16rem) !important;
+  }
 }
 
 body {
