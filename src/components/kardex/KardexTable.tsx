@@ -265,8 +265,8 @@ export default function KardexTable() {
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-black bg-opacity-50 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center p-4">
             <div className="bg-white rounded-3xl max-w-2xl max-h-[85vh] w-full mx-auto flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                <h3 className="text-base font-semibold text-gray-900">Detalles del Movimiento</h3>
+              <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-200 px-6 pt-3 pb-3">
+                <h3 className="text-sm font-semibold text-gray-900">Detalles del Movimiento</h3>
                 <button
                   onClick={() => setSelectedMovimiento(null)}
                   className="text-gray-400 hover:text-gray-600 flex-shrink-0"

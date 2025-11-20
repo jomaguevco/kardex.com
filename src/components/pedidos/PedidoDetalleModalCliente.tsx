@@ -103,10 +103,10 @@ export default function PedidoDetalleModalCliente({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-white">
+            <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 pt-3 pb-3 text-white">
               <div>
-                <h2 className="text-lg font-bold">Detalle del Pedido</h2>
-                <p className="text-sm text-white/80">{pedido.numero_pedido}</p>
+                <h2 className="text-sm font-bold">Detalle del Pedido</h2>
+                <p className="text-[10px] text-white/80">{pedido.numero_pedido}</p>
               </div>
               <button
                 onClick={onClose}
