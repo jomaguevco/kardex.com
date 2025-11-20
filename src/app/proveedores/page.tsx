@@ -553,9 +553,9 @@ function ProveedoresContent() {
 
       {/* Modal de confirmación de eliminación */}
       {isDeleteModalOpen && proveedorToDelete && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm">
-          <div className="flex h-full w-full items-center justify-center p-4">
-            <div className="glass-card w-full max-w-2xl max-h-[85vh] mt-8 sm:mt-12 ml-8 sm:ml-16 rounded-3xl p-6 shadow-2xl animate-fade-in overflow-hidden">
+        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm p-8 sm:p-12">
+          <div className="h-full w-full flex items-start justify-start">
+            <div className="glass-card w-full max-w-2xl max-h-[85vh] rounded-3xl p-6 shadow-2xl animate-fade-in overflow-hidden">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100">
                 <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
