@@ -63,6 +63,7 @@ function ProveedoresContent() {
         document.body.style.overflow = originalOverflow || ''
       }
     }
+    return undefined
   }, [isModalOpen, isDetailOpen, proveedorToDelete])
 
   const { data, isLoading, error } = useQuery({

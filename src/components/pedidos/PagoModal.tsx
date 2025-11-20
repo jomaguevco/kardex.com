@@ -55,6 +55,10 @@ export default function PagoModal({
   onSuccess
 }: PagoModalProps) {
   const [metodoPago, setMetodoPago] = useState<MetodoPago | ''>('')
+  const [comprobante, setComprobante] = useState<File | null>(null)
+  const [previewComprobante, setPreviewComprobante] = useState<string | null>(null)
+  const [isProcesando, setIsProcesando] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Bloquear scroll cuando el modal está abierto
   useEffect(() => {
@@ -65,13 +69,8 @@ export default function PagoModal({
         document.body.style.overflow = originalOverflow || ''
       }
     }
+    return undefined
   }, [isOpen])
-  const [comprobante, setComprobante] = useState<File | null>(null)
-  const [previewComprobante, setPreviewComprobante] = useState<string | null>(null)
-  const [isProcesando, setIsProcesando] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  if (!isOpen) return null
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -180,6 +179,8 @@ export default function PagoModal({
     }
   }
 
+  if (!isOpen) return null
+
   return (
     <>
       {/* Overlay */}
@@ -215,123 +216,120 @@ export default function PagoModal({
             {/* Content */}
             <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-10 sm:pl-16 pr-4 sm:pr-6 py-6">
               <form id="pago-form" onSubmit={handleSubmit} className="space-y-6">
-            {/* Método de pago */}
-            <div>
-              <label className="mb-3 block text-sm font-semibold text-slate-900">
-                Selecciona el método de pago
-              </label>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {METODOS_PAGO.map((metodo) => {
-                  const Icon = metodo.icon
-                  const isSelected = metodoPago === metodo.value
-                  const requiereComprobante = ['YAPE', 'PLIN', 'TRANSFERENCIA'].includes(metodo.value)
+                {/* Método de pago */}
+                <div>
+                  <label className="mb-3 block text-sm font-semibold text-slate-900">
+                    Selecciona el método de pago
+                  </label>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {METODOS_PAGO.map((metodo) => {
+                      const Icon = metodo.icon
+                      const isSelected = metodoPago === metodo.value
+                      const requiereComprobante = ['YAPE', 'PLIN', 'TRANSFERENCIA'].includes(metodo.value)
 
-                  return (
-                    <button
-                      key={metodo.value}
-                      type="button"
-                      onClick={() => setMetodoPago(metodo.value)}
-                      className={`relative rounded-xl border-2 p-4 text-left transition ${
-                        isSelected
-                          ? 'border-emerald-500 bg-emerald-50'
-                          : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'
-                      }`}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                            isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
+                      return (
+                        <button
+                          key={metodo.value}
+                          type="button"
+                          onClick={() => setMetodoPago(metodo.value)}
+                          className={`relative rounded-xl border-2 p-4 text-left transition ${
+                            isSelected
+                              ? 'border-emerald-500 bg-emerald-50'
+                              : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'
                           }`}
                         >
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className={`font-semibold ${isSelected ? 'text-emerald-900' : 'text-slate-900'}`}>
-                              {metodo.label}
-                            </p>
-                            {isSelected && (
-                              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600">
-                                <div className="h-2 w-2 rounded-full bg-white" />
+                          <div className="flex items-start space-x-3">
+                            <div
+                              className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                                isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
+                              }`}
+                            >
+                              <Icon className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <p className={`font-semibold ${isSelected ? 'text-emerald-900' : 'text-slate-900'}`}>
+                                  {metodo.label}
+                                </p>
+                                {isSelected && (
+                                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600">
+                                    <div className="h-2 w-2 rounded-full bg-white" />
+                                  </div>
+                                )}
                               </div>
-                            )}
+                              <p className="mt-1 text-xs text-slate-600">{metodo.description}</p>
+                              {requiereComprobante && (
+                                <p className="mt-1 text-xs font-medium text-amber-600">
+                                  * Requiere comprobante
+                                </p>
+                              )}
+                            </div>
                           </div>
-                          <p className="mt-1 text-xs text-slate-600">{metodo.description}</p>
-                          {requiereComprobante && (
-                            <p className="mt-1 text-xs font-medium text-amber-600">
-                              * Requiere comprobante
-                            </p>
-                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Subir comprobante (si aplica) */}
+                {metodoPago && ['YAPE', 'PLIN', 'TRANSFERENCIA'].includes(metodoPago) && (
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-900">
+                      Comprobante de pago {metodoPago === 'YAPE' || metodoPago === 'PLIN' ? '(captura de pantalla)' : '(voucher)'}
+                    </label>
+                    <div className="space-y-3">
+                      {previewComprobante ? (
+                        <div className="relative rounded-lg border-2 border-slate-200 bg-slate-50 p-4">
+                          <img
+                            src={previewComprobante}
+                            alt="Comprobante de pago"
+                            className="max-h-64 w-full rounded-lg object-contain"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveComprobante}
+                            className="absolute right-2 top-2 rounded-full bg-red-500 p-2 text-white transition hover:bg-red-600"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
+                      ) : (
+                        <div
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-8 transition hover:border-slate-400 hover:bg-slate-100"
+                        >
+                          <Upload className="mb-2 h-10 w-10 text-slate-400" />
+                          <p className="text-sm font-semibold text-slate-700">
+                            Haz clic para subir comprobante
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500">JPG, PNG o GIF. Máximo 5MB</p>
+                        </div>
+                      )}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        disabled={isProcesando}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Información adicional */}
+                {metodoPago === 'EFECTIVO' && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                    <p className="text-sm font-medium text-amber-900">
+                      💡 Recordatorio: El pago en efectivo se realizará al momento de la entrega.
+                    </p>
+                  </div>
+                )}
+              </form>
             </div>
 
-            {/* Subir comprobante (si aplica) */}
-            {metodoPago && ['YAPE', 'PLIN', 'TRANSFERENCIA'].includes(metodoPago) && (
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-900">
-                  Comprobante de pago {metodoPago === 'YAPE' || metodoPago === 'PLIN' ? '(captura de pantalla)' : '(voucher)'}
-                </label>
-                <div className="space-y-3">
-                  {previewComprobante ? (
-                    <div className="relative rounded-lg border-2 border-slate-200 bg-slate-50 p-4">
-                      <img
-                        src={previewComprobante}
-                        alt="Comprobante de pago"
-                        className="max-h-64 w-full rounded-lg object-contain"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleRemoveComprobante}
-                        className="absolute right-2 top-2 rounded-full bg-red-500 p-2 text-white transition hover:bg-red-600"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-8 transition hover:border-slate-400 hover:bg-slate-100"
-                    >
-                      <Upload className="mb-2 h-10 w-10 text-slate-400" />
-                      <p className="text-sm font-semibold text-slate-700">
-                        Haz clic para subir comprobante
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">JPG, PNG o GIF. Máximo 5MB</p>
-                    </div>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    disabled={isProcesando}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Información adicional */}
-            {metodoPago === 'EFECTIVO' && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <p className="text-sm font-medium text-amber-900">
-                  💡 Recordatorio: El pago en efectivo se realizará al momento de la entrega.
-                </p>
-              </div>
-            )}
-
-            </form>
-          </div>
-            </form>
-          </div>
-
-          {/* Footer con botones */}
-          <div className="flex-shrink-0 flex gap-3 border-t border-slate-200 bg-white px-6 py-4">
+            {/* Footer con botones */}
+            <div className="flex-shrink-0 flex gap-3 border-t border-slate-200 bg-white px-6 py-4">
             <button
               type="button"
               onClick={onClose}
@@ -355,6 +353,7 @@ export default function PagoModal({
                 'Confirmar Pago'
               )}
             </button>
+            </div>
           </div>
         </div>
       </div>
