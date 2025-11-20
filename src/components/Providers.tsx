@@ -38,7 +38,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <div style={{ margin: 0, padding: 0, top: 0 }}>
+        {children}
+      </div>
       <Toaster
         position="top-right"
         toastOptions={{

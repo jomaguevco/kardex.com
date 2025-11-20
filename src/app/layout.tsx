@@ -19,8 +19,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className="scroll-smooth">
-      <body className={`${inter.className} bg-slate-950/95 antialiased`}> 
+    <html lang="es" className="scroll-smooth" style={{ margin: 0, padding: 0, top: 0 }}>
+      <body className={`${inter.className} bg-slate-950/95 antialiased`} style={{ margin: 0, padding: 0, top: 0 }}> 
         <Providers>{children}</Providers>
       </body>
     </html>
