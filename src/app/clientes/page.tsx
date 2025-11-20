@@ -383,7 +383,7 @@ function ClientesContent() {
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4">
-            <div className="glass-card relative w-full max-w-4xl max-h-[85vh] ml-auto animate-fade-in flex flex-col overflow-hidden">
+            <div className="glass-card relative w-full max-w-4xl max-h-[85vh] ml-auto rounded-3xl animate-fade-in flex flex-col overflow-hidden">
               <div className="flex-shrink-0 border-b border-slate-200/70 px-6 pt-3 pb-3">
                 <h2 className="text-sm font-semibold text-slate-900">
                   {editingCliente ? 'Editar cliente' : 'Nuevo cliente'}
@@ -515,7 +515,7 @@ function ClientesContent() {
       {isDetailOpen && selectedCliente && (
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-950/50 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center px-4 sm:px-12 py-4">
-            <div className="glass-card relative w-full max-w-4xl max-h-[85vh] ml-auto animate-fade-in flex flex-col overflow-hidden">
+            <div className="glass-card relative w-full max-w-4xl max-h-[85vh] ml-auto rounded-3xl animate-fade-in flex flex-col overflow-hidden">
               <div className="flex-shrink-0 border-b border-slate-200/70 px-6 pt-3 pb-3">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-slate-900">Detalles del cliente</h2>
@@ -579,8 +579,8 @@ function ClientesContent() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">Confirmar eliminación</h2>
-                <p className="text-sm text-slate-500">Esta acción no se puede deshacer</p>
+                <h2 className="text-sm font-semibold text-slate-900">Confirmar eliminación</h2>
+                <p className="text-[10px] text-slate-500">Esta acción no se puede deshacer</p>
               </div>
             </div>
             

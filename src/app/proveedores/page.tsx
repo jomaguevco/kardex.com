@@ -501,22 +501,15 @@ function ProveedoresContent() {
         <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/60 backdrop-blur-sm">
           <div className="flex h-full w-full items-center justify-center p-4 sm:p-10">
             <div className="glass-card w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 flex items-start justify-between gap-4 border-b border-slate-200/50">
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
-                  <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                  <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
                     {selectedProveedor.tipo_proveedor === 'INTERNACIONAL' ? 'Proveedor internacional' : 'Proveedor nacional'}
                   </span>
-                  <h2 className="mt-3 text-xl font-semibold text-slate-900">{selectedProveedor.nombre}</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="mt-2 text-sm font-semibold text-slate-900">{selectedProveedor.nombre}</h2>
+                  <p className="text-[10px] text-slate-500">
                     {selectedProveedor.direccion || 'Sin dirección registrada'}
-                </p>
-              </div>
-              <button
-                onClick={() => setIsDetailOpen(false)}
-                className="rounded-full bg-white/25 p-2 text-white transition hover:bg-white/40"
-              >
-                <X className="h-5 w-5" />
-              </button>
+                  </p>
                 </div>
                 <button onClick={() => setIsDetailOpen(false)} className="rounded-full bg-white/25 px-3 py-1 text-white transition hover:bg-white/40 flex-shrink-0">
                   ✕
