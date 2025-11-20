@@ -167,7 +167,7 @@ function VentasContent() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 py-4 sm:py-10 backdrop-blur-sm modal-container">
-          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col mx-auto">
+          <div className="glass-card w-full max-w-6xl max-h-[90vh] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col mx-auto -ml-8 sm:-ml-12">
             <div className="flex-shrink-0 mb-6 flex items-start justify-between gap-4">
               <div>
                 <span className="text-sm font-semibold uppercase tracking-wide text-slate-400">
