@@ -382,7 +382,7 @@ function ClientesContent() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-          <div className="glass-card relative w-full max-w-4xl max-h-[90vh] animate-fade-in flex flex-col">
+          <div className="glass-card relative w-full max-w-4xl max-h-[90vh] animate-fade-in flex flex-col rounded-3xl">
             <div className="flex-shrink-0 border-b border-slate-200/70 px-6 py-4">
               <h2 className="text-base font-semibold text-slate-900">
                 {editingCliente ? 'Editar cliente' : 'Nuevo cliente'}

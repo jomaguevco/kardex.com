@@ -5,8 +5,30 @@ class ApiService {
   private api: AxiosInstance;
 
   constructor() {
+    // En desarrollo local, usar proxy si la URL es de Railway (para evitar CORS)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+    
+    // Detectar si estamos en el navegador (cliente)
+    const isClient = typeof window !== 'undefined';
+    
+    // Detectar si la URL apunta a Railway
+    const isRailwayBackend = apiUrl.includes('railway.app');
+    
+    // Usar proxy si estamos en el cliente (navegador) y la URL es de Railway
+    // Esto evita problemas de CORS porque Next.js hace el proxy desde el servidor
+    const useProxy = isClient && isRailwayBackend;
+    
+    const baseURL = useProxy 
+      ? '/api-proxy' // Usar proxy para evitar CORS en desarrollo local
+      : apiUrl;
+    
+    // Log para debugging (solo en desarrollo)
+    if (isClient && process.env.NODE_ENV === 'development') {
+      console.log(`[ApiService] baseURL: ${baseURL}, apiUrl: ${apiUrl}, useProxy: ${useProxy}`);
+    }
+    
     this.api = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api',
+      baseURL,
       timeout: 30000, // 30 segundos para operaciones que pueden tomar más tiempo (crear ventas con múltiples productos)
       headers: {
         'Content-Type': 'application/json',
@@ -20,6 +42,17 @@ class ApiService {
     // Request interceptor
     this.api.interceptors.request.use(
       (config) => {
+        // Log de petición en desarrollo
+        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.log('[ApiService] Request:', {
+            method: config.method?.toUpperCase(),
+            url: config.url,
+            baseURL: config.baseURL,
+            fullURL: `${config.baseURL}${config.url}`,
+            data: config.data
+          });
+        }
+        
         if (typeof window !== 'undefined') {
           const token = localStorage.getItem('token');
           if (token) {
@@ -90,17 +123,51 @@ class ApiService {
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T> | any> {
-    const response = await this.api.get(url, config);
-    // Si es blob, retornar la respuesta completa
-    if (config?.responseType === 'blob') {
-      return response;
+    try {
+      const response = await this.api.get(url, config);
+      // Si es blob, retornar la respuesta completa
+      if (config?.responseType === 'blob') {
+        return response;
+      }
+      return response.data;
+    } catch (error: any) {
+      // Log detallado para debugging
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.error('[ApiService] Error en GET:', {
+          url,
+          baseURL: this.api.defaults.baseURL,
+          error: error.message,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
+      throw error;
     }
-    return response.data;
   }
 
   async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.api.post(url, data, config);
-    return response.data;
+    try {
+      const response = await this.api.post(url, data, config);
+      return response.data;
+    } catch (error: any) {
+      // Log detallado para debugging
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.error('[ApiService] Error en POST:', url);
+        console.error('[ApiService] baseURL:', this.api.defaults.baseURL);
+        console.error('[ApiService] Error completo:', error);
+        console.error('[ApiService] Status:', error.response?.status);
+        console.error('[ApiService] Status Text:', error.response?.statusText);
+        console.error('[ApiService] Response Data:', JSON.stringify(error.response?.data, null, 2));
+        if (error.response?.data) {
+          console.error('[ApiService] Response Data (parsed):', error.response.data);
+        }
+        console.error('[ApiService] Request URL:', error.config?.url);
+        console.error('[ApiService] Request Method:', error.config?.method);
+        console.error('[ApiService] Request Data:', error.config?.data);
+      }
+      throw error;
+    }
   }
 
   async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
