@@ -37,12 +37,6 @@ export default function PedidoDetalleModalCliente({
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
-      case 'BORRADOR':
-        return (
-          <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-            Borrador - Listo para pagar
-          </span>
-        )
       case 'EN_PROCESO':
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
@@ -86,7 +80,8 @@ export default function PedidoDetalleModalCliente({
     }, 1000)
   }
 
-  const mostrarBotonPagar = pedido.estado === 'BORRADOR'
+  // Ya no hay pedidos en BORRADOR (se crean pagados), así que no se muestra botón de pago
+  const mostrarBotonPagar = false
 
   return (
     <>

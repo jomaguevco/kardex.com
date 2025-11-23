@@ -103,8 +103,10 @@ export default function PedidosPage() {
       PENDIENTE: 'bg-yellow-100 text-yellow-800',
       APROBADO: 'bg-blue-100 text-blue-800',
       PAGADO: 'bg-purple-100 text-purple-800',
+      EN_PROCESO: 'bg-blue-100 text-blue-800',
       PROCESADO: 'bg-emerald-100 text-emerald-800',
       EN_CAMINO: 'bg-emerald-100 text-emerald-800',
+      ENTREGADO: 'bg-green-100 text-green-800',
       CANCELADO: 'bg-gray-100 text-gray-800',
       RECHAZADO: 'bg-red-100 text-red-800'
     }
@@ -121,8 +123,10 @@ export default function PedidosPage() {
       PENDIENTE: 'Pendiente',
       APROBADO: 'Aprobado - Listo para pagar',
       PAGADO: 'Pagado - En espera de envío',
+      EN_PROCESO: 'En preparación',
       PROCESADO: 'En camino',
       EN_CAMINO: 'En camino',
+      ENTREGADO: 'Entregado',
       CANCELADO: 'Cancelado',
       RECHAZADO: 'Rechazado'
     }

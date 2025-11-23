@@ -51,6 +51,11 @@ export interface CrearPedidoData {
   observaciones?: string;
 }
 
+export interface CrearPedidoYpagarData extends CrearPedidoData {
+  metodo_pago: string;
+  comprobante_pago?: string;
+}
+
 
 export interface MarcarComoPagadoData {
   metodo_pago: string;
@@ -77,7 +82,90 @@ export interface PedidosResponse {
 
 class PedidoService {
   /**
-   * Crear un nuevo pedido (Cliente)
+   * Crear un nuevo pedido y pagarlo inmediatamente (Cliente)
+   * El pago es obligatorio - no se puede crear un pedido sin pagarlo
+   */
+  async crearPedidoYpagar(data: CrearPedidoYpagarData, comprobanteFile?: File): Promise<PedidoResponse> {
+    try {
+      // Usar FormData si hay comprobante, JSON si no
+      let requestData: any;
+      let headers: any = {};
+      
+      if (comprobanteFile) {
+        // Si hay comprobante, usar FormData
+        const formData = new FormData();
+        formData.append('tipo_pedido', data.tipo_pedido);
+        formData.append('detalles', JSON.stringify(data.productos.map(p => ({
+          producto_id: p.producto_id,
+          cantidad: p.cantidad,
+          precio_unitario: p.precio_unitario,
+          descuento: p.descuento || 0
+        }))));
+        if (data.observaciones) {
+          formData.append('observaciones', data.observaciones);
+        }
+        formData.append('metodo_pago', data.metodo_pago);
+        formData.append('comprobante', comprobanteFile);
+        requestData = formData;
+        // No establecer Content-Type manualmente - axios lo hace automáticamente para FormData
+      } else {
+        // Si no hay comprobante, usar JSON
+        requestData = {
+          tipo_pedido: data.tipo_pedido,
+          detalles: data.productos.map(p => ({
+            producto_id: p.producto_id,
+            cantidad: p.cantidad,
+            precio_unitario: p.precio_unitario,
+            descuento: p.descuento || 0
+          })),
+          observaciones: data.observaciones,
+          metodo_pago: data.metodo_pago
+        };
+      }
+      
+      console.log('crearPedidoYpagar - Enviando request:', comprobanteFile ? 'FormData con comprobante' : requestData);
+      
+      const response = await apiService.post('/pedidos/crear-y-pagar', requestData, {
+        headers: comprobanteFile ? {} : { 'Content-Type': 'application/json' }
+      });
+      
+      console.log('crearPedidoYpagar - Respuesta recibida:', response);
+      
+      // El backend retorna { success: true, data: {...}, message: "..." }
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Pedido creado y pagado exitosamente'
+        };
+      }
+      
+      // Si no tiene success, podría ser un error
+      throw new Error(response?.message || 'Error al crear el pedido y procesar el pago');
+    } catch (error: any) {
+      console.error('crearPedidoYpagar - Error:', error);
+      
+      // Si axios lanza un error (4xx, 5xx), extraer el mensaje del response
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        const errorMessage = errorData.message || errorData.error || 'Error al crear el pedido y procesar el pago';
+        
+        // Si es un error de autenticación, loguearlo pero no lanzar error de cierre de sesión
+        if (error.response.status === 401 || error.response.status === 403) {
+          console.error('Error de autenticación al crear pedido y pagar:', errorMessage);
+          // No cerrar sesión automáticamente, solo mostrar el error
+        }
+        
+        throw new Error(errorMessage);
+      }
+      
+      // Si es un error de red u otro tipo, usar el mensaje del error
+      throw error instanceof Error ? error : new Error('Error al crear el pedido y procesar el pago');
+    }
+  }
+
+  /**
+   * Crear un nuevo pedido (Cliente) - DEPRECATED: usar crearPedidoYpagar
    */
   async crearPedido(data: CrearPedidoData): Promise<PedidoResponse> {
     try {

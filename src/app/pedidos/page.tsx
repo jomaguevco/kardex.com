@@ -28,18 +28,32 @@ function PedidosContent() {
   const [isDetalleOpen, setIsDetalleOpen] = useState(false)
   const [filtroEstado, setFiltroEstado] = useState<string>('EN_PROCESO')
 
+  // Obtener todos los pedidos para estadísticas
+  const { data: todosLosPedidos } = useQuery({
+    queryKey: ['pedidos', 'pendientes', 'TODOS'],
+    queryFn: async () => {
+      const response = await pedidoService.getPedidosPendientes({
+        estado: undefined, // Todos los estados
+        limit: 1000
+      })
+      return response.data || []
+    }
+  })
+
+  // Obtener pedidos filtrados para la tabla
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['pedidos', 'pendientes', filtroEstado],
     queryFn: async () => {
       const response = await pedidoService.getPedidosPendientes({
         estado: filtroEstado === 'TODOS' ? undefined : filtroEstado,
-        limit: 1000 // Obtener todos los pedidos
+        limit: 1000
       })
       return response.data || []
     }
   })
 
   const pedidos = data || []
+  const pedidosParaEstadisticas = todosLosPedidos || []
 
   const handleViewDetalle = (pedido: Pedido) => {
     setSelectedPedido(pedido)
@@ -84,7 +98,7 @@ function PedidosContent() {
             <div>
               <p className="text-sm font-medium text-slate-600">En Proceso</p>
               <p className="mt-2 text-3xl font-bold text-slate-900">
-                {pedidos.filter((p: Pedido) => p.estado === 'EN_PROCESO').length}
+                {pedidosParaEstadisticas.filter((p: Pedido) => p.estado === 'EN_PROCESO').length}
               </p>
             </div>
             <div className="rounded-xl bg-blue-100 p-3">
@@ -98,7 +112,7 @@ function PedidosContent() {
             <div>
               <p className="text-sm font-medium text-slate-600">En Camino</p>
               <p className="mt-2 text-3xl font-bold text-slate-900">
-                {pedidos.filter((p: Pedido) => p.estado === 'EN_CAMINO').length}
+                {pedidosParaEstadisticas.filter((p: Pedido) => p.estado === 'EN_CAMINO').length}
               </p>
             </div>
             <div className="rounded-xl bg-emerald-100 p-3">
@@ -112,7 +126,7 @@ function PedidosContent() {
             <div>
               <p className="text-sm font-medium text-slate-600">Entregados</p>
               <p className="mt-2 text-3xl font-bold text-slate-900">
-                {pedidos.filter((p: Pedido) => p.estado === 'ENTREGADO').length}
+                {pedidosParaEstadisticas.filter((p: Pedido) => p.estado === 'ENTREGADO').length}
               </p>
             </div>
             <div className="rounded-xl bg-green-100 p-3">
@@ -126,7 +140,7 @@ function PedidosContent() {
             <div>
               <p className="text-sm font-medium text-slate-600">Total</p>
               <p className="mt-2 text-3xl font-bold text-slate-900">
-                {pedidos.length}
+                {pedidosParaEstadisticas.length}
               </p>
             </div>
             <div className="rounded-xl bg-indigo-100 p-3">

@@ -122,12 +122,6 @@ export default function PedidoDetalleModal({
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
-      case 'BORRADOR':
-        return (
-          <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-            Borrador
-          </span>
-        )
       case 'EN_PROCESO':
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
@@ -252,6 +246,39 @@ export default function PedidoDetalleModal({
                 </div>
               </div>
             </div>
+
+            {/* Información de pago (si existe) */}
+            {pedido.metodo_pago && (
+              <div className="glass-card rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <h3 className="mb-3 text-sm font-semibold text-emerald-900">Información de Pago</h3>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-medium text-emerald-700">Método de pago</p>
+                    <p className="mt-1 text-sm font-semibold text-emerald-900">
+                      {pedido.metodo_pago}
+                    </p>
+                  </div>
+                  {pedido.fecha_pago && (
+                    <div>
+                      <p className="text-xs font-medium text-emerald-700">Fecha de pago</p>
+                      <p className="mt-1 text-sm font-semibold text-emerald-900">
+                        {format(new Date(pedido.fecha_pago), "dd 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                      </p>
+                    </div>
+                  )}
+                  {pedido.comprobante_pago && (
+                    <div className="md:col-span-2">
+                      <p className="text-xs font-medium text-emerald-700 mb-2">Comprobante</p>
+                      <img
+                        src={pedido.comprobante_pago}
+                        alt="Comprobante de pago"
+                        className="max-w-xs rounded-lg border border-emerald-200"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Productos */}
             <div>
@@ -414,8 +441,8 @@ export default function PedidoDetalleModal({
                   </button>
                 )}
 
-                {/* Anular pedido - solo si NO está EN_CAMINO ni ENTREGADO */}
-                {pedido.estado !== 'EN_CAMINO' && pedido.estado !== 'ENTREGADO' && (
+                {/* Anular pedido - solo si NO está EN_CAMINO ni ENTREGADO ni CANCELADO */}
+                {pedido.estado !== 'EN_CAMINO' && pedido.estado !== 'ENTREGADO' && pedido.estado !== 'CANCELADO' && (
                   <>
                     <div className="w-full">
                       <label className="mb-2 block text-sm font-semibold text-slate-900">

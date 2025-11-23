@@ -1,10 +1,46 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter, useSearchParams } from 'next/navigation'
 import pedidoService from '@/services/pedidoService'
-import { ShoppingCart, Trash2, Plus, Minus, Loader2, ArrowLeft } from 'lucide-react'
+import { ShoppingCart, Trash2, Plus, Minus, Loader2, ArrowLeft, CreditCard, Wallet, Building2, Smartphone, Upload, X } from 'lucide-react'
+import toast from 'react-hot-toast'
+
+type MetodoPago = 'EFECTIVO' | 'TARJETA' | 'TRANSFERENCIA' | 'YAPE' | 'PLIN'
+
+const METODOS_PAGO: { value: MetodoPago; label: string; icon: any; description: string }[] = [
+  {
+    value: 'EFECTIVO',
+    label: 'Efectivo',
+    icon: Wallet,
+    description: 'Pago en efectivo al momento de la entrega'
+  },
+  {
+    value: 'TARJETA',
+    label: 'Tarjeta',
+    icon: CreditCard,
+    description: 'Tarjeta de crédito o débito'
+  },
+  {
+    value: 'TRANSFERENCIA',
+    label: 'Transferencia',
+    icon: Building2,
+    description: 'Transferencia bancaria'
+  },
+  {
+    value: 'YAPE',
+    label: 'Yape',
+    icon: Smartphone,
+    description: 'Pago mediante Yape'
+  },
+  {
+    value: 'PLIN',
+    label: 'Plin',
+    icon: Smartphone,
+    description: 'Pago mediante Plin'
+  }
+]
 
 export default function NuevoPedidoPage() {
   const router = useRouter()
@@ -12,6 +48,11 @@ export default function NuevoPedidoPage() {
   const [carrito, setCarrito] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [observaciones, setObservaciones] = useState('')
+  const [mostrarPago, setMostrarPago] = useState(false)
+  const [metodoPago, setMetodoPago] = useState<MetodoPago | ''>('')
+  const [comprobante, setComprobante] = useState<File | null>(null)
+  const [previewComprobante, setPreviewComprobante] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!isAuthenticated || user?.rol !== 'CLIENTE') {
@@ -69,17 +110,66 @@ export default function NuevoPedidoPage() {
     return subtotal + impuesto
   }
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      toast.error('Solo se permiten archivos de imagen')
+      return
+    }
+
+    // Validar tamaño (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('La imagen no debe superar los 5MB')
+      return
+    }
+
+    setComprobante(file)
+
+    // Crear preview
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setPreviewComprobante(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemoveComprobante = () => {
+    setComprobante(null)
+    setPreviewComprobante(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
   const handleCrearPedido = async () => {
     if (carrito.length === 0) {
-      alert('El carrito está vacío')
+      toast.error('El carrito está vacío')
+      return
+    }
+
+    // Mostrar formulario de pago
+    setMostrarPago(true)
+  }
+
+  const handleProcesarPago = async () => {
+    if (!metodoPago) {
+      toast.error('Debes seleccionar un método de pago')
+      return
+    }
+
+    // Si es YAPE, PLIN o TRANSFERENCIA, requerir comprobante
+    if ((metodoPago === 'YAPE' || metodoPago === 'PLIN' || metodoPago === 'TRANSFERENCIA') && !comprobante) {
+      toast.error(`Debes subir un comprobante de pago para ${metodoPago}`)
       return
     }
 
     setIsLoading(true)
     
     try {
-      console.log('handleCrearPedido - Iniciando creación de pedido...')
-      console.log('handleCrearPedido - Carrito:', carrito)
+      console.log('handleProcesarPago - Iniciando creación de pedido y pago...')
       
       const productos = carrito.map(item => ({
         producto_id: item.id,
@@ -88,44 +178,42 @@ export default function NuevoPedidoPage() {
         descuento: 0
       }))
 
-      console.log('handleCrearPedido - Productos a enviar:', productos)
-
-      const response = await pedidoService.crearPedido({
+      // Crear el pedido y pagarlo en una sola operación (con comprobante si existe)
+      console.log('handleProcesarPago - Creando pedido y pagando...')
+      
+      const responsePedido = await pedidoService.crearPedidoYpagar({
         tipo_pedido: 'PEDIDO_APROBACION',
         productos,
-        observaciones: observaciones || undefined
-      })
+        observaciones: observaciones || undefined,
+        metodo_pago: metodoPago
+      }, comprobante || undefined)
 
-      console.log('handleCrearPedido - Respuesta:', response)
-
-      if (response && response.success) {
-        // Limpiar carrito
-        setCarrito([])
-        localStorage.removeItem('carrito')
-        
-        console.log('Pedido creado exitosamente:', response.data)
-        
-        // Mostrar mensaje de éxito
-        alert('¡Pedido creado exitosamente! Un vendedor lo revisará pronto.')
-        
-        // Redirigir a la página de pedidos sin recargar toda la página
-        router.push('/cliente-portal/pedidos')
-        
-        // No forzar reload - dejar que React maneje la navegación
-      } else {
-        console.error('Error al crear pedido - respuesta sin success:', response)
-        throw new Error(response?.message || 'Error al crear el pedido')
+      if (!responsePedido || !responsePedido.success) {
+        throw new Error(responsePedido?.message || 'Error al crear el pedido y procesar el pago')
       }
+
+      const pedido = responsePedido.data
+      console.log('handleProcesarPago - Pedido creado y pagado:', pedido.id)
+
+      console.log('handleProcesarPago - Proceso completado exitosamente')
+
+      // Limpiar carrito
+      setCarrito([])
+      localStorage.removeItem('carrito')
+      
+      // Mostrar mensaje de éxito
+      toast.success('¡Pedido creado y pagado exitosamente!')
+      
+      // Redirigir a la página de pedidos
+      router.push('/cliente-portal/pedidos')
+      
     } catch (error: any) {
-      console.error('Error al crear pedido:', error)
+      console.error('Error al procesar pedido y pago:', error)
       
       // Extraer mensaje de error
-      const errorMessage = error?.response?.data?.message || error?.message || 'Error al crear el pedido'
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al procesar el pedido'
       
-      // Mostrar error al usuario
-      alert(`Error al crear el pedido: ${errorMessage}`)
-      
-      // NO cerrar sesión automáticamente aquí - dejar que el interceptor maneje solo errores críticos
+      toast.error(`Error: ${errorMessage}`)
     } finally {
       setIsLoading(false)
     }
@@ -294,27 +382,168 @@ export default function NuevoPedidoPage() {
               />
             </div>
 
-            <button
-              onClick={handleCrearPedido}
-              disabled={isLoading}
-              className="mt-6 w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Creando pedido...</span>
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="h-5 w-5" />
-                  <span>Crear Pedido</span>
-                </>
-              )}
-            </button>
+            {!mostrarPago ? (
+              <>
+                <button
+                  onClick={handleCrearPedido}
+                  disabled={isLoading}
+                  className="mt-6 w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  <CreditCard className="h-5 w-5" />
+                  <span>Crear Pedido y Pagar</span>
+                </button>
 
-            <p className="mt-4 text-xs text-center text-slate-500">
-              Tu pedido será revisado por un vendedor antes de ser procesado
-            </p>
+                <p className="mt-4 text-xs text-center text-slate-500">
+                  Debes pagar el pedido para completar la compra
+                </p>
+              </>
+            ) : (
+              <div className="mt-6 space-y-4">
+                <h3 className="text-lg font-semibold text-slate-900">Método de Pago</h3>
+                
+                {/* Métodos de pago */}
+                <div className="grid grid-cols-1 gap-3">
+                  {METODOS_PAGO.map((metodo) => {
+                    const Icon = metodo.icon
+                    const isSelected = metodoPago === metodo.value
+                    const requiereComprobante = ['YAPE', 'PLIN', 'TRANSFERENCIA'].includes(metodo.value)
+
+                    return (
+                      <button
+                        key={metodo.value}
+                        type="button"
+                        onClick={() => setMetodoPago(metodo.value)}
+                        disabled={isLoading}
+                        className={`relative rounded-xl border-2 p-3 text-left transition ${
+                          isSelected
+                            ? 'border-emerald-500 bg-emerald-50'
+                            : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                              isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className={`font-semibold ${isSelected ? 'text-emerald-900' : 'text-slate-900'}`}>
+                                {metodo.label}
+                              </p>
+                              {isSelected && (
+                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600">
+                                  <div className="h-2 w-2 rounded-full bg-white" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="mt-1 text-xs text-slate-600">{metodo.description}</p>
+                            {requiereComprobante && (
+                              <p className="mt-1 text-xs font-medium text-amber-600">
+                                * Requiere comprobante
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Subir comprobante (si aplica) */}
+                {metodoPago && ['YAPE', 'PLIN', 'TRANSFERENCIA'].includes(metodoPago) && (
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-900">
+                      Comprobante de pago {metodoPago === 'YAPE' || metodoPago === 'PLIN' ? '(captura de pantalla)' : '(voucher)'}
+                    </label>
+                    <div className="space-y-3">
+                      {previewComprobante ? (
+                        <div className="relative rounded-lg border-2 border-slate-200 bg-slate-50 p-4">
+                          <img
+                            src={previewComprobante}
+                            alt="Comprobante de pago"
+                            className="max-h-48 w-full rounded-lg object-contain"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveComprobante}
+                            disabled={isLoading}
+                            className="absolute right-2 top-2 rounded-full bg-red-500 p-2 text-white transition hover:bg-red-600 disabled:opacity-50"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={() => !isLoading && fileInputRef.current?.click()}
+                          className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-6 transition hover:border-slate-400 hover:bg-slate-100 disabled:cursor-not-allowed"
+                        >
+                          <Upload className="mb-2 h-8 w-8 text-slate-400" />
+                          <p className="text-sm font-semibold text-slate-700">
+                            Haz clic para subir comprobante
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500">JPG, PNG o GIF. Máximo 5MB</p>
+                        </div>
+                      )}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Información adicional para efectivo */}
+                {metodoPago === 'EFECTIVO' && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-sm font-medium text-amber-900">
+                      💡 Recordatorio: El pago en efectivo se realizará al momento de la entrega.
+                    </p>
+                  </div>
+                )}
+
+                {/* Botones de acción */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMostrarPago(false)
+                      setMetodoPago('')
+                      setComprobante(null)
+                      setPreviewComprobante(null)
+                    }}
+                    disabled={isLoading}
+                    className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleProcesarPago}
+                    disabled={isLoading || !metodoPago}
+                    className="flex-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center space-x-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Procesando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-5 w-5" />
+                        <span>Confirmar y Pagar</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -19,13 +19,6 @@ export default function PedidosTable({
 }: PedidosTableProps) {
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
-      case 'BORRADOR':
-        return (
-          <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-            <Calendar className="mr-1 h-3 w-3" />
-            Borrador
-          </span>
-        )
       case 'EN_PROCESO':
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
