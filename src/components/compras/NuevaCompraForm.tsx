@@ -108,7 +108,7 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
       setValue(`detalles.${productoExistenteIndex}.cantidad`, nuevaCantidad)
       setValue(`detalles.${productoExistenteIndex}.subtotal`, nuevoSubtotal)
       
-      toast.success(`${productoAAgregar.nombre}: cantidad ${nuevaCantidad}`, { duration: 1500 })
+      // Sin toast para ser más rápido (solo feedback visual en la cantidad)
     } else {
       // Si no existe, agregarlo nuevo
       const precio = productoAAgregar.precio_compra || productoAAgregar.precio_venta
@@ -121,7 +121,7 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
       })
 
       setProductosCache((prev) => ({ ...prev, [productoAAgregar.id]: productoAAgregar }))
-      toast.success(`${productoAAgregar.nombre} agregado`, { duration: 1500 })
+      // Sin toast para ser más rápido - el producto aparece directamente en la lista
     }
 
     setSelectedProduct(null)
@@ -259,27 +259,19 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
       <div>
         <label className="block text-sm font-medium text-slate-600">Agregar productos</label>
         <div className="mt-1 space-y-2">
-          {/* Escáner de código de barras - Modo Híbrido */}
+          {/* Escáner de código de barras - Modo Rápido */}
           <BarcodeScanner
             onProductFound={(producto) => {
-              // Modo híbrido: 
-              // - Si el producto ya existe en la lista, incrementa cantidad en 1
-              // - Si no existe, lo agrega con cantidad 1 (luego puedes ajustar manualmente)
+              // Agregar directamente a detalles (sin pasos intermedios)
+              // Si el producto ya existe, incrementa cantidad
+              // Si no existe, lo agrega con cantidad 1
               agregarProducto(producto, 1)
-              
-              // Auto-focus de nuevo para siguiente escaneo (opcional - puedes desactivarlo)
-              setTimeout(() => {
-                const scannerInput = document.querySelector('input[placeholder*="Escanea código"]') as HTMLInputElement
-                if (scannerInput) {
-                  scannerInput.focus()
-                }
-              }, 100)
             }}
-            placeholder="Escanea código de barras (1 vez = cantidad 1, o escanea múltiples veces)..."
+            placeholder="Escanea código de barras (se agrega automáticamente)..."
             className="mb-2"
           />
           <p className="text-xs text-gray-500 mt-1 mb-2">
-            💡 Escanea 1 vez y ajusta cantidad manualmente, o escanea múltiples veces para incrementar
+            ⚡ Escanea y el producto se agrega automáticamente. Ajusta cantidades después si es necesario.
           </p>
           
           {/* Búsqueda manual por nombre */}

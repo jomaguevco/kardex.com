@@ -57,17 +57,35 @@ export default function BarcodeScanner({
     try {
       const producto = await productoService.getProductoByBarcode(codigo.trim())
       setProductoEncontrado(producto)
+      
+      // Limpiar campo inmediatamente para siguiente escaneo
+      setCodigoBarras('')
+      
+      // Llamar callback inmediatamente (sin toast para ser más rápido)
       onProductFound(producto)
-      setCodigoBarras('') // Limpiar después de encontrar
-      toast.success(`Producto encontrado: ${producto.nombre}`)
+      
+      // Auto-focus de nuevo para siguiente escaneo
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus()
+        }
+      }, 50)
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || error?.message || 'Producto no encontrado'
       setProductoEncontrado(null)
+      setCodigoBarras('') // Limpiar también en caso de error
+      
+      // Auto-focus de nuevo para reintentar
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus()
+        }
+      }, 50)
       
       if (onError) {
         onError(errorMessage)
       } else {
-        toast.error(errorMessage)
+        toast.error(errorMessage, { duration: 2000 })
       }
     } finally {
       setIsSearching(false)
@@ -83,11 +101,17 @@ export default function BarcodeScanner({
       clearTimeout(timeoutRef.current)
     }
 
-    // Si el código tiene al menos 3 caracteres, buscar después de 500ms sin escribir
-    if (valor.length >= 3) {
+    // Para escáneres, los códigos de barras suelen tener 8+ caracteres
+    // Buscar inmediatamente cuando se detecta un código largo (típico de escáner)
+    // O después de 300ms sin escribir (más rápido que antes)
+    if (valor.length >= 8) {
+      // Código largo = probablemente de escáner, buscar inmediatamente
+      buscarProducto(valor)
+    } else if (valor.length >= 3) {
+      // Código corto = búsqueda manual, esperar 300ms
       timeoutRef.current = setTimeout(() => {
         buscarProducto(valor)
-      }, 500)
+      }, 300)
     }
   }
 
