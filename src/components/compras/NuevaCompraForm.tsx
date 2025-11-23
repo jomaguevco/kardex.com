@@ -259,13 +259,15 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
       <div>
         <label className="block text-sm font-medium text-slate-600">Agregar productos</label>
         <div className="mt-1 space-y-2">
-          {/* Escáner de código de barras - Modo Incremental */}
+          {/* Escáner de código de barras - Modo Híbrido */}
           <BarcodeScanner
             onProductFound={(producto) => {
-              // Agregar o incrementar cantidad automáticamente
+              // Modo híbrido: 
+              // - Si el producto ya existe en la lista, incrementa cantidad en 1
+              // - Si no existe, lo agrega con cantidad 1 (luego puedes ajustar manualmente)
               agregarProducto(producto, 1)
               
-              // Auto-focus de nuevo para siguiente escaneo
+              // Auto-focus de nuevo para siguiente escaneo (opcional - puedes desactivarlo)
               setTimeout(() => {
                 const scannerInput = document.querySelector('input[placeholder*="Escanea código"]') as HTMLInputElement
                 if (scannerInput) {
@@ -273,9 +275,12 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
                 }
               }, 100)
             }}
-            placeholder="Escanea código de barras (cada escaneo suma 1 unidad)..."
+            placeholder="Escanea código de barras (1 vez = cantidad 1, o escanea múltiples veces)..."
             className="mb-2"
           />
+          <p className="text-xs text-gray-500 mt-1 mb-2">
+            💡 Escanea 1 vez y ajusta cantidad manualmente, o escanea múltiples veces para incrementar
+          </p>
           
           {/* Búsqueda manual por nombre */}
           <div className="flex gap-2">
