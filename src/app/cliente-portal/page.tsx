@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuthStore } from '@/store/authStore'
-import { useRouter } from 'next/navigation'
+import { useClienteAuth } from '@/hooks/useClienteAuth'
 import clientePortalService from '@/services/clientePortalService'
 import { 
   Package, ShoppingBag, Receipt, TrendingUp, Loader2, 
@@ -12,8 +11,7 @@ import {
 import Link from 'next/link'
 
 export default function ClientePortalPage() {
-  const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isLoading: authLoading, isAuthorized } = useClienteAuth()
   const [dashboard, setDashboard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -81,13 +79,10 @@ export default function ClientePortalPage() {
   ]
 
   useEffect(() => {
-    if (!isAuthenticated || user?.rol !== 'CLIENTE') {
-      router.push('/')
-      return
+    if (isAuthorized && !authLoading) {
+      fetchDashboard()
     }
-
-    fetchDashboard()
-  }, [isAuthenticated, user, router])
+  }, [isAuthorized, authLoading])
 
   useEffect(() => {
     // Auto-slide para banners principales
@@ -126,7 +121,7 @@ export default function ClientePortalPage() {
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length)
   }
 
-  if (isLoading) {
+  if (isLoading || authLoading || !isAuthorized) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">

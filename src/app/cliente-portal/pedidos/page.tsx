@@ -1,16 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuthStore } from '@/store/authStore'
-import { useRouter } from 'next/navigation'
+import { useClienteAuth } from '@/hooks/useClienteAuth'
 import pedidoService from '@/services/pedidoService'
 import { ClipboardList, Loader2, Calendar, Package, Eye } from 'lucide-react'
 import PedidoDetalleModalCliente from '@/components/pedidos/PedidoDetalleModalCliente'
 import { Pedido } from '@/services/pedidoService'
 
 export default function PedidosPage() {
-  const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isLoading: authLoading, isAuthorized } = useClienteAuth()
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null)
@@ -54,23 +52,20 @@ export default function PedidosPage() {
   }
 
   useEffect(() => {
-    if (!isAuthenticated || user?.rol !== 'CLIENTE') {
-      router.push('/')
-      return
+    if (isAuthorized && !authLoading) {
+      fetchPedidos()
+      
+      // Refrescar pedidos cada 5 segundos si no hay pedidos (para detectar nuevos)
+      const interval = setInterval(() => {
+        if (pedidos.length === 0) {
+          console.log('Refrescando pedidos automáticamente...')
+          fetchPedidos()
+        }
+      }, 5000)
+
+      return () => clearInterval(interval)
     }
-
-    fetchPedidos()
-    
-    // Refrescar pedidos cada 5 segundos si no hay pedidos (para detectar nuevos)
-    const interval = setInterval(() => {
-      if (pedidos.length === 0) {
-        console.log('Refrescando pedidos automáticamente...')
-        fetchPedidos()
-      }
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [isAuthenticated, user, router, pedidos.length])
+  }, [isAuthorized, authLoading, pedidos.length])
 
   // Refrescar cuando la página vuelva a estar visible (después de crear un pedido)
   useEffect(() => {
