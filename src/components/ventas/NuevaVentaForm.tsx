@@ -219,14 +219,6 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         fechaVenta = new Date(fechaVenta).toISOString()
       }
 
-      // Asegurar que cliente_id esté correctamente establecido
-      const clienteIdFinal = data.cliente_id || clienteSeleccionado?.id || 0
-      
-      if (!clienteIdFinal || clienteIdFinal === 0) {
-        toast.error('Debes seleccionar un cliente')
-        return
-      }
-
       const ventaData: VentaForm = {
         numero_factura: data.numero_factura,
         cliente_id: Number(clienteIdFinal),
