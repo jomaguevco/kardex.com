@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, BarChart3, Plus, Receipt } from 'lucide-react'
+import { Sparkles, BarChart3, Plus, Receipt, Edit, X } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
@@ -161,7 +161,12 @@ function VentasContent() {
         </div>
 
         <div className="card">
-          <VentasTable onView={handleViewVenta} onEdit={handleEditVenta} onCancel={handleCancelarVenta} />
+          <VentasTable 
+            onView={handleViewVenta} 
+            onEdit={handleEditVenta} 
+            onCancel={handleCancelarVenta}
+            onDownloadPDF={handleDownloadPDF}
+          />
         </div>
       </section>
 
@@ -264,18 +269,36 @@ function VentasContent() {
               <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
                 Cerrar
               </button>
-              <button 
-                onClick={() => handleDownloadPDF(selectedVenta)} 
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-              >
-                <Download className="h-4 w-4" />
-                Descargar PDF
-              </button>
-              {selectedVenta.estado?.toUpperCase() !== 'ANULADA' && (
-                <button onClick={() => handleCancelarVenta(selectedVenta)} className="btn-primary sm:min-w-[180px]">
-                  Cancelar venta
+              {/* PROCESADA: Mostrar descarga PDF */}
+              {selectedVenta.estado?.toUpperCase() === 'PROCESADA' && (
+                <button 
+                  onClick={() => handleDownloadPDF(selectedVenta)} 
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar PDF
                 </button>
               )}
+              {/* PENDIENTE: Mostrar editar y cancelar */}
+              {selectedVenta.estado?.toUpperCase() === 'PENDIENTE' && (
+                <>
+                  <button 
+                    onClick={() => handleEditVenta(selectedVenta)} 
+                    className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Editar
+                  </button>
+                  <button 
+                    onClick={() => handleCancelarVenta(selectedVenta)} 
+                    className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar venta
+                  </button>
+                </>
+              )}
+              {/* ANULADA: Solo mostrar cerrar (ya está arriba) */}
             </div>
           </div>
         </div>

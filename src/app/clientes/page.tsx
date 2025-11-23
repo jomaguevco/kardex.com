@@ -217,12 +217,6 @@ function ClientesContent() {
             <h2 className="text-lg font-semibold text-slate-900">Directorio de clientes</h2>
             <p className="text-sm text-slate-500">Gestiona clientes con la misma estética y fluidez del dashboard.</p>
           </div>
-          <button
-            onClick={handleCreateCliente}
-            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            <Plus className="mr-2 h-4 w-4" /> Nuevo cliente
-          </button>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -238,13 +232,8 @@ function ClientesContent() {
           </div>
           <div className="card p-5 text-sm text-slate-600">
             <p className="font-medium text-slate-800">Acciones rápidas</p>
-            <div className="mt-3">
-              <button
-                onClick={handleCreateCliente}
-                className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
-              >
-                <Plus className="h-4 w-4" /> Nuevo cliente
-              </button>
+            <div className="mt-3 text-slate-500">
+              <p>Usa el botón "Nuevo cliente" en la parte superior para agregar un nuevo cliente al sistema.</p>
             </div>
           </div>
         </div>

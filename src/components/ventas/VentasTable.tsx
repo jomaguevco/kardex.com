@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Eye, Edit, X, Calendar, User } from 'lucide-react'
+import { Eye, Edit, X, Calendar, User, Download } from 'lucide-react'
 import { VentaFilters, Venta } from '@/types'
 import { ventaService } from '@/services/ventaService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
@@ -13,9 +13,10 @@ interface VentasTableProps {
   onView?: (venta: Venta) => void
   onEdit?: (venta: Venta) => void
   onCancel?: (venta: Venta) => void
+  onDownloadPDF?: (venta: Venta) => void
 }
 
-export default function VentasTable({ onView, onEdit, onCancel }: VentasTableProps) {
+export default function VentasTable({ onView, onEdit, onCancel, onDownloadPDF }: VentasTableProps) {
   const [filters, setFilters] = useState<VentaFilters>({
     page: 1,
     limit: 10,
@@ -153,16 +154,28 @@ export default function VentasTable({ onView, onEdit, onCancel }: VentasTablePro
                             <Eye className="h-4 w-4" />
                           </AccionButton>
                         )}
-                        {onEdit && (
-                          <AccionButton title="Editar" onClick={() => onEdit(venta)} variant="primary">
-                            <Edit className="h-4 w-4" />
+                        {/* PENDIENTE: Ver, Editar, Cancelar */}
+                        {normalizeEstado(venta.estado) === 'pendiente' && (
+                          <>
+                            {onEdit && (
+                              <AccionButton title="Editar" onClick={() => onEdit(venta)} variant="primary">
+                                <Edit className="h-4 w-4" />
+                              </AccionButton>
+                            )}
+                            {onCancel && (
+                              <AccionButton title="Cancelar" onClick={() => onCancel(venta)} variant="danger">
+                                <X className="h-4 w-4" />
+                              </AccionButton>
+                            )}
+                          </>
+                        )}
+                        {/* PROCESADA: Ver, Descargar PDF */}
+                        {normalizeEstado(venta.estado) === 'procesada' && onDownloadPDF && (
+                          <AccionButton title="Descargar PDF" onClick={() => onDownloadPDF(venta)} variant="primary">
+                            <Download className="h-4 w-4" />
                           </AccionButton>
                         )}
-                        {onCancel && normalizeEstado(venta.estado) !== 'cancelada' && (
-                          <AccionButton title="Cancelar" onClick={() => onCancel(venta)} variant="danger">
-                            <X className="h-4 w-4" />
-                          </AccionButton>
-                        )}
+                        {/* ANULADA: Solo Ver (ya está incluido arriba) */}
                       </div>
                     </td>
                   </tr>
@@ -218,7 +231,12 @@ function EstadoBadge({ estado }: { estado: string }) {
 }
 
 function normalizeEstado(estado: string) {
-  return (estado || '').toString().toLowerCase()
+  const normalized = (estado || '').toString().toLowerCase()
+  // Mapear estados del backend a estados normalizados
+  if (normalized === 'procesada') return 'procesada'
+  if (normalized === 'pendiente') return 'pendiente'
+  if (normalized === 'anulada' || normalized === 'cancelada') return 'cancelada'
+  return normalized
 }
 
 function AccionButton({ children, onClick, disabled, title, variant = 'ghost' }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; title: string; variant?: 'ghost' | 'primary' | 'danger' }) {

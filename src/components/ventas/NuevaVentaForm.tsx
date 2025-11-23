@@ -45,6 +45,9 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
   const [productosCache, setProductosCache] = useState<Record<number, Producto>>({})
   const [busquedaProducto, setBusquedaProducto] = useState('')
   const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null)
+  const [busquedaCliente, setBusquedaCliente] = useState('')
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null)
+  const [mostrarDropdownClientes, setMostrarDropdownClientes] = useState(false)
 
   const { data: productosData, isLoading: loadingProductos } = useQuery({
     queryKey: ['productos', { search: busquedaProducto, limit: 10 }],
@@ -53,8 +56,9 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
   })
 
   const { data: clientesData, isLoading: loadingClientes, error: clientesError } = useQuery({
-    queryKey: ['clientes', 'selector'],
-    queryFn: () => clienteService.getClientes({ limit: 200 })
+    queryKey: ['clientes', 'search', busquedaCliente],
+    queryFn: () => clienteService.getClientes({ search: busquedaCliente, limit: 10 }),
+    enabled: busquedaCliente.length >= 2
   })
 
   const clientes: Cliente[] = clientesData?.clientes ?? []
@@ -286,24 +290,78 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
           )}
         </div>
 
-        <div>
+        <div className="relative">
           <label className="block text-base font-medium text-gray-700 mb-1">
             Cliente
           </label>
-          <select
+          <div className="relative">
+            <input
+              type="text"
+              value={busquedaCliente}
+              onChange={(e) => {
+                setBusquedaCliente(e.target.value)
+                setMostrarDropdownClientes(true)
+                if (!e.target.value) {
+                  setClienteSeleccionado(null)
+                  setValue('cliente_id', 0)
+                }
+              }}
+              onFocus={() => {
+                if (busquedaCliente.length >= 2) {
+                  setMostrarDropdownClientes(true)
+                }
+              }}
+              onBlur={() => {
+                // Delay para permitir click en el dropdown
+                setTimeout(() => setMostrarDropdownClientes(false), 200)
+              }}
+              placeholder="Buscar por nombre, documento o email..."
+              className="input-field text-base w-full"
+            />
+            {loadingClientes && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <LoadingSpinner size="sm" />
+              </div>
+            )}
+            {mostrarDropdownClientes && busquedaCliente.length >= 2 && clientes.length > 0 && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                {clientes.map((cliente) => (
+                  <div
+                    key={cliente.id}
+                    onClick={() => {
+                      setClienteSeleccionado(cliente)
+                      setBusquedaCliente(cliente.nombre)
+                      setValue('cliente_id', cliente.id)
+                      setMostrarDropdownClientes(false)
+                    }}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="font-medium text-gray-900">{cliente.nombre}</div>
+                    <div className="text-sm text-gray-500">
+                      {cliente.numero_documento && `${cliente.tipo_documento || 'DOC'}: ${cliente.numero_documento}`}
+                      {cliente.email && ` • ${cliente.email}`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {mostrarDropdownClientes && busquedaCliente.length >= 2 && !loadingClientes && clientes.length === 0 && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-sm text-gray-500">
+                No se encontraron clientes
+              </div>
+            )}
+          </div>
+          <input
+            type="hidden"
             {...register('cliente_id', { valueAsNumber: true })}
-            className="input-field text-base"
-            disabled={loadingClientes}
-          >
-            <option value={0}>Selecciona un cliente</option>
-            {clientes.map((cliente) => (
-              <option key={cliente.id} value={cliente.id}>
-                {cliente.nombre}
-              </option>
-            ))}
-          </select>
+          />
           {errors.cliente_id && (
             <p className="text-base text-red-600 mt-1">{errors.cliente_id.message}</p>
+          )}
+          {clienteSeleccionado && (
+            <p className="text-sm text-gray-600 mt-1">
+              Cliente seleccionado: <span className="font-medium">{clienteSeleccionado.nombre}</span>
+            </p>
           )}
         </div>
       </div>

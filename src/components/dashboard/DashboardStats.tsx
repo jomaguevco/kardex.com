@@ -3,6 +3,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { DollarSign, ShoppingCart, Package, TrendingUp } from 'lucide-react'
 import { cn } from '@/utils/cn'
+import { dashboardService } from '@/services/dashboardService'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface StatCardProps {
   title: string
@@ -42,37 +44,62 @@ function StatCard({ title, value, change, changeType = 'neutral', icon: Icon, co
 }
 
 export default function DashboardStats() {
-  // Simular datos - en producción vendrían de la API
+  const { data: statsData, isLoading, error } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: () => dashboardService.getDashboardStats(),
+    refetchInterval: 30000 // Refrescar cada 30 segundos
+  })
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="card-hover p-6">
+            <LoadingSpinner size="sm" />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="card p-6 text-sm text-rose-600">
+        Error al cargar estadísticas del dashboard
+      </div>
+    )
+  }
+
   const stats = [
     {
       title: 'Ventas del Día',
-      value: '$12,450',
-      change: '+12% vs ayer',
-      changeType: 'positive' as const,
+      value: `$${Number(statsData?.ventasDelDia || 0).toFixed(2)}`,
+      change: statsData?.crecimiento ? `${statsData.crecimiento > 0 ? '+' : ''}${statsData.crecimiento.toFixed(1)}% vs mes anterior` : undefined,
+      changeType: (statsData?.crecimiento || 0) > 0 ? 'positive' : (statsData?.crecimiento || 0) < 0 ? 'negative' : 'neutral' as const,
       icon: DollarSign,
       color: 'bg-green-500'
     },
     {
       title: 'Ventas Totales',
-      value: '156',
-      change: '+8% vs mes anterior',
-      changeType: 'positive' as const,
+      value: statsData?.ventasDelMes?.toString() || '0',
+      change: statsData?.crecimiento ? `${statsData.crecimiento > 0 ? '+' : ''}${statsData.crecimiento.toFixed(1)}% vs mes anterior` : undefined,
+      changeType: (statsData?.crecimiento || 0) > 0 ? 'positive' : (statsData?.crecimiento || 0) < 0 ? 'negative' : 'neutral' as const,
       icon: ShoppingCart,
       color: 'bg-blue-500'
     },
     {
       title: 'Productos',
-      value: '1,234',
-      change: 'Stock actualizado',
-      changeType: 'neutral' as const,
+      value: statsData?.totalProductos?.toString() || '0',
+      change: statsData?.productosStockBajo ? `${statsData.productosStockBajo} con stock bajo` : 'Stock actualizado',
+      changeType: (statsData?.productosStockBajo || 0) > 0 ? 'negative' : 'neutral' as const,
       icon: Package,
       color: 'bg-purple-500'
     },
     {
       title: 'Crecimiento',
-      value: '23.5%',
-      change: '+2.1% vs mes anterior',
-      changeType: 'positive' as const,
+      value: statsData?.crecimiento ? `${statsData.crecimiento > 0 ? '+' : ''}${statsData.crecimiento.toFixed(1)}%` : '0%',
+      change: statsData?.crecimiento ? `${statsData.crecimiento > 0 ? '+' : ''}${statsData.crecimiento.toFixed(1)}% vs mes anterior` : undefined,
+      changeType: (statsData?.crecimiento || 0) > 0 ? 'positive' : (statsData?.crecimiento || 0) < 0 ? 'negative' : 'neutral' as const,
       icon: TrendingUp,
       color: 'bg-orange-500'
     }

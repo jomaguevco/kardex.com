@@ -154,16 +154,23 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
                             <Eye className="h-4 w-4" />
                           </AccionButton>
                         )}
-                        {onEdit && (
-                          <AccionButton title="Editar" onClick={() => onEdit(compra)} variant="primary">
-                            <Edit className="h-4 w-4" />
-                          </AccionButton>
+                        {/* PENDIENTE: Ver, Editar, Cancelar */}
+                        {normalizeEstado(compra.estado) === 'pendiente' && (
+                          <>
+                            {onEdit && (
+                              <AccionButton title="Editar" onClick={() => onEdit(compra)} variant="primary">
+                                <Edit className="h-4 w-4" />
+                              </AccionButton>
+                            )}
+                            {onCancel && (
+                              <AccionButton title="Cancelar" onClick={() => onCancel(compra)} variant="danger">
+                                <X className="h-4 w-4" />
+                              </AccionButton>
+                            )}
+                          </>
                         )}
-                        {onCancel && normalizeEstado(compra.estado) !== 'cancelada' && (
-                          <AccionButton title="Cancelar" onClick={() => onCancel(compra)} variant="danger">
-                            <X className="h-4 w-4" />
-                          </AccionButton>
-                        )}
+                        {/* PROCESADA: Solo Ver (ya está incluido arriba) */}
+                        {/* ANULADA: Solo Ver (ya está incluido arriba) */}
                       </div>
                     </td>
                   </tr>
@@ -219,7 +226,12 @@ function EstadoBadge({ estado }: { estado: string }) {
 }
 
 function normalizeEstado(estado: string) {
-  return (estado || '').toString().toLowerCase()
+  const normalized = (estado || '').toString().toLowerCase()
+  // Mapear estados del backend a estados normalizados
+  if (normalized === 'procesada') return 'procesada'
+  if (normalized === 'pendiente') return 'pendiente'
+  if (normalized === 'anulada' || normalized === 'cancelada') return 'cancelada'
+  return normalized
 }
 
 function AccionButton({ children, onClick, disabled, title, variant = 'ghost' }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; title: string; variant?: 'ghost' | 'primary' | 'danger' }) {

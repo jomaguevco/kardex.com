@@ -257,11 +257,24 @@ function ComprasContent() {
                 <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
                   Cerrar
                 </button>
-                {selectedCompra.estado?.toUpperCase() !== 'ANULADA' && (
-                  <button onClick={() => handleCancelarCompra(selectedCompra)} className="btn-primary sm:min-w-[180px]">
-                    Cancelar compra
-                  </button>
+                {/* PENDIENTE: Mostrar editar y cancelar */}
+                {selectedCompra.estado?.toUpperCase() === 'PENDIENTE' && (
+                  <>
+                    <button 
+                      onClick={() => handleEditCompra(selectedCompra)} 
+                      className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-600 transition hover:bg-amber-100"
+                    >
+                      Editar
+                    </button>
+                    <button 
+                      onClick={() => handleCancelarCompra(selectedCompra)} 
+                      className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
+                    >
+                      Cancelar compra
+                    </button>
+                  </>
                 )}
+                {/* PROCESADA y ANULADA: Solo mostrar cerrar (ya está arriba) */}
               </div>
             </div>
           </div>
