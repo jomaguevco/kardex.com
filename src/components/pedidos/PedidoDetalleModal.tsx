@@ -1,30 +1,32 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, CheckCircle, XCircle, Package, User, Calendar, DollarSign, AlertCircle } from 'lucide-react'
+import { X, Package, User, Calendar, DollarSign, AlertCircle, Truck, MessageSquare, XCircle } from 'lucide-react'
 import { Pedido } from '@/services/pedidoService'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import toast from 'react-hot-toast'
+import pedidoService from '@/services/pedidoService'
 
 interface PedidoDetalleModalProps {
   pedido: Pedido
   isOpen: boolean
   onClose: () => void
-  onAprobar: (pedidoId: number) => Promise<void>
-  onRechazar: (pedidoId: number, motivo: string) => Promise<void>
+  onRefresh?: () => void
 }
 
 export default function PedidoDetalleModal({
   pedido,
   isOpen,
   onClose,
-  onAprobar,
-  onRechazar
+  onRefresh
 }: PedidoDetalleModalProps) {
-  const [motivoRechazo, setMotivoRechazo] = useState('')
-  const [isAprobando, setIsAprobando] = useState(false)
-  const [isRechazando, setIsRechazando] = useState(false)
+  const [actualizacion, setActualizacion] = useState('')
+  const [motivoAnulacion, setMotivoAnulacion] = useState('')
+  const [isMarcandoEnCamino, setIsMarcandoEnCamino] = useState(false)
+  const [isMarcandoEntregado, setIsMarcandoEntregado] = useState(false)
+  const [isAgregandoActualizacion, setIsAgregandoActualizacion] = useState(false)
+  const [isAnulando, setIsAnulando] = useState(false)
 
   // Bloquear scroll cuando el modal está abierto
   useEffect(() => {
@@ -39,73 +41,115 @@ export default function PedidoDetalleModal({
 
   if (!isOpen) return null
 
-  const handleAprobar = async () => {
-    if (!confirm('¿Estás seguro de aprobar este pedido? El cliente podrá proceder al pago.')) {
+  const handleMarcarEnCamino = async () => {
+    if (!confirm('¿Estás seguro de marcar este pedido como en camino?')) {
       return
     }
 
     try {
-      setIsAprobando(true)
-      await onAprobar(pedido.id)
-      toast.success('Pedido aprobado correctamente')
+      setIsMarcandoEnCamino(true)
+      await pedidoService.marcarComoEnCamino(pedido.id)
+      toast.success('Pedido marcado como en camino correctamente')
+      if (onRefresh) onRefresh()
       onClose()
     } catch (error: any) {
-      toast.error(error?.message || 'Error al aprobar el pedido')
+      toast.error(error?.message || 'Error al marcar pedido como en camino')
     } finally {
-      setIsAprobando(false)
+      setIsMarcandoEnCamino(false)
     }
   }
 
-  const handleRechazar = async () => {
-    if (!motivoRechazo.trim()) {
-      toast.error('Debes ingresar un motivo de rechazo')
+  const handleMarcarEntregado = async () => {
+    if (!confirm('¿Estás seguro de marcar este pedido como entregado? Se creará la venta y se descontará el stock.')) {
       return
     }
 
     try {
-      setIsRechazando(true)
-      await onRechazar(pedido.id, motivoRechazo.trim())
-      toast.success('Pedido rechazado correctamente')
-      setMotivoRechazo('')
+      setIsMarcandoEntregado(true)
+      await pedidoService.marcarComoEntregado(pedido.id)
+      toast.success('Pedido marcado como entregado correctamente')
+      if (onRefresh) onRefresh()
       onClose()
     } catch (error: any) {
-      toast.error(error?.message || 'Error al rechazar el pedido')
+      toast.error(error?.message || 'Error al marcar pedido como entregado')
     } finally {
-      setIsRechazando(false)
+      setIsMarcandoEntregado(false)
+    }
+  }
+
+  const handleAgregarActualizacion = async () => {
+    if (!actualizacion.trim()) {
+      toast.error('Debes ingresar una actualización')
+      return
+    }
+
+    try {
+      setIsAgregandoActualizacion(true)
+      await pedidoService.agregarActualizacionEnvio(pedido.id, actualizacion.trim())
+      toast.success('Actualización agregada correctamente')
+      setActualizacion('')
+      if (onRefresh) onRefresh()
+    } catch (error: any) {
+      toast.error(error?.message || 'Error al agregar actualización')
+    } finally {
+      setIsAgregandoActualizacion(false)
+    }
+  }
+
+  const handleAnular = async () => {
+    if (!motivoAnulacion.trim()) {
+      toast.error('Debes ingresar un motivo de anulación')
+      return
+    }
+
+    if (!confirm('¿Estás seguro de anular este pedido? Esta acción no se puede deshacer.')) {
+      return
+    }
+
+    try {
+      setIsAnulando(true)
+      await pedidoService.anularPedido(pedido.id, motivoAnulacion.trim())
+      toast.success('Pedido anulado correctamente')
+      setMotivoAnulacion('')
+      if (onRefresh) onRefresh()
+      onClose()
+    } catch (error: any) {
+      toast.error(error?.message || 'Error al anular pedido')
+    } finally {
+      setIsAnulando(false)
     }
   }
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
-      case 'PENDIENTE':
+      case 'BORRADOR':
         return (
           <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-            Pendiente
+            Borrador
           </span>
         )
-      case 'APROBADO':
+      case 'EN_PROCESO':
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-            Aprobado
+            En Proceso
           </span>
         )
-      case 'PAGADO':
-        return (
-          <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-800">
-            Pagado
-          </span>
-        )
-      case 'PROCESADO':
       case 'EN_CAMINO':
         return (
           <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-            {estado === 'EN_CAMINO' ? 'En Camino' : 'Procesado'}
+            En Camino
           </span>
         )
-      case 'RECHAZADO':
+      case 'ENTREGADO':
         return (
-          <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
-            Rechazado
+          <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+            Entregado
+          </span>
+        )
+      case 'CANCELADO':
+        return (
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
+            Cancelado
           </span>
         )
       default:
@@ -290,13 +334,27 @@ export default function PedidoDetalleModal({
               </div>
             )}
 
-            {/* Motivo de rechazo si está rechazado */}
-            {pedido.estado === 'RECHAZADO' && pedido.motivo_rechazo && (
+            {/* Actualizaciones del envío (si existen) */}
+            {pedido.actualizaciones_envio && (
+              <div className="glass-card rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                <h3 className="mb-3 text-sm font-semibold text-indigo-900">Actualizaciones del Envío</h3>
+                <div className="space-y-2">
+                  {pedido.actualizaciones_envio.split('\n\n').map((actualizacion, index) => (
+                    <div key={index} className="rounded-lg bg-white p-3 border border-indigo-100">
+                      <p className="text-sm text-indigo-800 whitespace-pre-line">{actualizacion}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Motivo de cancelación si está cancelado */}
+            {pedido.estado === 'CANCELADO' && pedido.motivo_rechazo && (
               <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                 <div className="flex items-start space-x-2">
                   <AlertCircle className="h-5 w-5 text-red-600" />
                   <div>
-                    <p className="text-sm font-semibold text-red-900">Motivo de rechazo:</p>
+                    <p className="text-sm font-semibold text-red-900">Motivo de cancelación:</p>
                     <p className="mt-1 text-sm text-red-700">{pedido.motivo_rechazo}</p>
                   </div>
                 </div>
@@ -306,63 +364,102 @@ export default function PedidoDetalleModal({
           </div>
 
           {/* Footer con acciones */}
-          {pedido.estado === 'PENDIENTE' && (
+          {pedido.estado !== 'CANCELADO' && (
             <div className="flex-shrink-0 space-y-4 border-t border-slate-200 bg-white p-6">
-              {/* Motivo de rechazo */}
+              {/* Agregar actualización */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-900">
-                  Motivo de rechazo (si aplica):
+                  Agregar actualización sobre el envío:
                 </label>
                 <textarea
-                  value={motivoRechazo}
-                  onChange={(e) => setMotivoRechazo(e.target.value)}
-                  placeholder="Ingrese el motivo del rechazo..."
+                  value={actualizacion}
+                  onChange={(e) => setActualizacion(e.target.value)}
+                  placeholder="Ej: El pedido salió del almacén, llegará mañana..."
                   rows={3}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 />
+                <button
+                  onClick={handleAgregarActualizacion}
+                  disabled={isAgregandoActualizacion || !actualizacion.trim()}
+                  className="mt-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center space-x-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  <span>{isAgregandoActualizacion ? 'Agregando...' : 'Agregar Actualización'}</span>
+                </button>
               </div>
 
-              {/* Botones */}
-              <div className="flex gap-3">
+              {/* Botones de acción según estado */}
+              <div className="flex gap-3 flex-wrap">
+                {/* Marcar como en camino - solo si está EN_PROCESO */}
+                {pedido.estado === 'EN_PROCESO' && (
+                  <button
+                    onClick={handleMarcarEnCamino}
+                    disabled={isMarcandoEnCamino}
+                    className="flex-1 min-w-[200px] rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center space-x-2"
+                  >
+                    <Truck className="h-5 w-5" />
+                    <span>{isMarcandoEnCamino ? 'Marcando...' : 'Marcar como En Camino'}</span>
+                  </button>
+                )}
+
+                {/* Marcar como entregado - solo si está EN_CAMINO */}
+                {pedido.estado === 'EN_CAMINO' && (
+                  <button
+                    onClick={handleMarcarEntregado}
+                    disabled={isMarcandoEntregado}
+                    className="flex-1 min-w-[200px] rounded-lg bg-green-600 px-4 py-3 font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center space-x-2"
+                  >
+                    <Package className="h-5 w-5" />
+                    <span>{isMarcandoEntregado ? 'Marcando...' : 'Marcar como Entregado'}</span>
+                  </button>
+                )}
+
+                {/* Anular pedido - solo si NO está EN_CAMINO ni ENTREGADO */}
+                {pedido.estado !== 'EN_CAMINO' && pedido.estado !== 'ENTREGADO' && (
+                  <>
+                    <div className="w-full">
+                      <label className="mb-2 block text-sm font-semibold text-slate-900">
+                        Motivo de anulación:
+                      </label>
+                      <textarea
+                        value={motivoAnulacion}
+                        onChange={(e) => setMotivoAnulacion(e.target.value)}
+                        placeholder="Ingrese el motivo de anulación..."
+                        rows={2}
+                        className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                      />
+                    </div>
+                    <button
+                      onClick={handleAnular}
+                      disabled={isAnulando || !motivoAnulacion.trim()}
+                      className="flex-1 min-w-[200px] rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center space-x-2"
+                    >
+                      <XCircle className="h-5 w-5" />
+                      <span>{isAnulando ? 'Anulando...' : 'Anular Pedido'}</span>
+                    </button>
+                  </>
+                )}
+
                 <button
                   onClick={onClose}
-                  className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+                  className="flex-1 min-w-[150px] rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleRechazar}
-                  disabled={isRechazando || !motivoRechazo.trim()}
-                  className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isRechazando ? 'Rechazando...' : 'Rechazar Pedido'}
-                </button>
-                <button
-                  onClick={handleAprobar}
-                  disabled={isAprobando}
-                  className="flex-1 rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isAprobando ? 'Aprobando...' : (
-                    <>
-                      <CheckCircle className="mr-2 inline h-5 w-5" />
-                      Aprobar Pedido
-                    </>
-                  )}
+                  Cerrar
                 </button>
               </div>
             </div>
           )}
 
-            {pedido.estado !== 'PENDIENTE' && (
-              <div className="flex-shrink-0 flex justify-end border-t border-slate-200 bg-white px-6 py-4">
-                <button
-                  onClick={onClose}
-                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Cerrar
-                </button>
-              </div>
-            )}
+          {pedido.estado === 'CANCELADO' && (
+            <div className="flex-shrink-0 flex justify-end border-t border-slate-200 bg-white px-6 py-4">
+              <button
+                onClick={onClose}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Cerrar
+              </button>
+            </div>
+          )}
           </div>
         </div>
       </div>

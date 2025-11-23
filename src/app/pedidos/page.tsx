@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, ShoppingBag, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { Sparkles, ShoppingBag, Clock, CreditCard, Truck, AlertCircle, Package, CheckCircle } from 'lucide-react'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import PedidosTable from '@/components/pedidos/PedidosTable'
@@ -26,7 +26,7 @@ function PedidosContent() {
   const queryClient = useQueryClient()
   const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null)
   const [isDetalleOpen, setIsDetalleOpen] = useState(false)
-  const [filtroEstado, setFiltroEstado] = useState<string>('PENDIENTE')
+  const [filtroEstado, setFiltroEstado] = useState<string>('EN_PROCESO')
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['pedidos', 'pendientes', filtroEstado],
@@ -52,73 +52,11 @@ function PedidosContent() {
     refetch()
   }
 
-  const handleAprobar = async (pedidoId: number) => {
-    try {
-      console.log('Aprobando pedido:', pedidoId)
-      const response = await pedidoService.aprobarPedido(pedidoId)
-      console.log('Respuesta de aprobar pedido:', response)
-      
-      if (response && response.success) {
-        toast.success(response.message || 'Pedido aprobado exitosamente')
-        queryClient.invalidateQueries({ queryKey: ['pedidos'] })
-        refetch()
-        handleCloseDetalle()
-      } else {
-        throw new Error(response?.message || 'Error al aprobar el pedido')
-      }
-    } catch (error: any) {
-      console.error('Error al aprobar pedido:', error)
-      const errorMessage = error?.response?.data?.message || error?.message || 'Error al aprobar el pedido'
-      toast.error(errorMessage)
-    }
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['pedidos'] })
+    refetch()
   }
 
-  const handleRechazar = async (pedidoId: number, motivo: string) => {
-    if (!motivo || !motivo.trim()) {
-      toast.error('Debe proporcionar un motivo de rechazo')
-      return
-    }
-
-    try {
-      console.log('Rechazando pedido:', pedidoId, 'Motivo:', motivo)
-      const response = await pedidoService.rechazarPedido(pedidoId, { motivo_rechazo: motivo.trim() })
-      console.log('Respuesta de rechazar pedido:', response)
-      
-      if (response && response.success) {
-        toast.success(response.message || 'Pedido rechazado exitosamente')
-        queryClient.invalidateQueries({ queryKey: ['pedidos'] })
-        refetch()
-        handleCloseDetalle()
-      } else {
-        throw new Error(response?.message || 'Error al rechazar el pedido')
-      }
-    } catch (error: any) {
-      console.error('Error al rechazar pedido:', error)
-      const errorMessage = error?.response?.data?.message || error?.message || 'Error al rechazar el pedido'
-      toast.error(errorMessage)
-    }
-  }
-
-  const handleProcesarEnvio = async (pedidoId: number) => {
-    try {
-      console.log('Procesando envío de pedido:', pedidoId)
-      const response = await pedidoService.procesarEnvio(pedidoId)
-      console.log('Respuesta de procesar envío:', response)
-      
-      if (response && response.success) {
-        toast.success(response.message || 'Envío procesado exitosamente')
-        queryClient.invalidateQueries({ queryKey: ['pedidos'] })
-        refetch()
-        handleCloseDetalle()
-      } else {
-        throw new Error(response?.message || 'Error al procesar el envío')
-      }
-    } catch (error: any) {
-      console.error('Error al procesar envío:', error)
-      const errorMessage = error?.response?.data?.message || error?.message || 'Error al procesar el envío'
-      toast.error(errorMessage)
-    }
-  }
 
   return (
     <div className="space-y-10 animate-fade-in">
@@ -131,10 +69,10 @@ function PedidosContent() {
             Gestión de Pedidos
           </span>
           <h1 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">
-            Aprobar y Gestionar Pedidos
+            Gestionar Envíos de Pedidos
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-white/80 sm:text-base">
-            Revisa, aprueba o rechaza los pedidos realizados por los clientes
+            Gestiona el envío y entrega de pedidos pagados por los clientes
           </p>
         </div>
       </section>
@@ -144,13 +82,13 @@ function PedidosContent() {
         <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Pendientes</p>
+              <p className="text-sm font-medium text-slate-600">En Proceso</p>
               <p className="mt-2 text-3xl font-bold text-slate-900">
-                {pedidos.filter((p: Pedido) => p.estado === 'PENDIENTE').length}
+                {pedidos.filter((p: Pedido) => p.estado === 'EN_PROCESO').length}
               </p>
             </div>
-            <div className="rounded-xl bg-amber-100 p-3">
-              <Clock className="h-6 w-6 text-amber-600" />
+            <div className="rounded-xl bg-blue-100 p-3">
+              <Package className="h-6 w-6 text-blue-600" />
             </div>
           </div>
         </div>
@@ -158,13 +96,13 @@ function PedidosContent() {
         <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Aprobados</p>
+              <p className="text-sm font-medium text-slate-600">En Camino</p>
               <p className="mt-2 text-3xl font-bold text-slate-900">
-                {pedidos.filter((p: Pedido) => p.estado === 'APROBADO' || p.estado === 'PROCESADO').length}
+                {pedidos.filter((p: Pedido) => p.estado === 'EN_CAMINO').length}
               </p>
             </div>
             <div className="rounded-xl bg-emerald-100 p-3">
-              <CheckCircle className="h-6 w-6 text-emerald-600" />
+              <Truck className="h-6 w-6 text-emerald-600" />
             </div>
           </div>
         </div>
@@ -172,13 +110,13 @@ function PedidosContent() {
         <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Rechazados</p>
+              <p className="text-sm font-medium text-slate-600">Entregados</p>
               <p className="mt-2 text-3xl font-bold text-slate-900">
-                {pedidos.filter((p: Pedido) => p.estado === 'RECHAZADO').length}
+                {pedidos.filter((p: Pedido) => p.estado === 'ENTREGADO').length}
               </p>
             </div>
-            <div className="rounded-xl bg-red-100 p-3">
-              <XCircle className="h-6 w-6 text-red-600" />
+            <div className="rounded-xl bg-green-100 p-3">
+              <CheckCircle className="h-6 w-6 text-green-600" />
             </div>
           </div>
         </div>
@@ -214,44 +152,44 @@ function PedidosContent() {
               Todos
             </button>
             <button
-              onClick={() => setFiltroEstado('PENDIENTE')}
+              onClick={() => setFiltroEstado('EN_PROCESO')}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                filtroEstado === 'PENDIENTE'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              Pendientes
-            </button>
-            <button
-              onClick={() => setFiltroEstado('APROBADO')}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                filtroEstado === 'APROBADO'
+                filtroEstado === 'EN_PROCESO'
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Aprobados
+              En Proceso
             </button>
             <button
-              onClick={() => setFiltroEstado('PAGADO')}
+              onClick={() => setFiltroEstado('EN_CAMINO')}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                filtroEstado === 'PAGADO'
-                  ? 'bg-purple-600 text-white'
+                filtroEstado === 'EN_CAMINO'
+                  ? 'bg-emerald-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Pagados
+              En Camino
             </button>
             <button
-              onClick={() => setFiltroEstado('RECHAZADO')}
+              onClick={() => setFiltroEstado('ENTREGADO')}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                filtroEstado === 'RECHAZADO'
-                  ? 'bg-red-600 text-white'
+                filtroEstado === 'ENTREGADO'
+                  ? 'bg-green-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Rechazados
+              Entregados
+            </button>
+            <button
+              onClick={() => setFiltroEstado('CANCELADO')}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                filtroEstado === 'CANCELADO'
+                  ? 'bg-gray-600 text-white'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Cancelados
             </button>
           </div>
         </div>
@@ -286,9 +224,6 @@ function PedidosContent() {
         <PedidosTable
           pedidos={pedidos}
           onViewDetalle={handleViewDetalle}
-          onAprobar={handleAprobar}
-          onRechazar={handleRechazar}
-          onProcesarEnvio={handleProcesarEnvio}
         />
       )}
 
@@ -298,8 +233,7 @@ function PedidosContent() {
           pedido={selectedPedido}
           isOpen={isDetalleOpen}
           onClose={handleCloseDetalle}
-          onAprobar={handleAprobar}
-          onRechazar={handleRechazar}
+          onRefresh={handleRefresh}
         />
       )}
     </div>

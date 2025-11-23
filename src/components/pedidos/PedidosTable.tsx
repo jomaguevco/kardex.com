@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, CheckCircle, XCircle, Package, Calendar, User, DollarSign, Truck, CreditCard } from 'lucide-react'
+import { Eye, Package, Calendar, User, DollarSign, Truck, CreditCard } from 'lucide-react'
 import { Pedido } from '@/services/pedidoService'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -11,54 +11,40 @@ import TableWrapper from '@/components/ui/TableWrapper'
 interface PedidosTableProps {
   pedidos: Pedido[]
   onViewDetalle: (pedido: Pedido) => void
-  onAprobar: (pedidoId: number) => void
-  onRechazar: (pedidoId: number, motivo: string) => void
-  onProcesarEnvio?: (pedidoId: number) => void
 }
 
 export default function PedidosTable({
   pedidos,
-  onViewDetalle,
-  onAprobar,
-  onRechazar,
-  onProcesarEnvio
+  onViewDetalle
 }: PedidosTableProps) {
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
-      case 'PENDIENTE':
+      case 'BORRADOR':
         return (
           <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
             <Calendar className="mr-1 h-3 w-3" />
-            Pendiente
+            Borrador
           </span>
         )
-      case 'APROBADO':
+      case 'EN_PROCESO':
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-            <CheckCircle className="mr-1 h-3 w-3" />
-            Aprobado
+            <Package className="mr-1 h-3 w-3" />
+            En Proceso
           </span>
         )
-      case 'PAGADO':
-        return (
-          <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-800">
-            <CreditCard className="mr-1 h-3 w-3" />
-            Pagado
-          </span>
-        )
-      case 'PROCESADO':
       case 'EN_CAMINO':
         return (
           <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
             <Truck className="mr-1 h-3 w-3" />
-            {estado === 'EN_CAMINO' ? 'En Camino' : 'Procesado'}
+            En Camino
           </span>
         )
-      case 'RECHAZADO':
+      case 'ENTREGADO':
         return (
-          <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
-            <XCircle className="mr-1 h-3 w-3" />
-            Rechazado
+          <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+            <Package className="mr-1 h-3 w-3" />
+            Entregado
           </span>
         )
       case 'CANCELADO':
@@ -152,55 +138,13 @@ export default function PedidosTable({
                   {getEstadoBadge(pedido.estado)}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => onViewDetalle(pedido)}
-                      className="rounded-lg bg-indigo-100 p-2 text-indigo-600 transition hover:bg-indigo-200"
-                      title="Ver detalle"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    {pedido.estado === 'PENDIENTE' && (
-                      <>
-                        <button
-                          onClick={() => {
-                            if (confirm('¿Estás seguro de aprobar este pedido? El cliente podrá proceder al pago.')) {
-                              onAprobar(pedido.id)
-                            }
-                          }}
-                          className="rounded-lg bg-emerald-100 p-2 text-emerald-600 transition hover:bg-emerald-200"
-                          title="Aprobar"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            const motivo = prompt('Ingrese el motivo del rechazo:')
-                            if (motivo && motivo.trim()) {
-                              onRechazar(pedido.id, motivo.trim())
-                            }
-                          }}
-                          className="rounded-lg bg-red-100 p-2 text-red-600 transition hover:bg-red-200"
-                          title="Rechazar"
-                        >
-                          <XCircle className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                    {pedido.estado === 'PAGADO' && onProcesarEnvio && (
-                      <button
-                        onClick={() => {
-                          if (confirm('¿Estás seguro de procesar el envío? Se creará la venta y se descontará el stock.')) {
-                            onProcesarEnvio(pedido.id)
-                          }
-                        }}
-                        className="rounded-lg bg-teal-100 p-2 text-teal-600 transition hover:bg-teal-200"
-                        title="Procesar Envío"
-                      >
-                        <Truck className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+                  <button
+                    onClick={() => onViewDetalle(pedido)}
+                    className="rounded-lg bg-indigo-100 p-2 text-indigo-600 transition hover:bg-indigo-200"
+                    title="Ver detalle"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </button>
                 </td>
               </tr>
             ))}

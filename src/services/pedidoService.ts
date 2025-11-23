@@ -5,7 +5,7 @@ export interface Pedido {
   cliente_id: number;
   usuario_id: number;
   numero_pedido: string;
-  estado: 'PENDIENTE' | 'EN_PROCESO' | 'APROBADO' | 'PAGADO' | 'PROCESADO' | 'EN_CAMINO' | 'CANCELADO' | 'RECHAZADO';
+  estado: 'BORRADOR' | 'EN_PROCESO' | 'EN_CAMINO' | 'ENTREGADO' | 'CANCELADO';
   tipo_pedido: 'PEDIDO_APROBACION' | 'COMPRA_DIRECTA';
   subtotal: number;
   descuento: number;
@@ -21,10 +21,12 @@ export interface Pedido {
   fecha_pago?: string;
   comprobante_pago?: string;
   fecha_envio?: string;
+  actualizaciones_envio?: string;
   detalles?: DetallePedido[];
   cliente?: any;
   usuario?: any;
   aprobador?: any;
+  venta?: any;
 }
 
 export interface DetallePedido {
@@ -49,13 +51,6 @@ export interface CrearPedidoData {
   observaciones?: string;
 }
 
-export interface AprobarPedidoData {
-  metodo_pago?: string;
-}
-
-export interface RechazarPedidoData {
-  motivo_rechazo: string;
-}
 
 export interface MarcarComoPagadoData {
   metodo_pago: string;
@@ -230,72 +225,6 @@ class PedidoService {
     };
   }
 
-  /**
-   * Aprobar un pedido (Vendedor/Admin)
-   */
-  async aprobarPedido(id: number, data?: AprobarPedidoData): Promise<PedidoResponse> {
-    try {
-      console.log('aprobarPedido - Iniciando aprobación:', { id, data });
-      const response = await apiService.put(`/pedidos/${id}/aprobar`, data || {});
-      console.log('aprobarPedido - Respuesta del servidor:', response);
-      
-      // El backend retorna { success: true, data: { pedido: {...} }, message: "..." }
-      if (response && response.success) {
-        return {
-          success: true,
-          data: response.data?.pedido || response.data,
-          message: response.message || 'Pedido aprobado exitosamente'
-        };
-      }
-      
-      // Si no tiene success, podría ser un error
-      const errorMessage = response?.message || response?.error || 'Error al aprobar el pedido';
-      console.error('aprobarPedido - Respuesta sin success:', response);
-      throw new Error(errorMessage);
-    } catch (error: any) {
-      console.error('aprobarPedido - Error capturado:', error);
-      
-      // Si axios lanza un error (4xx, 5xx), extraer el mensaje del response
-      if (error?.response?.data) {
-        const errorData = error.response.data;
-        const errorMessage = errorData.message || errorData.error || `Error ${error.response.status}: Error al aprobar el pedido`;
-        console.error('aprobarPedido - Error del servidor:', errorMessage);
-        throw new Error(errorMessage);
-      }
-      
-      // Si es un error de red u otro tipo, usar el mensaje del error
-      const finalError = error instanceof Error ? error : new Error('Error al aprobar el pedido');
-      console.error('aprobarPedido - Error final:', finalError.message);
-      throw finalError;
-    }
-  }
-
-  /**
-   * Rechazar un pedido (Vendedor/Admin)
-   */
-  async rechazarPedido(id: number, data: RechazarPedidoData): Promise<PedidoResponse> {
-    try {
-      const response = await apiService.put(`/pedidos/${id}/rechazar`, data);
-      // El backend retorna { success: true, data: {...}, message: "..." }
-      if (response && response.success) {
-        return {
-          success: true,
-          data: response.data,
-          message: response.message || 'Pedido rechazado exitosamente'
-        };
-      }
-      // Si no tiene success, podría ser un error
-      throw new Error(response?.message || 'Error al rechazar el pedido');
-    } catch (error: any) {
-      // Si axios lanza un error (4xx, 5xx), extraer el mensaje del response
-      if (error?.response?.data) {
-        const errorData = error.response.data;
-        throw new Error(errorData.message || errorData.error || 'Error al rechazar el pedido');
-      }
-      // Si es un error de red u otro tipo, usar el mensaje del error
-      throw error instanceof Error ? error : new Error('Error al rechazar el pedido');
-    }
-  }
 
   /**
    * Cancelar mi pedido (Cliente)
@@ -391,6 +320,121 @@ class PedidoService {
       }
       
       throw error instanceof Error ? error : new Error('Error al procesar envío');
+    }
+  }
+
+  /**
+   * Marcar pedido como en proceso (Vendedor/Admin)
+   */
+  async marcarComoEnProceso(id: number): Promise<PedidoResponse> {
+    try {
+      const response = await apiService.put(`/pedidos/${id}/marcar-en-proceso`);
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Pedido marcado como en proceso exitosamente'
+        };
+      }
+      throw new Error(response?.message || 'Error al marcar pedido como en proceso');
+    } catch (error: any) {
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al marcar pedido como en proceso');
+      }
+      throw error instanceof Error ? error : new Error('Error al marcar pedido como en proceso');
+    }
+  }
+
+  /**
+   * Marcar pedido como en camino (Vendedor/Admin) - Solo cambia estado, NO crea venta
+   */
+  async marcarComoEnCamino(id: number): Promise<PedidoResponse> {
+    try {
+      const response = await apiService.put(`/pedidos/${id}/marcar-en-camino`);
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data?.pedido || response.data,
+          message: response.message || 'Pedido marcado como en camino exitosamente'
+        };
+      }
+      throw new Error(response?.message || 'Error al marcar pedido como en camino');
+    } catch (error: any) {
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al marcar pedido como en camino');
+      }
+      throw error instanceof Error ? error : new Error('Error al marcar pedido como en camino');
+    }
+  }
+
+  /**
+   * Marcar pedido como entregado - Crear venta y descontar stock (Vendedor/Admin)
+   */
+  async marcarComoEntregado(id: number): Promise<PedidoResponse> {
+    try {
+      const response = await apiService.put(`/pedidos/${id}/marcar-entregado`);
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data?.pedido || response.data,
+          message: response.message || 'Pedido marcado como entregado exitosamente'
+        };
+      }
+      throw new Error(response?.message || 'Error al marcar pedido como entregado');
+    } catch (error: any) {
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al marcar pedido como entregado');
+      }
+      throw error instanceof Error ? error : new Error('Error al marcar pedido como entregado');
+    }
+  }
+
+  /**
+   * Agregar actualización sobre el envío del pedido (Vendedor/Admin)
+   */
+  async agregarActualizacionEnvio(id: number, actualizacion: string): Promise<PedidoResponse> {
+    try {
+      const response = await apiService.post(`/pedidos/${id}/actualizacion-envio`, { actualizacion });
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Actualización agregada exitosamente'
+        };
+      }
+      throw new Error(response?.message || 'Error al agregar actualización');
+    } catch (error: any) {
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al agregar actualización');
+      }
+      throw error instanceof Error ? error : new Error('Error al agregar actualización');
+    }
+  }
+
+  /**
+   * Anular pedido (Vendedor/Admin)
+   */
+  async anularPedido(id: number, motivo?: string): Promise<PedidoResponse> {
+    try {
+      const response = await apiService.put(`/pedidos/${id}/anular`, { motivo });
+      if (response && response.success) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || 'Pedido anulado exitosamente'
+        };
+      }
+      throw new Error(response?.message || 'Error al anular pedido');
+    } catch (error: any) {
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al anular pedido');
+      }
+      throw error instanceof Error ? error : new Error('Error al anular pedido');
     }
   }
 

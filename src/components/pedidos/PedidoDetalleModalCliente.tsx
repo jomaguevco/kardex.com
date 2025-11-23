@@ -36,42 +36,32 @@ export default function PedidoDetalleModalCliente({
   if (!isOpen) return null
 
   const getEstadoBadge = (estado: string) => {
-    // Si tiene fecha_envio, mostrar como EN_CAMINO para el cliente
-    const estadoParaCliente = pedido.fecha_envio ? 'EN_CAMINO' : estado
-
-    switch (estadoParaCliente) {
-      case 'PENDIENTE':
+    switch (estado) {
+      case 'BORRADOR':
         return (
           <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-            Pendiente
+            Borrador - Listo para pagar
           </span>
         )
-      case 'APROBADO':
+      case 'EN_PROCESO':
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-            <CheckCircle className="mr-1 h-3 w-3" />
-            Aprobado - Listo para pagar
-          </span>
-        )
-      case 'PAGADO':
-        return (
-          <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-800">
-            <CreditCard className="mr-1 h-3 w-3" />
-            Pagado - En espera de envío
+            <Package className="mr-1 h-3 w-3" />
+            En preparación
           </span>
         )
       case 'EN_CAMINO':
-      case 'PROCESADO':
         return (
           <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
             <Truck className="mr-1 h-3 w-3" />
             En camino
           </span>
         )
-      case 'RECHAZADO':
+      case 'ENTREGADO':
         return (
-          <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
-            Rechazado
+          <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+            <CheckCircle className="mr-1 h-3 w-3" />
+            Entregado
           </span>
         )
       case 'CANCELADO':
@@ -96,7 +86,7 @@ export default function PedidoDetalleModalCliente({
     }, 1000)
   }
 
-  const mostrarBotonPagar = pedido.estado === 'APROBADO'
+  const mostrarBotonPagar = pedido.estado === 'BORRADOR'
 
   return (
     <>
@@ -232,7 +222,7 @@ export default function PedidoDetalleModalCliente({
               <div className="glass-card rounded-xl border border-blue-200 bg-blue-50 p-4">
                 <div className="flex items-start space-x-3">
                   <Truck className="mt-1 h-5 w-5 text-blue-600" />
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-sm font-semibold text-blue-900">Pedido en camino</h3>
                     <p className="mt-1 text-sm text-blue-700">
                       Tu pedido fue enviado el {format(new Date(pedido.fecha_envio), "dd 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
@@ -243,6 +233,20 @@ export default function PedidoDetalleModalCliente({
                       </p>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Actualizaciones del envío (si existen) */}
+            {pedido.actualizaciones_envio && (
+              <div className="glass-card rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                <h3 className="mb-3 text-sm font-semibold text-indigo-900">Actualizaciones del Envío</h3>
+                <div className="space-y-2">
+                  {pedido.actualizaciones_envio.split('\n\n').map((actualizacion, index) => (
+                    <div key={index} className="rounded-lg bg-white p-3 border border-indigo-100">
+                      <p className="text-sm text-indigo-800 whitespace-pre-line">{actualizacion}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -328,13 +332,13 @@ export default function PedidoDetalleModalCliente({
               </div>
             )}
 
-            {/* Motivo de rechazo si está rechazado */}
-            {pedido.estado === 'RECHAZADO' && pedido.motivo_rechazo && (
+            {/* Motivo de cancelación si está cancelado */}
+            {pedido.estado === 'CANCELADO' && pedido.motivo_rechazo && (
               <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                 <div className="flex items-start space-x-2">
                   <X className="h-5 w-5 text-red-600" />
                   <div>
-                    <p className="text-sm font-semibold text-red-900">Motivo de rechazo:</p>
+                    <p className="text-sm font-semibold text-red-900">Motivo de cancelación:</p>
                     <p className="mt-1 text-sm text-red-700">{pedido.motivo_rechazo}</p>
                   </div>
                 </div>
@@ -354,7 +358,7 @@ export default function PedidoDetalleModalCliente({
                 <span>Proceder al Pago</span>
               </button>
               <p className="text-center text-xs text-slate-500">
-                Tu pedido ha sido aprobado. Procede al pago para completar tu compra.
+                Procede al pago para completar tu compra.
               </p>
             </div>
           )}
