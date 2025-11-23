@@ -307,6 +307,39 @@ class PedidoService {
   /**
    * Marcar pedido como pagado (Cliente)
    */
+  /**
+   * Subir comprobante de pago
+   */
+  async uploadComprobante(id: number, file: File): Promise<{ comprobante_pago: string }> {
+    try {
+      const formData = new FormData();
+      formData.append('comprobante', file);
+
+      const response = await apiService.post(`/pedidos/${id}/upload-comprobante`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response && response.success) {
+        return {
+          comprobante_pago: response.data.comprobante_pago
+        };
+      }
+
+      throw new Error(response?.message || 'Error al subir comprobante');
+    } catch (error: any) {
+      console.error('uploadComprobante - Error:', error);
+
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        throw new Error(errorData.message || errorData.error || 'Error al subir comprobante');
+      }
+
+      throw error instanceof Error ? error : new Error('Error al subir comprobante');
+    }
+  }
+
   async marcarComoPagado(id: number, data: MarcarComoPagadoData): Promise<PedidoResponse> {
     try {
       console.log('marcarComoPagado - Enviando request:', { id, data });

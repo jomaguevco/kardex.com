@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Trash2, Calculator } from 'lucide-react'
+import { Plus, Trash2, Calculator, Receipt, User, Calendar, Package, ShoppingCart, X } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { productoService } from '@/services/productoService'
 import { ventaService } from '@/services/ventaService'
@@ -165,8 +165,6 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       
       setValue(`detalles.${productoExistenteIndex}.cantidad`, nuevaCantidad, { shouldValidate: true, shouldDirty: true })
       setValue(`detalles.${productoExistenteIndex}.subtotal`, nuevoSubtotal, { shouldValidate: true, shouldDirty: true })
-      
-      // Sin toast para ser más rápido (solo feedback visual en la cantidad)
     } else {
       // Si no existe, agregarlo nuevo
       const nuevoDetalle = {
@@ -190,7 +188,6 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       }, 0)
 
       setProductosCache((prev) => ({ ...prev, [productoAAgregar.id]: productoAAgregar }))
-      // Sin toast para ser más rápido - el producto aparece directamente en la lista
     }
 
     setProductoSeleccionado(null)
@@ -201,26 +198,22 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
     const detalle = watchedDetalles[index]
     if (!detalle) return
     
-    // Asegurar que el valor sea un número válido, si no usar el valor actual o 0
     const valorNum = isNaN(valor) || !isFinite(valor) ? (campo === 'cantidad' ? 1 : 0) : valor
     
     const cantidad = campo === 'cantidad' ? Math.max(1, valorNum || detalle.cantidad || 1) : (Number(detalle.cantidad) || 1)
     const precio = campo === 'precio_unitario' ? Math.max(0, valorNum || detalle.precio_unitario || 0) : (Number(detalle.precio_unitario) || 0)
     const descuento = campo === 'descuento' ? Math.max(0, valorNum || 0) : (Number(detalle.descuento) || 0)
     
-    // Calcular subtotal asegurándonos de que todos los valores sean números válidos
     const cantidadValida = Number(cantidad) || 0
     const precioValido = Number(precio) || 0
     const descuentoValido = Number(descuento) || 0
     const subtotal = Math.max(0, (cantidadValida * precioValido) - descuentoValido)
 
-    // Actualizar todos los valores usando setValue para que se registren correctamente
     setValue(`detalles.${index}.cantidad`, cantidadValida, { shouldValidate: true, shouldDirty: true })
     setValue(`detalles.${index}.precio_unitario`, precioValido, { shouldValidate: true, shouldDirty: true })
     setValue(`detalles.${index}.descuento`, descuentoValido, { shouldValidate: true, shouldDirty: true })
     setValue(`detalles.${index}.subtotal`, subtotal, { shouldValidate: true, shouldDirty: true })
     
-    // Asegurar que producto_id esté establecido
     if (detalle.producto_id) {
       setValue(`detalles.${index}.producto_id`, detalle.producto_id, { shouldValidate: true })
     }
@@ -228,17 +221,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
 
   const onSubmit = async (data: VentaFormData) => {
     try {
-      // Validaciones adicionales antes de enviar
-      // Verificar cliente_id del formulario o del estado
       const clienteIdFinal = data.cliente_id || clienteSeleccionado?.id || 0
-      
-      console.log('onSubmit - Datos del formulario:', {
-        cliente_id: data.cliente_id,
-        clienteSeleccionado: clienteSeleccionado?.id,
-        clienteIdFinal,
-        detalles: data.detalles?.length,
-        total: data.total
-      })
       
       if (!clienteIdFinal || clienteIdFinal === 0) {
         toast.error('Debes seleccionar un cliente')
@@ -250,7 +233,6 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         return
       }
 
-      // Validar que todos los detalles tengan información válida
       const detallesInvalidos = data.detalles.filter(
         detalle => !detalle.producto_id || detalle.cantidad <= 0 || detalle.precio_unitario <= 0
       )
@@ -260,10 +242,8 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         return
       }
 
-      // Formatear fecha correctamente
       let fechaVenta = data.fecha
       if (typeof fechaVenta === 'string' && fechaVenta.includes('T')) {
-        // Si es datetime-local, convertir a ISO
         fechaVenta = new Date(fechaVenta).toISOString()
       }
 
@@ -284,8 +264,6 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
           subtotal: Number(detalle.subtotal)
         }))
       }
-      
-      console.log('Enviando venta:', { ...ventaData, detalles: ventaData.detalles.length })
 
       await ventaService.createVenta(ventaData)
       toast.success('Venta creada exitosamente')
@@ -306,11 +284,6 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       onSuccess?.()
     } catch (error: any) {
       console.error('Error al crear venta:', error)
-      console.error('Error completo:', {
-        message: error?.message,
-        response: error?.response?.data,
-        status: error?.response?.status
-      })
       
       let errorMessage = 'Error al crear la venta'
       
@@ -327,271 +300,283 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, (errors) => {
-      console.error('Errores de validación:', errors)
-      console.error('Valores del formulario:', watch())
-      console.error('Cliente seleccionado:', clienteSeleccionado)
-      
-      // Mostrar errores específicos
-      if (errors.cliente_id) {
-        toast.error('Debes seleccionar un cliente')
-      } else if (errors.detalles) {
-        toast.error('Debes agregar al menos un producto')
-      } else if (errors.subtotal) {
-        toast.error('El subtotal debe ser mayor a 0')
-      } else if (errors.total) {
-        toast.error('El total debe ser mayor a 0')
-      } else if (errors.numero_factura) {
-        toast.error('El número de factura es requerido')
-      } else if (errors.fecha) {
-        toast.error('La fecha es requerida')
-      } else {
-        // Mostrar el primer error encontrado
-        const firstError = Object.values(errors)[0]
-        if (firstError) {
-          const errorMessage = firstError.message || 'Por favor completa todos los campos requeridos'
-          toast.error(errorMessage)
+    <form 
+      onSubmit={handleSubmit(onSubmit, (errors) => {
+        if (errors.cliente_id) {
+          toast.error('Debes seleccionar un cliente')
+        } else if (errors.detalles) {
+          toast.error('Debes agregar al menos un producto')
+        } else if (errors.subtotal) {
+          toast.error('El subtotal debe ser mayor a 0')
+        } else if (errors.total) {
+          toast.error('El total debe ser mayor a 0')
+        } else {
+          const firstError = Object.values(errors)[0]
+          if (firstError) {
+            const errorMessage = firstError.message || 'Por favor completa todos los campos requeridos'
+            toast.error(errorMessage)
+          }
         }
-      }
-    })} className="space-y-6">
-      {/* Información básica */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div>
-          <label className="block text-base font-medium text-gray-700 mb-1">
-            Número de Factura
-          </label>
-          <input
-            {...register('numero_factura')}
-            className="input-field text-base"
-            placeholder="FAC-001"
-          />
-          {errors.numero_factura && (
-            <p className="text-base text-red-600 mt-1">{errors.numero_factura.message}</p>
-          )}
+      })} 
+      className="space-y-6"
+    >
+      {/* Información básica - Card con gradiente */}
+      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-6 shadow-lg shadow-slate-900/5">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 p-2">
+            <Receipt className="h-5 w-5 text-white" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900">Información de la Venta</h3>
         </div>
-
-        <div>
-          <label className="block text-base font-medium text-gray-700 mb-1">
-            Fecha
-          </label>
-          <input
-            {...register('fecha')}
-            type="datetime-local"
-            className="input-field text-base"
-          />
-          {errors.fecha && (
-            <p className="text-base text-red-600 mt-1">{errors.fecha.message}</p>
-          )}
-        </div>
-
-        <div className="relative">
-          <label className="block text-base font-medium text-gray-700 mb-1">
-            Cliente
-          </label>
-          <div className="relative">
+        
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+              <Receipt className="h-4 w-4" />
+              Número de Factura
+            </label>
             <input
-              type="text"
-              value={busquedaCliente}
-              onChange={(e) => {
-                setBusquedaCliente(e.target.value)
-                setMostrarDropdownClientes(true)
-                if (!e.target.value) {
-                  setClienteSeleccionado(null)
-                  setValue('cliente_id', 0)
-                }
-              }}
-              onFocus={() => {
-                if (busquedaCliente.length >= 2) {
-                  setMostrarDropdownClientes(true)
-                }
-              }}
-              onBlur={() => {
-                // Delay para permitir click en el dropdown
-                setTimeout(() => setMostrarDropdownClientes(false), 200)
-              }}
-              placeholder="Buscar por nombre, documento o email..."
-              className="input-field text-base w-full"
+              {...register('numero_factura')}
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              placeholder="FAC-001"
             />
-            {loadingClientes && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <LoadingSpinner size="sm" />
-              </div>
+            {errors.numero_factura && (
+              <p className="mt-1 text-xs text-red-600">{errors.numero_factura.message}</p>
             )}
-            {mostrarDropdownClientes && busquedaCliente.length >= 2 && clientes.length > 0 && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {clientes.map((cliente) => (
-                  <div
-                    key={cliente.id}
-                    onClick={() => {
-                      setClienteSeleccionado(cliente)
-                      setBusquedaCliente(cliente.nombre)
-                      setValue('cliente_id', cliente.id, { 
-                        shouldValidate: true,
-                        shouldDirty: true,
-                        shouldTouch: true
-                      })
-                      setMostrarDropdownClientes(false)
-                      console.log('Cliente seleccionado:', cliente.id, cliente.nombre)
-                      // Forzar validación del campo
-                      setTimeout(() => {
-                        trigger('cliente_id')
-                      }, 100)
-                    }}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                  >
-                    <div className="font-medium text-gray-900">{cliente.nombre}</div>
-                    <div className="text-sm text-gray-500">
-                      {cliente.numero_documento && `${cliente.tipo_documento || 'DOC'}: ${cliente.numero_documento}`}
-                      {cliente.email && ` • ${cliente.email}`}
+          </div>
+
+          <div>
+            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+              <Calendar className="h-4 w-4" />
+              Fecha
+            </label>
+            <input
+              {...register('fecha')}
+              type="datetime-local"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+            {errors.fecha && (
+              <p className="mt-1 text-xs text-red-600">{errors.fecha.message}</p>
+            )}
+          </div>
+
+          <div className="relative">
+            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+              <User className="h-4 w-4" />
+              Cliente *
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={busquedaCliente}
+                onChange={(e) => {
+                  setBusquedaCliente(e.target.value)
+                  setMostrarDropdownClientes(true)
+                  if (!e.target.value) {
+                    setClienteSeleccionado(null)
+                    setValue('cliente_id', 0)
+                  }
+                }}
+                onFocus={() => {
+                  if (busquedaCliente.length >= 2) {
+                    setMostrarDropdownClientes(true)
+                  }
+                }}
+                onBlur={() => {
+                  setTimeout(() => setMostrarDropdownClientes(false), 200)
+                }}
+                placeholder="Buscar por nombre, documento o email..."
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              />
+              {loadingClientes && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <LoadingSpinner size="sm" />
+                </div>
+              )}
+              {mostrarDropdownClientes && busquedaCliente.length >= 2 && clientes.length > 0 && (
+                <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-xl">
+                  {clientes.map((cliente) => (
+                    <div
+                      key={cliente.id}
+                      onClick={() => {
+                        setClienteSeleccionado(cliente)
+                        setBusquedaCliente(cliente.nombre)
+                        setValue('cliente_id', cliente.id, { 
+                          shouldValidate: true,
+                          shouldDirty: true,
+                          shouldTouch: true
+                        })
+                        setMostrarDropdownClientes(false)
+                        setTimeout(() => {
+                          trigger('cliente_id')
+                        }, 100)
+                      }}
+                      className="cursor-pointer border-b border-slate-100 px-4 py-3 transition hover:bg-slate-50 last:border-b-0"
+                    >
+                      <div className="font-medium text-slate-900">{cliente.nombre}</div>
+                      <div className="text-xs text-slate-500">
+                        {cliente.numero_documento && `${cliente.tipo_documento || 'DOC'}: ${cliente.numero_documento}`}
+                        {cliente.email && ` • ${cliente.email}`}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+              {mostrarDropdownClientes && busquedaCliente.length >= 2 && !loadingClientes && clientes.length === 0 && (
+                <div className="absolute z-50 mt-1 w-full rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-500 shadow-xl">
+                  No se encontraron clientes
+                </div>
+              )}
+            </div>
+            <input
+              type="hidden"
+              {...register('cliente_id', { 
+                valueAsNumber: true,
+                validate: (value) => {
+                  const finalValue = value || clienteSeleccionado?.id || 0
+                  return finalValue > 0 || 'Debes seleccionar un cliente'
+                }
+              })}
+              value={clienteSeleccionado?.id || watch('cliente_id') || 0}
+            />
+            {errors.cliente_id && (
+              <p className="mt-1 text-xs text-red-600">{errors.cliente_id.message}</p>
             )}
-            {mostrarDropdownClientes && busquedaCliente.length >= 2 && !loadingClientes && clientes.length === 0 && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-sm text-gray-500">
-                No se encontraron clientes
+            {clienteSeleccionado && (
+              <div className="mt-2 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5">
+                <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
+                <span className="text-xs font-medium text-emerald-700">
+                  {clienteSeleccionado.nombre}
+                </span>
               </div>
             )}
           </div>
-          <input
-            type="hidden"
-            {...register('cliente_id', { 
-              valueAsNumber: true,
-              validate: (value) => {
-                const finalValue = value || clienteSeleccionado?.id || 0
-                return finalValue > 0 || 'Debes seleccionar un cliente'
-              }
-            })}
-            value={clienteSeleccionado?.id || watch('cliente_id') || 0}
-          />
-          {errors.cliente_id && (
-            <p className="text-base text-red-600 mt-1">{errors.cliente_id.message}</p>
-          )}
-          {!clienteSeleccionado && !watch('cliente_id') && (
-            <p className="text-sm text-amber-600 mt-1">⚠️ Debes seleccionar un cliente para continuar</p>
-          )}
-          {clienteSeleccionado && (
-            <p className="text-sm text-gray-600 mt-1">
-              Cliente seleccionado: <span className="font-medium">{clienteSeleccionado.nombre}</span>
-            </p>
-          )}
         </div>
       </div>
 
-      {/* Búsqueda de productos */}
-      <div>
-        <label className="block text-base font-medium text-gray-700 mb-1">
-          Agregar Producto
-        </label>
-        <div className="space-y-3">
-          {/* Escáner de código de barras - Modo Rápido */}
-          <BarcodeScanner
-            onProductFound={(producto) => {
-              // Verificar stock
-              if (producto.stock_actual <= 0) {
-                toast.error('Producto sin stock disponible', { duration: 1500 })
-                return
-              }
+      {/* Búsqueda de productos - Card moderna */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 p-2">
+            <Package className="h-5 w-5 text-white" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900">Agregar Productos</h3>
+        </div>
 
-              // Agregar directamente a detalles (sin pasos intermedios)
-              // Si el producto ya existe, incrementa cantidad
-              // Si no existe, lo agrega con cantidad 1
-              agregarProducto(producto, 1)
-            }}
-            placeholder="Escanea código de barras (se agrega automáticamente)..."
-            className="mb-2"
-          />
-          <p className="text-xs text-gray-500 mt-1 mb-2">
-            ⚡ Escanea y el producto se agrega automáticamente. Ajusta cantidades después si es necesario.
-          </p>
+        <div className="space-y-4">
+          {/* Escáner de código de barras */}
+          <div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4">
+            <BarcodeScanner
+              onProductFound={(producto) => {
+                if (producto.stock_actual <= 0) {
+                  toast.error('Producto sin stock disponible', { duration: 1500 })
+                  return
+                }
+                agregarProducto(producto, 1)
+              }}
+              placeholder="Escanea código de barras (se agrega automáticamente)..."
+              className="mb-2"
+            />
+            <p className="mt-2 text-xs text-slate-600">
+              ⚡ Escanea y el producto se agrega automáticamente. Ajusta cantidades después si es necesario.
+            </p>
+          </div>
           
-          {/* Búsqueda manual por nombre */}
-          <div className="flex space-x-2">
+          {/* Búsqueda manual */}
+          <div className="flex gap-2">
             <div className="flex-1">
               <input
                 type="text"
                 value={busquedaProducto}
                 onChange={(e) => setBusquedaProducto(e.target.value)}
-                className="input-field text-base"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 placeholder="Buscar producto por nombre o código..."
-            />
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => agregarProducto()}
+              disabled={!productoSeleccionado}
+              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:shadow-xl hover:shadow-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Plus className="h-4 w-4" />
+              Agregar
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => agregarProducto()}
-            disabled={!productoSeleccionado}
-            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed text-base"
-          >
-            <Plus className="h-5 w-5 mr-1" />
-            Agregar
-          </button>
-        </div>
 
-        {/* Lista de productos encontrados */}
-        {busquedaProducto.length > 2 && (
-          <div className="mt-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg">
-            {loadingProductos ? (
-              <div className="p-4 text-center">
-                <LoadingSpinner size="sm" />
-              </div>
-            ) : (
-              productosData?.productos.map((producto) => (
-                <div
-                  key={producto.id}
-                  className={cn(
-                    'p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100',
-                    productoSeleccionado?.id === producto.id && 'bg-primary-50'
-                  )}
-                  onClick={() => setProductoSeleccionado(producto as any)}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-gray-900 text-base">{producto.nombre}</p>
-                      <p className="text-base text-gray-500">
-                        {producto.codigo_interno} - Stock: {producto.stock_actual}
+          {/* Lista de productos encontrados */}
+          {busquedaProducto.length > 2 && (
+            <div className="max-h-40 overflow-y-auto rounded-lg border border-slate-200 bg-white">
+              {loadingProductos ? (
+                <div className="flex items-center justify-center p-4">
+                  <LoadingSpinner size="sm" />
+                </div>
+              ) : (
+                productosData?.productos.map((producto) => (
+                  <div
+                    key={producto.id}
+                    className={cn(
+                      'cursor-pointer border-b border-slate-100 p-3 transition hover:bg-slate-50 last:border-b-0',
+                      productoSeleccionado?.id === producto.id && 'bg-emerald-50'
+                    )}
+                    onClick={() => setProductoSeleccionado(producto as any)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-slate-900">{producto.nombre}</p>
+                        <p className="text-xs text-slate-500">
+                          {producto.codigo_interno} - Stock: {producto.stock_actual}
+                        </p>
+                      </div>
+                      <p className="font-semibold text-emerald-600">
+                        ${Number(producto.precio_venta).toFixed(2)}
                       </p>
                     </div>
-                    <p className="font-semibold text-primary-600 text-base">
-                      ${Number(producto.precio_venta).toFixed(2)}
-                    </p>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Detalles de la venta */}
-      <div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">Productos</h3>
+      {/* Lista de productos agregados */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 p-2">
+            <ShoppingCart className="h-5 w-5 text-white" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900">
+            Productos en la Venta ({fields.length})
+          </h3>
+        </div>
+
         {fields.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <p className="text-base">No hay productos agregados</p>
-            <p className="text-base">Busca y agrega productos para continuar</p>
+          <div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 py-12 text-center">
+            <Package className="mx-auto h-12 w-12 text-slate-400" />
+            <p className="mt-4 text-sm font-medium text-slate-600">No hay productos agregados</p>
+            <p className="mt-1 text-xs text-slate-500">Busca y agrega productos para continuar</p>
           </div>
         ) : (
           <div className="space-y-3">
             {fields.map((field, index) => {
               const producto = productosCache[watchedDetalles[index]?.producto_id]
               return (
-                <div key={field.id} className="card p-4">
-                  {/* Inputs hidden para producto_id y subtotal */}
+                <div 
+                  key={field.id} 
+                  className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4 shadow-sm transition hover:shadow-md"
+                >
                   <input type="hidden" {...register(`detalles.${index}.producto_id`, { valueAsNumber: true })} />
                   <input type="hidden" {...register(`detalles.${index}.subtotal`, { valueAsNumber: true })} />
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-2 sm:gap-4 items-center">
-                    <div className="md:col-span-2">
-                      <p className="font-medium text-gray-900 text-base">{producto?.nombre}</p>
-                      <p className="text-base text-gray-500">{producto?.codigo_interno}</p>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 lg:items-center">
+                    <div className="lg:col-span-2">
+                      <p className="font-semibold text-slate-900">{producto?.nombre}</p>
+                      <p className="text-xs text-slate-500">{producto?.codigo_interno}</p>
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
-                        Cantidad
-                      </label>
+                      <label className="mb-1 block text-xs font-medium text-slate-600">Cantidad</label>
                       <input
                         {...register(`detalles.${index}.cantidad`, { 
                           valueAsNumber: true,
@@ -605,19 +590,16 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         step="1"
                         min="1"
                         onKeyDown={(e) => {
-                          // Prevenir teclas de punto decimal y coma
                           if (e.key === '.' || e.key === ',' || e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
                             e.preventDefault()
                           }
                         }}
-                        className="input-field text-base"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
-                        Precio
-                      </label>
+                      <label className="mb-1 block text-xs font-medium text-slate-600">Precio</label>
                       <input
                         {...register(`detalles.${index}.precio_unitario`, { 
                           valueAsNumber: true,
@@ -630,14 +612,12 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input-field text-base"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
-                        Descuento
-                      </label>
+                      <label className="mb-1 block text-xs font-medium text-slate-600">Descuento</label>
                       <input
                         {...register(`detalles.${index}.descuento`, { 
                           valueAsNumber: true,
@@ -649,15 +629,13 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input-field text-base"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
-                        Subtotal
-                      </label>
-                      <p className="font-semibold text-gray-900 text-base">
+                      <label className="mb-1 block text-xs font-medium text-slate-600">Subtotal</label>
+                      <p className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900">
                         ${(Number(watchedDetalles[index]?.subtotal) || 0).toFixed(2)}
                       </p>
                     </div>
@@ -666,7 +644,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                       <button
                         type="button"
                         onClick={() => remove(index)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                        className="rounded-lg p-2 text-red-600 transition hover:bg-red-50"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -679,49 +657,52 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         )}
       </div>
 
-      {/* Totales */}
-      <div className="card p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-          <Calculator className="h-6 w-6 mr-2" />
-          Totales
-        </h3>
+      {/* Totales - Card destacada */}
+      <div className="rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-6 shadow-xl shadow-indigo-500/10">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 p-2">
+            <Calculator className="h-5 w-5 text-white" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900">Resumen de Totales</h3>
+        </div>
         
-        {/* Inputs hidden para validación */}
         <input type="hidden" {...register('subtotal', { valueAsNumber: true })} />
         <input type="hidden" {...register('total', { valueAsNumber: true })} />
         
         <div className="space-y-3">
-          <div className="flex justify-between">
-            <span className="text-gray-600 text-base">Subtotal:</span>
-            <span className="font-semibold text-base">${(Number(watchedSubtotal) || 0).toFixed(2)}</span>
+          <div className="flex items-center justify-between rounded-lg bg-white/60 px-4 py-3">
+            <span className="text-sm font-medium text-slate-700">Subtotal:</span>
+            <span className="text-base font-semibold text-slate-900">
+              ${(Number(watchedSubtotal) || 0).toFixed(2)}
+            </span>
           </div>
           
-          <div className="flex justify-between">
-            <span className="text-gray-600 text-base">Descuento:</span>
+          <div className="flex items-center justify-between rounded-lg bg-white/60 px-4 py-3">
+            <span className="text-sm font-medium text-slate-700">Descuento:</span>
             <input
               {...register('descuento', { valueAsNumber: true })}
               type="number"
               step="0.01"
               min="0"
-              className="w-24 text-right font-semibold text-base border-b border-gray-300 focus:border-primary-500 focus:outline-none"
+              className="w-24 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-right text-sm font-semibold shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
           
-          <div className="flex justify-between">
-            <span className="text-gray-600 text-base">Impuesto:</span>
+          <div className="flex items-center justify-between rounded-lg bg-white/60 px-4 py-3">
+            <span className="text-sm font-medium text-slate-700">Impuesto:</span>
             <input
               {...register('impuesto', { valueAsNumber: true })}
               type="number"
               step="0.01"
               min="0"
-              className="w-24 text-right font-semibold text-base border-b border-gray-300 focus:border-primary-500 focus:outline-none"
+              className="w-24 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-right text-sm font-semibold shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
           
-          <div className="border-t border-gray-200 pt-3">
-            <div className="flex justify-between text-xl font-bold">
-              <span>Total:</span>
-              <span className="text-primary-600">
+          <div className="border-t-2 border-indigo-200 pt-3">
+            <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-indigo-500 to-blue-600 px-4 py-4">
+              <span className="text-base font-bold text-white">TOTAL:</span>
+              <span className="text-xl font-bold text-white">
                 ${(Number(watch('total')) || 0).toFixed(2)}
               </span>
             </div>
@@ -730,43 +711,43 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       </div>
 
       {/* Observaciones */}
-      <div>
-        <label className="block text-base font-medium text-gray-700 mb-1">
-          Observaciones
-        </label>
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
+        <label className="mb-2 block text-sm font-medium text-slate-700">Observaciones</label>
         <textarea
           {...register('observaciones')}
           rows={3}
-          className="input-field text-base"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           placeholder="Observaciones adicionales..."
         />
       </div>
 
-      {/* Botones */}
-      <div className="flex justify-end space-x-4">
+      {/* Botones de acción */}
+      <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-6">
         <button
           type="button"
           onClick={onCancel}
-          className="btn-outline text-base"
+          className="rounded-lg border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={isSubmitting || fields.length === 0}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed text-base"
+          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:shadow-xl hover:shadow-indigo-500/40 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? (
             <>
-              <LoadingSpinner size="sm" className="mr-2" />
+              <LoadingSpinner size="sm" />
               Creando...
             </>
           ) : (
-            'Crear Venta'
+            <>
+              <Receipt className="h-4 w-4" />
+              Crear Venta
+            </>
           )}
         </button>
       </div>
     </form>
   )
 }
-

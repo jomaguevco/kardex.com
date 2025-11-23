@@ -128,30 +128,17 @@ export default function PagoModal({
 
       let comprobanteUrl: string | undefined = undefined
 
-      // Si hay comprobante, subirlo primero
+      // Si hay comprobante, subirlo primero al servidor
       if (comprobante) {
-        // Aquí deberías subir la imagen al servidor
-        // Por ahora, usaremos una URL temporal o base64
-        // En producción, esto debería subirse a un servicio de almacenamiento
-        const formData = new FormData()
-        formData.append('file', comprobante)
-
         try {
-          // Intentar subir el archivo si hay un endpoint para ello
-          // Por ahora, usaremos base64 como fallback
-          const reader = new FileReader()
-          reader.readAsDataURL(comprobante)
-          reader.onloadend = () => {
-            comprobanteUrl = reader.result as string
-          }
-        } catch (error) {
-          console.warn('No se pudo subir el comprobante, usando base64 temporal')
+          const uploadResult = await pedidoService.uploadComprobante(pedidoId, comprobante)
+          comprobanteUrl = uploadResult.comprobante_pago
+        } catch (error: any) {
+          console.error('Error al subir comprobante:', error)
+          toast.error(error?.message || 'Error al subir el comprobante. Intenta nuevamente.')
+          setIsProcesando(false)
+          return
         }
-      }
-
-      // Esperar un momento para que se procese la imagen si es necesario
-      if (comprobante && !comprobanteUrl) {
-        await new Promise(resolve => setTimeout(resolve, 100))
       }
 
       // Marcar pedido como pagado
