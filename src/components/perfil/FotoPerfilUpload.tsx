@@ -64,7 +64,7 @@ export default function FotoPerfilUpload() {
   }
 
   // Obtener URL de la foto usando el helper compartido
-  const fotoUrl = preview || getFotoPerfilUrl(user?.foto_perfil) || null
+  const fotoUrl = preview || getFotoPerfilUrl(user?.foto_perfil, false) || null
 
   return (
     <div className="glass-card rounded-2xl p-6 animate-fade-in">
@@ -82,8 +82,12 @@ export default function FotoPerfilUpload() {
                 className="h-full w-full object-cover"
                 style={{ objectPosition: 'center center' }}
                 onError={(e) => {
+                  console.error('Error al cargar imagen:', fotoUrl)
                   // Si falla la carga, mostrar placeholder
                   (e.currentTarget as HTMLImageElement).style.display = 'none'
+                }}
+                onLoad={() => {
+                  console.log('Imagen cargada exitosamente:', fotoUrl)
                 }}
               />
             ) : (
@@ -122,16 +126,21 @@ export default function FotoPerfilUpload() {
             <button
               onClick={async () => {
                 try {
-                  await usuarioService.uploadFoto(new File([], ''))
+                  setUploading(true)
+                  await usuarioService.eliminarFoto()
                   if (user) {
-                    setUser({ ...user, foto_perfil: undefined })
+                    setUser({ ...user, foto_perfil: null })
                   }
-                  toast.success('Foto eliminada')
-                } catch (error) {
-                  // Silently fail
+                  toast.success('Foto eliminada exitosamente')
+                } catch (error: any) {
+                  console.error('Error al eliminar foto:', error)
+                  toast.error(error?.response?.data?.message || 'Error al eliminar la foto')
+                } finally {
+                  setUploading(false)
                 }
               }}
-              className="btn-secondary inline-flex items-center gap-2"
+              disabled={uploading}
+              className="btn-secondary inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <X className="h-4 w-4" />
               Eliminar foto

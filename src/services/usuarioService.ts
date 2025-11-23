@@ -28,6 +28,11 @@ class UsuarioService {
     return (response as any)?.data || response;
   }
 
+  async eliminarFoto(): Promise<{ foto_perfil: null }> {
+    const response = await api.delete<{ foto_perfil: null }>('/auth/eliminar-foto');
+    return (response as any)?.data || response;
+  }
+
   async actualizarPreferencias(preferencias: any): Promise<void> {
     await api.put('/auth/preferencias', { preferencias });
   }
