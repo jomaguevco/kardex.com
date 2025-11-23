@@ -157,14 +157,14 @@ export default function VentasTable({ onView, onEdit, onCancel, onDownloadPDF }:
                         {/* PENDIENTE: Ver, Editar, Cancelar */}
                         {normalizeEstado(venta.estado) === 'pendiente' && (
                           <>
-                            {onEdit && (
-                              <AccionButton title="Editar" onClick={() => onEdit(venta)} variant="primary">
-                                <Edit className="h-4 w-4" />
-                              </AccionButton>
-                            )}
+                        {onEdit && (
+                          <AccionButton title="Editar" onClick={() => onEdit(venta)} variant="primary">
+                            <Edit className="h-4 w-4" />
+                          </AccionButton>
+                        )}
                             {onCancel && (
-                              <AccionButton title="Cancelar" onClick={() => onCancel(venta)} variant="danger">
-                                <X className="h-4 w-4" />
+                          <AccionButton title="Cancelar" onClick={() => onCancel(venta)} variant="danger">
+                            <X className="h-4 w-4" />
                               </AccionButton>
                             )}
                           </>

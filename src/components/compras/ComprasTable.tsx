@@ -157,15 +157,15 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
                         {/* PENDIENTE: Ver, Editar, Cancelar */}
                         {normalizeEstado(compra.estado) === 'pendiente' && (
                           <>
-                            {onEdit && (
-                              <AccionButton title="Editar" onClick={() => onEdit(compra)} variant="primary">
-                                <Edit className="h-4 w-4" />
-                              </AccionButton>
-                            )}
+                        {onEdit && (
+                          <AccionButton title="Editar" onClick={() => onEdit(compra)} variant="primary">
+                            <Edit className="h-4 w-4" />
+                          </AccionButton>
+                        )}
                             {onCancel && (
-                              <AccionButton title="Cancelar" onClick={() => onCancel(compra)} variant="danger">
-                                <X className="h-4 w-4" />
-                              </AccionButton>
+                          <AccionButton title="Cancelar" onClick={() => onCancel(compra)} variant="danger">
+                            <X className="h-4 w-4" />
+                          </AccionButton>
                             )}
                           </>
                         )}
