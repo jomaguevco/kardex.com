@@ -274,22 +274,33 @@ export default function PedidoDetalleModal({
                       </p>
                     </div>
                   )}
-                  {pedido.comprobante_pago && (
-                    <div className="md:col-span-2 bg-white rounded-lg p-4 border border-emerald-200">
-                      <p className="text-xs font-medium text-emerald-700 mb-3">Comprobante de Pago</p>
-                      <div className="flex justify-center">
-                        <img
-                          src={pedido.comprobante_pago}
-                          alt="Comprobante de pago"
-                          className="max-w-md rounded-lg border-2 border-emerald-200 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                          onClick={() => window.open(pedido.comprobante_pago, '_blank')}
-                        />
+                  {pedido.comprobante_pago && (() => {
+                    // Construir URL completa del comprobante
+                    const comprobanteUrl = pedido.comprobante_pago.startsWith('http')
+                      ? pedido.comprobante_pago
+                      : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4001'}${pedido.comprobante_pago}`;
+                    
+                    return (
+                      <div className="md:col-span-2 bg-white rounded-lg p-4 border border-emerald-200">
+                        <p className="text-xs font-medium text-emerald-700 mb-3">Comprobante de Pago</p>
+                        <div className="flex justify-center">
+                          <img
+                            src={comprobanteUrl}
+                            alt="Comprobante de pago"
+                            className="max-w-md rounded-lg border-2 border-emerald-200 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                            onClick={() => window.open(comprobanteUrl, '_blank')}
+                            onError={(e) => {
+                              console.error('Error al cargar comprobante:', comprobanteUrl);
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
+                        <p className="text-xs text-emerald-600 mt-2 text-center">
+                          Haz clic en la imagen para ver en tamaño completo
+                        </p>
                       </div>
-                      <p className="text-xs text-emerald-600 mt-2 text-center">
-                        Haz clic en la imagen para ver en tamaño completo
-                      </p>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
                 {!pedido.comprobante_pago && (pedido.metodo_pago === 'EFECTIVO' || pedido.metodo_pago === 'TARJETA') && (
                   <div className="mt-4 rounded-lg bg-amber-50 border border-amber-200 p-3">
