@@ -47,8 +47,19 @@ export const ventaService = {
         responseType: 'blob'
       });
       
+      // Verificar que la respuesta sea un blob válido
+      if (!response || !(response as any).data) {
+        throw new Error('No se recibió un PDF válido del servidor');
+      }
+      
       // Crear un blob y descargarlo
       const blob = new Blob([(response as any).data], { type: 'application/pdf' });
+      
+      // Verificar que el blob no esté vacío
+      if (blob.size === 0) {
+        throw new Error('El PDF recibido está vacío');
+      }
+      
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

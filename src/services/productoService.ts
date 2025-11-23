@@ -85,6 +85,15 @@ class ProductoService {
     return (response.data as any).data;
   }
 
+  /**
+   * Buscar producto por código de barras exacto
+   * Útil para escáneres de códigos de barras
+   */
+  async getProductoByBarcode(codigoBarras: string): Promise<Producto> {
+    const response = await apiService.get(`/productos/by-barcode/${encodeURIComponent(codigoBarras)}`);
+    return (response.data as any).data;
+  }
+
   async createProducto(data: CreateProductoData): Promise<Producto> {
     const response = await apiService.post('/productos', data);
     return (response.data as any).data;

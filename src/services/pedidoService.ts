@@ -239,7 +239,7 @@ class PedidoService {
       const response = await apiService.put(`/pedidos/${id}/aprobar`, data || {});
       console.log('aprobarPedido - Respuesta del servidor:', response);
       
-      // El backend retorna { success: true, data: {...}, message: "..." }
+      // El backend retorna { success: true, data: { pedido: {...} }, message: "..." }
       if (response && response.success) {
         return {
           success: true,

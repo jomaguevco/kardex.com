@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { Plus, Trash2, Calculator } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import BarcodeScanner from '@/components/ui/BarcodeScanner'
 import { productoService } from '@/services/productoService'
 import { proveedorService } from '@/services/proveedorService'
 import { compraService } from '@/services/compraService'
@@ -86,27 +87,43 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
   const descuento = watch('descuento') || 0
   const impuesto = watch('impuesto') || 0
 
-  const agregarProducto = () => {
-    if (!selectedProduct) {
+  const agregarProducto = (producto?: Producto, cantidadIncremental: number = 1) => {
+    const productoAAgregar = producto || selectedProduct
+    if (!productoAAgregar) {
       toast.error('Selecciona un producto de la lista')
       return
     }
 
-    const productoExistente = detalles.find((detalle) => detalle.producto_id === selectedProduct.id)
-    if (productoExistente) {
-      toast.error('Este producto ya está en la compra')
-      return
+    // Buscar si el producto ya existe en los detalles
+    const productoExistenteIndex = detalles.findIndex((detalle) => detalle.producto_id === productoAAgregar.id)
+    
+    if (productoExistenteIndex >= 0) {
+      // Si ya existe, incrementar la cantidad
+      const detalleExistente = detalles[productoExistenteIndex]
+      const nuevaCantidad = (detalleExistente.cantidad || 1) + cantidadIncremental
+      const precio = detalleExistente.precio_unitario || productoAAgregar.precio_compra || productoAAgregar.precio_venta
+      const descuento = detalleExistente.descuento || 0
+      const nuevoSubtotal = (nuevaCantidad * precio) - descuento
+      
+      setValue(`detalles.${productoExistenteIndex}.cantidad`, nuevaCantidad)
+      setValue(`detalles.${productoExistenteIndex}.subtotal`, nuevoSubtotal)
+      
+      toast.success(`${productoAAgregar.nombre}: cantidad ${nuevaCantidad}`, { duration: 1500 })
+    } else {
+      // Si no existe, agregarlo nuevo
+      const precio = productoAAgregar.precio_compra || productoAAgregar.precio_venta
+      append({
+        producto_id: productoAAgregar.id,
+        cantidad: cantidadIncremental,
+        precio_unitario: precio,
+        descuento: 0,
+        subtotal: precio * cantidadIncremental
+      })
+
+      setProductosCache((prev) => ({ ...prev, [productoAAgregar.id]: productoAAgregar }))
+      toast.success(`${productoAAgregar.nombre} agregado`, { duration: 1500 })
     }
 
-    append({
-      producto_id: selectedProduct.id,
-      cantidad: 1,
-      precio_unitario: selectedProduct.precio_compra || selectedProduct.precio_venta,
-      descuento: 0,
-      subtotal: selectedProduct.precio_compra || selectedProduct.precio_venta
-    })
-
-    setProductosCache((prev) => ({ ...prev, [selectedProduct.id]: selectedProduct }))
     setSelectedProduct(null)
     setBusquedaProducto('')
   }
@@ -241,24 +258,45 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
 
       <div>
         <label className="block text-sm font-medium text-slate-600">Agregar productos</label>
-        <div className="mt-1 flex gap-2">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={busquedaProducto}
-              onChange={(event) => setBusquedaProducto(event.target.value)}
-              placeholder="Buscar por nombre o código..."
-              className="input-field"
-            />
+        <div className="mt-1 space-y-2">
+          {/* Escáner de código de barras - Modo Incremental */}
+          <BarcodeScanner
+            onProductFound={(producto) => {
+              // Agregar o incrementar cantidad automáticamente
+              agregarProducto(producto, 1)
+              
+              // Auto-focus de nuevo para siguiente escaneo
+              setTimeout(() => {
+                const scannerInput = document.querySelector('input[placeholder*="Escanea código"]') as HTMLInputElement
+                if (scannerInput) {
+                  scannerInput.focus()
+                }
+              }, 100)
+            }}
+            placeholder="Escanea código de barras (cada escaneo suma 1 unidad)..."
+            className="mb-2"
+          />
+          
+          {/* Búsqueda manual por nombre */}
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={busquedaProducto}
+                onChange={(event) => setBusquedaProducto(event.target.value)}
+                placeholder="Buscar por nombre o código..."
+                className="input-field"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => agregarProducto()}
+              disabled={!selectedProduct}
+              className="btn-primary inline-flex items-center gap-1 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Plus className="h-4 w-4" /> Agregar
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={agregarProducto}
-            disabled={!selectedProduct}
-            className="btn-primary inline-flex items-center gap-1 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Plus className="h-4 w-4" /> Agregar
-          </button>
         </div>
         {busquedaProducto.length > 2 && (
           <div className="mt-2 max-h-48 overflow-y-auto rounded-2xl border border-slate-100 bg-white">

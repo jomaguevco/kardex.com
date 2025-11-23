@@ -93,6 +93,20 @@ function ComprasContent() {
     }
   }
 
+  const handleProcesarCompra = async (compra: Compra) => {
+    const confirmar = window.confirm(`¿Deseas marcar la compra ${compra.numero_factura} como PROCESADA? Esto aumentará el stock de los productos.`)
+    if (!confirmar) return
+
+    try {
+      await compraService.updateCompra(compra.id, { estado: 'PROCESADA' as any })
+      toast.success('Compra procesada correctamente. El stock ha sido actualizado.')
+      handleCloseDetalle()
+      queryClient.invalidateQueries({ queryKey: ['compras'] })
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || 'No se pudo procesar la compra')
+    }
+  }
+
   return (
     <div className="space-y-10 animate-fade-in">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 px-6 py-8 text-white shadow-xl">
@@ -257,9 +271,15 @@ function ComprasContent() {
                 <button onClick={handleCloseDetalle} className="btn-outline sm:min-w-[150px]">
                   Cerrar
                 </button>
-                {/* PENDIENTE: Mostrar editar y cancelar */}
+                {/* PENDIENTE: Mostrar procesar, editar y cancelar */}
                 {selectedCompra.estado?.toUpperCase() === 'PENDIENTE' && (
                   <>
+                    <button 
+                      onClick={() => handleProcesarCompra(selectedCompra)} 
+                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-100"
+                    >
+                      Marcar como procesada
+                    </button>
                     <button 
                       onClick={() => handleEditCompra(selectedCompra)} 
                       className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-600 transition hover:bg-amber-100"
@@ -274,7 +294,16 @@ function ComprasContent() {
                     </button>
                   </>
                 )}
-                {/* PROCESADA y ANULADA: Solo mostrar cerrar (ya está arriba) */}
+                {/* PROCESADA: Mostrar anular */}
+                {selectedCompra.estado?.toUpperCase() === 'PROCESADA' && (
+                  <button 
+                    onClick={() => handleCancelarCompra(selectedCompra)} 
+                    className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
+                  >
+                    Anular compra
+                  </button>
+                )}
+                {/* ANULADA: Solo mostrar cerrar (ya está arriba) */}
               </div>
             </div>
           </div>

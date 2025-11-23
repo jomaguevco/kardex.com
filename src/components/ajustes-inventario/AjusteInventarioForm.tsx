@@ -10,6 +10,7 @@ import toast from 'react-hot-toast'
 import { productoService } from '@/services/productoService'
 import { ajusteInventarioService, TipoMovimiento, CreateAjusteData } from '@/services/ajusteInventarioService'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import BarcodeScanner from '@/components/ui/BarcodeScanner'
 import { cn } from '@/utils/cn'
 
 const ajusteSchema = z.object({
@@ -131,15 +132,31 @@ export default function AjusteInventarioForm({ tiposMovimiento, onSuccess, onCan
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Producto <span className="text-red-500">*</span>
         </label>
-        <div className="flex space-x-2">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={busquedaProducto}
-              onChange={(e) => setBusquedaProducto(e.target.value)}
-              className="input-field"
-              placeholder="Buscar producto por nombre o código..."
-            />
+        <div className="space-y-2">
+          {/* Escáner de código de barras */}
+          <BarcodeScanner
+            onProductFound={(producto) => {
+              setProductoSeleccionado(producto)
+              setBusquedaProducto('')
+              setValue('producto_id', producto.id)
+              setValue('precio_unitario', producto.costo_promedio || producto.precio_compra || 0)
+              toast.success(`Producto seleccionado: ${producto.nombre}`)
+            }}
+            placeholder="Escanea código de barras..."
+            className="mb-2"
+          />
+          
+          {/* Búsqueda manual por nombre */}
+          <div className="flex space-x-2">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={busquedaProducto}
+                onChange={(e) => setBusquedaProducto(e.target.value)}
+                className="input-field"
+                placeholder="Buscar producto por nombre o código..."
+              />
+            </div>
           </div>
         </div>
 

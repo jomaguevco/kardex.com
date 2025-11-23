@@ -12,6 +12,7 @@ import { clienteService } from '@/services/clienteService'
 import { VentaForm, Producto, Cliente } from '@/types'
 import toast from 'react-hot-toast'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import BarcodeScanner from '@/components/ui/BarcodeScanner'
 import { cn } from '@/utils/cn'
 
 const detalleVentaSchema = z.object({
@@ -145,39 +146,53 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
     }
   }, [productoSeleccionado])
 
-  const agregarProducto = () => {
-    if (!productoSeleccionado) return
+  const agregarProducto = (producto?: Producto, cantidadIncremental: number = 1) => {
+    const productoAAgregar = producto || productoSeleccionado
+    if (!productoAAgregar) return
 
-    const productoExistente = watchedDetalles.find(
-      detalle => detalle.producto_id === productoSeleccionado.id
+    // Buscar si el producto ya existe en los detalles
+    const productoExistenteIndex = watchedDetalles.findIndex(
+      detalle => detalle.producto_id === productoAAgregar.id
     )
 
-    if (productoExistente) {
-      toast.error('Este producto ya está en la venta')
-      return
+    if (productoExistenteIndex >= 0) {
+      // Si ya existe, incrementar la cantidad
+      const detalleExistente = watchedDetalles[productoExistenteIndex]
+      const nuevaCantidad = (detalleExistente.cantidad || 1) + cantidadIncremental
+      const precio = detalleExistente.precio_unitario || productoAAgregar.precio_venta
+      const descuento = detalleExistente.descuento || 0
+      const nuevoSubtotal = (nuevaCantidad * precio) - descuento
+      
+      setValue(`detalles.${productoExistenteIndex}.cantidad`, nuevaCantidad, { shouldValidate: true, shouldDirty: true })
+      setValue(`detalles.${productoExistenteIndex}.subtotal`, nuevoSubtotal, { shouldValidate: true, shouldDirty: true })
+      
+      toast.success(`${productoAAgregar.nombre}: cantidad ${nuevaCantidad}`, { duration: 1500 })
+    } else {
+      // Si no existe, agregarlo nuevo
+      const nuevoDetalle = {
+        producto_id: productoAAgregar.id,
+        cantidad: cantidadIncremental,
+        precio_unitario: Number(productoAAgregar.precio_venta) || 0,
+        descuento: 0,
+        subtotal: (Number(productoAAgregar.precio_venta) || 0) * cantidadIncremental
+      }
+      
+      append(nuevoDetalle)
+      
+      // Asegurar que los valores se registren correctamente
+      const index = fields.length
+      setTimeout(() => {
+        setValue(`detalles.${index}.producto_id`, nuevoDetalle.producto_id, { shouldValidate: true })
+        setValue(`detalles.${index}.cantidad`, nuevoDetalle.cantidad, { shouldValidate: true })
+        setValue(`detalles.${index}.precio_unitario`, nuevoDetalle.precio_unitario, { shouldValidate: true })
+        setValue(`detalles.${index}.descuento`, nuevoDetalle.descuento, { shouldValidate: true })
+        setValue(`detalles.${index}.subtotal`, nuevoDetalle.subtotal, { shouldValidate: true })
+      }, 0)
+
+      setProductosCache((prev) => ({ ...prev, [productoAAgregar.id]: productoAAgregar }))
+      toast.success(`${productoAAgregar.nombre} agregado`, { duration: 1500 })
     }
 
-    const nuevoDetalle = {
-      producto_id: productoSeleccionado.id,
-      cantidad: 1,
-      precio_unitario: Number(productoSeleccionado.precio_venta) || 0,
-      descuento: 0,
-      subtotal: Number(productoSeleccionado.precio_venta) || 0
-    }
-    
-    append(nuevoDetalle)
-    
-    // Asegurar que los valores se registren correctamente
-    const index = fields.length
-    setTimeout(() => {
-      setValue(`detalles.${index}.producto_id`, nuevoDetalle.producto_id, { shouldValidate: true })
-      setValue(`detalles.${index}.cantidad`, nuevoDetalle.cantidad, { shouldValidate: true })
-      setValue(`detalles.${index}.precio_unitario`, nuevoDetalle.precio_unitario, { shouldValidate: true })
-      setValue(`detalles.${index}.descuento`, nuevoDetalle.descuento, { shouldValidate: true })
-      setValue(`detalles.${index}.subtotal`, nuevoDetalle.subtotal, { shouldValidate: true })
-    }, 0)
-
-    setProductosCache((prev) => ({ ...prev, [productoSeleccionado.id]: productoSeleccionado }))
     setProductoSeleccionado(null)
     setBusquedaProducto('')
   }
@@ -469,19 +484,45 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         <label className="block text-base font-medium text-gray-700 mb-1">
           Agregar Producto
         </label>
-        <div className="flex space-x-2">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={busquedaProducto}
-              onChange={(e) => setBusquedaProducto(e.target.value)}
-              className="input-field text-base"
-              placeholder="Buscar producto por nombre o código..."
+        <div className="space-y-3">
+          {/* Escáner de código de barras - Modo Incremental */}
+          <BarcodeScanner
+            onProductFound={(producto) => {
+              // Verificar stock
+              if (producto.stock_actual <= 0) {
+                toast.error('Producto sin stock disponible')
+                return
+              }
+
+              // Agregar o incrementar cantidad automáticamente
+              agregarProducto(producto, 1)
+              
+              // Auto-focus de nuevo para siguiente escaneo
+              setTimeout(() => {
+                const scannerInput = document.querySelector('input[placeholder*="Escanea código"]') as HTMLInputElement
+                if (scannerInput) {
+                  scannerInput.focus()
+                }
+              }, 100)
+            }}
+            placeholder="Escanea código de barras (cada escaneo suma 1 unidad)..."
+            className="mb-2"
+          />
+          
+          {/* Búsqueda manual por nombre */}
+          <div className="flex space-x-2">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={busquedaProducto}
+                onChange={(e) => setBusquedaProducto(e.target.value)}
+                className="input-field text-base"
+                placeholder="Buscar producto por nombre o código..."
             />
           </div>
           <button
             type="button"
-            onClick={agregarProducto}
+            onClick={() => agregarProducto()}
             disabled={!productoSeleccionado}
             className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed text-base"
           >
