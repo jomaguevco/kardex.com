@@ -119,21 +119,50 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true });
         
         try {
-          // Primero verificar localStorage (más confiable que el store en algunos casos)
-          const token = localStorage.getItem('token');
+          // Esperar un momento para que Zustand persista restaure el estado primero
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Primero verificar el store (Zustand persist) - esto es más confiable
+          const currentState = get();
+          let token = currentState.token;
+          let user = currentState.user;
+          let permisos = currentState.permisos;
+          
+          // Si el store tiene datos, usarlos y sincronizar con localStorage
+          if (token && user) {
+            // Sincronizar con localStorage para compatibilidad
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            if (permisos) {
+              localStorage.setItem('permisos', JSON.stringify(permisos));
+            }
+            
+            // Restaurar estado desde el store
+            set({
+              user,
+              token,
+              permisos,
+              isAuthenticated: true,
+              isLoading: false
+            });
+            return;
+          }
+          
+          // Si no hay datos en el store, verificar localStorage como fallback
+          const tokenFromStorage = localStorage.getItem('token');
           const userStr = localStorage.getItem('user');
           const permisosStr = localStorage.getItem('permisos');
           
-          if (token && userStr) {
+          if (tokenFromStorage && userStr) {
             try {
-              const user = JSON.parse(userStr);
-              const permisos = permisosStr ? JSON.parse(permisosStr) : null;
+              const userFromStorage = JSON.parse(userStr);
+              const permisosFromStorage = permisosStr ? JSON.parse(permisosStr) : null;
               
-              // Restaurar estado desde localStorage
+              // Restaurar estado desde localStorage y actualizar el store
               set({
-                user,
-                token,
-                permisos,
+                user: userFromStorage,
+                token: tokenFromStorage,
+                permisos: permisosFromStorage,
                 isAuthenticated: true,
                 isLoading: false
               });
@@ -147,34 +176,31 @@ export const useAuthStore = create<AuthStore>()(
             }
           }
           
-          // Si no hay datos en localStorage, verificar el store (Zustand persist)
-          const currentState = get();
-          if (currentState.user && currentState.token && currentState.isAuthenticated) {
-            // Sincronizar con localStorage
-            localStorage.setItem('token', currentState.token);
-            localStorage.setItem('user', JSON.stringify(currentState.user));
-            if (currentState.permisos) {
-              localStorage.setItem('permisos', JSON.stringify(currentState.permisos));
-            }
-            set({ isLoading: false });
-            return;
+          // No hay datos válidos en ningún lugar, pero NO limpiar el estado
+          // Dejar que el usuario permanezca autenticado si el persist middleware tiene datos
+          // Solo limpiar si realmente no hay nada
+          const finalState = get();
+          if (!finalState.token && !finalState.user) {
+            set({
+              user: null,
+              token: null,
+              permisos: null,
+              isAuthenticated: false,
+              isLoading: false
+            });
+          } else {
+            // Si hay datos en el store, mantenerlos aunque no estén en localStorage
+            set({
+              isAuthenticated: !!finalState.token && !!finalState.user,
+              isLoading: false
+            });
           }
-          
-          // No hay datos válidos, limpiar estado
-          set({
-            user: null,
-            token: null,
-            permisos: null,
-            isAuthenticated: false,
-            isLoading: false
-          });
         } catch (error) {
           console.error('Error en checkAuth:', error);
+          // No limpiar el estado en caso de error, solo marcar como no cargando
+          const finalState = get();
           set({
-            user: null,
-            token: null,
-            permisos: null,
-            isAuthenticated: false,
+            isAuthenticated: !!finalState.token && !!finalState.user,
             isLoading: false
           });
         }

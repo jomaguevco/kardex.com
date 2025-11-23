@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import NotificacionesPanel from './NotificacionesPanel'
+import { getFotoPerfilUrl } from '@/utils/fotoPerfil'
 import {
   Store, ShoppingBag, Package, Receipt, CreditCard,
   MessageCircle, User, LogOut, Bell, ShoppingCart,
@@ -22,24 +23,6 @@ export default function ClienteNavbar() {
   const [cartCount, setCartCount] = useState(0)
   const [favoritesCount, setFavoritesCount] = useState(0)
   const [notificacionesCount, setNotificacionesCount] = useState(0)
-
-  const getApiBaseUrl = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api'
-    return apiUrl.replace(/\/api$/, '') || 'http://localhost:4001'
-  }
-
-  const getFotoUrl = () => {
-    if (!user?.foto_perfil) return null
-    const baseUrl = (process.env.NEXT_PUBLIC_FILES_BASE_URL || getApiBaseUrl()).replace(/\/$/, '')
-    let url = user.foto_perfil
-    if (url.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
-      url = url.replace(/^http:\/\//, 'https://')
-    } else if (!url.startsWith('http')) {
-      const path = url.startsWith('/') ? url : `/${url}`
-      url = `${baseUrl}${path}`
-    }
-    return url
-  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -244,9 +227,9 @@ export default function ClienteNavbar() {
                       : 'bg-white/10 text-white backdrop-blur-sm hover:bg-white/20'
                   }`}
                 >
-                  {user?.foto_perfil ? (
+                  {getFotoPerfilUrl(user?.foto_perfil) ? (
                     <img
-                      src={getFotoUrl() || ''}
+                      src={getFotoPerfilUrl(user?.foto_perfil) || ''}
                       alt={user?.nombre_usuario || 'Cliente'}
                       className="h-8 w-8 rounded-full object-cover border-2 border-white"
                       onError={(e) => {
@@ -255,7 +238,7 @@ export default function ClienteNavbar() {
                       }}
                     />
                   ) : null}
-                  {(!user?.foto_perfil || !getFotoUrl()) && (
+                  {!getFotoPerfilUrl(user?.foto_perfil) && (
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-indigo-600 text-sm font-bold text-white">
                       {user?.nombre_usuario?.charAt(0).toUpperCase() || 'C'}
                     </div>

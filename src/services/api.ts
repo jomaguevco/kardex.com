@@ -116,6 +116,7 @@ class ApiService {
           }
           
           // Solo cerrar sesión si es un problema de token claramente identificado
+          // Y NO durante la inicialización (primeros 2 segundos después de cargar la página)
           const esErrorToken = 
             errorMessage.includes('Token') ||
             errorMessage.includes('acceso requerido') ||
@@ -123,14 +124,26 @@ class ApiService {
             (error.response?.status === 401 && !esErrorValidacion);
           
           if (esErrorToken) {
+            // Verificar si estamos en período de inicialización (primeros 2 segundos)
+            const isInitializing = typeof window !== 'undefined' && 
+              (window as any).__APP_INIT_TIME && 
+              Date.now() - (window as any).__APP_INIT_TIME < 2000;
+            
+            // No cerrar sesión durante la inicialización
+            if (isInitializing) {
+              console.warn('Error de autenticación durante inicialización, ignorando:', errorMessage);
+              return Promise.reject(error);
+            }
+            
             console.error('Error de autenticación:', errorMessage);
             
             // Dar un pequeño delay para evitar cerrar sesión inmediatamente
             setTimeout(() => {
               if (typeof window !== 'undefined') {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                localStorage.removeItem('permisos');
+                // Usar el store de auth para hacer logout correctamente
+                const { useAuthStore } = require('@/store/authStore');
+                const { logout } = useAuthStore.getState();
+                logout();
                 
                 // Solo redirigir si no estamos ya en la página de login
                 if (window.location.pathname !== '/') {

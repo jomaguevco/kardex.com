@@ -22,11 +22,8 @@ class UsuarioService {
     const formData = new FormData();
     formData.append('foto', file);
 
-    const response = await api.post<{ foto_perfil: string }>('/auth/upload-foto', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    // No establecer Content-Type manualmente - axios lo hace automáticamente con el boundary correcto
+    const response = await api.post<{ foto_perfil: string }>('/auth/upload-foto', formData);
 
     return (response as any)?.data || response;
   }

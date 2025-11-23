@@ -5,12 +5,7 @@ import { Upload, User, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import usuarioService from '@/services/usuarioService'
 import { useAuthStore } from '@/store/authStore'
-
-const getApiBaseUrl = () => {
-  // Opción 2b: derivar SIEMPRE de NEXT_PUBLIC_API_URL
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api'
-  return apiUrl.replace(/\/api$/, '') || 'http://localhost:4001'
-}
+import { getFotoPerfilUrl } from '@/utils/fotoPerfil'
 
 export default function FotoPerfilUpload() {
   const { user, setUser } = useAuthStore()
@@ -68,28 +63,8 @@ export default function FotoPerfilUpload() {
     }
   }
 
-  const getFotoUrl = () => {
-    if (preview) return preview
-    if (user?.foto_perfil) {
-      const baseUrl = getApiBaseUrl().replace(/\/$/, '')
-      let url = user.foto_perfil
-      // Si ya incluye http, usar directo pero forzar https si la app está en https
-      if (url.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
-        url = url.replace(/^http:\/\//, 'https://')
-      } else if (!url.startsWith('http')) {
-        // Asegurar slash inicial y componer con baseUrl
-        const path = url.startsWith('/') ? url : `/${url}`
-        url = `${baseUrl}${path}`
-      }
-      // Cache-busting para evitar imágenes viejas en CDN/navegador
-      const cacheBuster = `v=${Date.now()}`
-      url += url.includes('?') ? `&${cacheBuster}` : `?${cacheBuster}`
-      return url
-    }
-    return null
-  }
-
-  const fotoUrl = getFotoUrl()
+  // Obtener URL de la foto usando el helper compartido
+  const fotoUrl = preview || getFotoPerfilUrl(user?.foto_perfil) || null
 
   return (
     <div className="glass-card rounded-2xl p-6 animate-fade-in">

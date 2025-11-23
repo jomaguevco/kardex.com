@@ -23,6 +23,39 @@ function WhatsAppButtonWrapper() {
   return <WhatsAppButton />
 }
 
+function AuthInitializer() {
+  const { checkAuth } = useAuthStore()
+  const [initialized, setInitialized] = useState(false)
+
+  useEffect(() => {
+    // Marcar tiempo de inicialización para el interceptor de axios
+    if (typeof window !== 'undefined') {
+      (window as any).__APP_INIT_TIME = Date.now()
+    }
+
+    // Restaurar sesión al cargar la aplicación
+    const initializeAuth = async () => {
+      try {
+        await checkAuth()
+      } catch (error) {
+        console.error('Error al inicializar autenticación:', error)
+      } finally {
+        setInitialized(true)
+        // Marcar fin de período de inicialización después de 2 segundos
+        setTimeout(() => {
+          if (typeof window !== 'undefined') {
+            (window as any).__APP_INIT_TIME = null
+          }
+        }, 2000)
+      }
+    }
+
+    initializeAuth()
+  }, [checkAuth])
+
+  return null
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -38,6 +71,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthInitializer />
       <div style={{ margin: 0, padding: 0, marginTop: 0, paddingTop: 0, top: 0, position: 'relative', minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
         {children}
       </div>
