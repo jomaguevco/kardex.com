@@ -192,6 +192,14 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       // Verificar cliente_id del formulario o del estado
       const clienteIdFinal = data.cliente_id || clienteSeleccionado?.id || 0
       
+      console.log('onSubmit - Datos del formulario:', {
+        cliente_id: data.cliente_id,
+        clienteSeleccionado: clienteSeleccionado?.id,
+        clienteIdFinal,
+        detalles: data.detalles?.length,
+        total: data.total
+      })
+      
       if (!clienteIdFinal || clienteIdFinal === 0) {
         toast.error('Debes seleccionar un cliente')
         return
@@ -279,7 +287,14 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit, (errors) => {
+      console.error('Errores de validación:', errors)
+      // Mostrar el primer error encontrado
+      const firstError = Object.values(errors)[0]
+      if (firstError) {
+        toast.error(firstError.message || 'Por favor completa todos los campos requeridos')
+      }
+    })} className="space-y-6">
       {/* Información básica */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div>
@@ -374,10 +389,20 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
           </div>
           <input
             type="hidden"
-            {...register('cliente_id', { valueAsNumber: true })}
+            {...register('cliente_id', { 
+              valueAsNumber: true,
+              validate: (value) => {
+                const finalValue = value || clienteSeleccionado?.id || 0
+                return finalValue > 0 || 'Debes seleccionar un cliente'
+              }
+            })}
+            value={clienteSeleccionado?.id || watch('cliente_id') || 0}
           />
           {errors.cliente_id && (
             <p className="text-base text-red-600 mt-1">{errors.cliente_id.message}</p>
+          )}
+          {!clienteSeleccionado && !watch('cliente_id') && (
+            <p className="text-sm text-amber-600 mt-1">⚠️ Debes seleccionar un cliente para continuar</p>
           )}
           {clienteSeleccionado && (
             <p className="text-sm text-gray-600 mt-1">
