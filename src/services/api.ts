@@ -77,6 +77,24 @@ class ApiService {
         return response;
       },
       (error) => {
+        // Manejar errores de red y timeout
+        if (!error.response) {
+          // Error de red (sin respuesta del servidor)
+          const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+          const isNetworkError = error.code === 'ERR_NETWORK' || error.message?.includes('Network Error');
+          
+          if (isTimeout || isNetworkError) {
+            // No cerrar sesión por errores de red temporales
+            const errorMessage = isTimeout 
+              ? 'Tiempo de espera agotado. Por favor, verifica tu conexión e intenta nuevamente.'
+              : 'Error de conexión. Por favor, verifica tu conexión a internet e intenta nuevamente.';
+            
+            // Agregar mensaje personalizado al error
+            error.userMessage = errorMessage;
+            return Promise.reject(error);
+          }
+        }
+        
         // Solo cerrar sesión si es un 401/403 y no es un error de validación
         // Evitar cerrar sesión en errores temporales o de validación
         if (error.response?.status === 401 || error.response?.status === 403) {

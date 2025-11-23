@@ -210,8 +210,8 @@ export default function NuevoPedidoPage() {
     } catch (error: any) {
       console.error('Error al procesar pedido y pago:', error)
       
-      // Extraer mensaje de error
-      const errorMessage = error?.response?.data?.message || error?.message || 'Error al procesar el pedido'
+      // Extraer mensaje de error (priorizar userMessage para errores de red)
+      const errorMessage = error?.userMessage || error?.response?.data?.message || error?.message || 'Error al procesar el pedido'
       
       toast.error(`Error: ${errorMessage}`)
     } finally {
