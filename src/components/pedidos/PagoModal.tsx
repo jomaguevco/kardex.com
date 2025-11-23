@@ -1,3 +1,11 @@
+/**
+ * @deprecated Este componente está DEPRECADO y ya no se usa en el flujo actual.
+ * 
+ * Los pedidos ahora se crean y pagan inmediatamente usando crearPedidoYpagar en la página
+ * de creación de pedidos. Este componente se mantiene solo para compatibilidad con código legacy.
+ * 
+ * NO usar este componente en código nuevo. El pago se integra directamente en el flujo de creación.
+ */
 'use client'
 
 import { useState, useRef, useEffect } from 'react'

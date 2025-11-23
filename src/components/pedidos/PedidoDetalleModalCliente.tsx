@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { X, Package, User, Calendar, DollarSign, CheckCircle, Truck, CreditCard } from 'lucide-react'
+import { useEffect } from 'react'
+import { X, Package, User, Calendar, DollarSign, CheckCircle, Truck } from 'lucide-react'
 import { Pedido } from '@/services/pedidoService'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import PagoModal from './PagoModal'
 
 interface PedidoDetalleModalClienteProps {
   pedido: Pedido
@@ -20,8 +19,6 @@ export default function PedidoDetalleModalCliente({
   onClose,
   onRefresh
 }: PedidoDetalleModalClienteProps) {
-  const [isPagoModalOpen, setIsPagoModalOpen] = useState(false)
-
   // Bloquear scroll cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
@@ -68,20 +65,6 @@ export default function PedidoDetalleModalCliente({
         return <span className="text-sm text-slate-600">{estado}</span>
     }
   }
-
-  const handlePagoSuccess = () => {
-    setIsPagoModalOpen(false)
-    if (onRefresh) {
-      onRefresh()
-    }
-    // Cerrar modal después de un momento para que se vea el mensaje
-    setTimeout(() => {
-      onClose()
-    }, 1000)
-  }
-
-  // Ya no hay pedidos en BORRADOR (se crean pagados), así que no se muestra botón de pago
-  const mostrarBotonPagar = false
 
   return (
     <>
@@ -342,46 +325,18 @@ export default function PedidoDetalleModalCliente({
 
           </div>
 
-          {/* Footer con acciones */}
-          {mostrarBotonPagar && (
-            <div className="flex-shrink-0 space-y-4 border-t border-slate-200 bg-white p-6">
-              <button
-                onClick={() => setIsPagoModalOpen(true)}
-                className="w-full rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 font-semibold text-white shadow-lg transition hover:shadow-xl flex items-center justify-center space-x-2"
-              >
-                <CreditCard className="h-5 w-5" />
-                <span>Proceder al Pago</span>
-              </button>
-              <p className="text-center text-xs text-slate-500">
-                Procede al pago para completar tu compra.
-              </p>
-            </div>
-          )}
-
-            {!mostrarBotonPagar && (
-              <div className="flex-shrink-0 flex justify-end border-t border-slate-200 bg-white px-6 py-4">
-                <button
-                  onClick={onClose}
-                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Cerrar
-                </button>
-              </div>
-            )}
+          {/* Footer */}
+          <div className="flex-shrink-0 flex justify-end border-t border-slate-200 bg-white px-6 py-4">
+            <button
+              onClick={onClose}
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Cerrar
+            </button>
+          </div>
           </div>
         </div>
       </div>
-
-      {/* Modal de pago */}
-      {isPagoModalOpen && (
-        <PagoModal
-          pedidoId={pedido.id}
-          total={Number(pedido.total)}
-          isOpen={isPagoModalOpen}
-          onClose={() => setIsPagoModalOpen(false)}
-          onSuccess={handlePagoSuccess}
-        />
-      )}
     </>
   )
 }
