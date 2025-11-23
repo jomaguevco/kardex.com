@@ -53,6 +53,11 @@ class ApiService {
           });
         }
         
+        // Si es FormData, no establecer Content-Type (axios lo hace automáticamente con el boundary correcto)
+        if (config.data instanceof FormData) {
+          delete config.headers['Content-Type'];
+        }
+        
         if (typeof window !== 'undefined') {
           const token = localStorage.getItem('token');
           if (token) {

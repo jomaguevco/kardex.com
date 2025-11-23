@@ -315,11 +315,8 @@ class PedidoService {
       const formData = new FormData();
       formData.append('comprobante', file);
 
-      const response = await apiService.post(`/pedidos/${id}/upload-comprobante`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      // No establecer Content-Type manualmente - axios lo hace automáticamente para FormData
+      const response = await apiService.post(`/pedidos/${id}/upload-comprobante`, formData);
 
       if (response && response.success) {
         return {

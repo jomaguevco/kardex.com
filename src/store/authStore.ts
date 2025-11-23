@@ -118,40 +118,62 @@ export const useAuthStore = create<AuthStore>()(
         
         set({ isLoading: true });
         
-        // Verificar si ya tenemos datos en el store (de Zustand persist)
-        const currentState = get();
-        if (currentState.user && currentState.token && currentState.isAuthenticated) {
-          // Sincronizar con localStorage si no está presente
-          if (!localStorage.getItem('token') || !localStorage.getItem('user')) {
+        try {
+          // Primero verificar localStorage (más confiable que el store en algunos casos)
+          const token = localStorage.getItem('token');
+          const userStr = localStorage.getItem('user');
+          const permisosStr = localStorage.getItem('permisos');
+          
+          if (token && userStr) {
+            try {
+              const user = JSON.parse(userStr);
+              const permisos = permisosStr ? JSON.parse(permisosStr) : null;
+              
+              // Restaurar estado desde localStorage
+              set({
+                user,
+                token,
+                permisos,
+                isAuthenticated: true,
+                isLoading: false
+              });
+              return;
+            } catch (error) {
+              console.error('Error al parsear datos de localStorage:', error);
+              // Limpiar datos corruptos
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              localStorage.removeItem('permisos');
+            }
+          }
+          
+          // Si no hay datos en localStorage, verificar el store (Zustand persist)
+          const currentState = get();
+          if (currentState.user && currentState.token && currentState.isAuthenticated) {
+            // Sincronizar con localStorage
             localStorage.setItem('token', currentState.token);
             localStorage.setItem('user', JSON.stringify(currentState.user));
-          }
-          set({ isLoading: false });
-          return;
-        }
-        
-        // Si no hay datos en el store, verificar localStorage
-        const token = localStorage.getItem('token');
-        const userStr = localStorage.getItem('user');
-        
-        if (token && userStr) {
-          try {
-            const user = JSON.parse(userStr);
-            set({
-              user,
-              token,
-              isAuthenticated: true,
-              isLoading: false
-            });
-          } catch (error) {
-            // Token inválido, limpiar estado
-            get().logout();
+            if (currentState.permisos) {
+              localStorage.setItem('permisos', JSON.stringify(currentState.permisos));
+            }
             set({ isLoading: false });
+            return;
           }
-        } else {
+          
+          // No hay datos válidos, limpiar estado
           set({
             user: null,
             token: null,
+            permisos: null,
+            isAuthenticated: false,
+            isLoading: false
+          });
+        } catch (error) {
+          console.error('Error en checkAuth:', error);
+          set({
+            user: null,
+            token: null,
+            permisos: null,
             isAuthenticated: false,
             isLoading: false
           });
