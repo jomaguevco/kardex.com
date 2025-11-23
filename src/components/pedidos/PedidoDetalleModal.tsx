@@ -247,35 +247,65 @@ export default function PedidoDetalleModal({
               </div>
             </div>
 
-            {/* Información de pago (si existe) */}
-            {pedido.metodo_pago && (
-              <div className="glass-card rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                <h3 className="mb-3 text-sm font-semibold text-emerald-900">Información de Pago</h3>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <div>
-                    <p className="text-xs font-medium text-emerald-700">Método de pago</p>
-                    <p className="mt-1 text-sm font-semibold text-emerald-900">
+            {/* Evidencias de Pago - Sección destacada */}
+            {pedido.metodo_pago ? (
+              <div className="glass-card rounded-xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-green-50 p-6 shadow-lg">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="rounded-lg bg-emerald-600 p-2">
+                    <DollarSign className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-emerald-900">Evidencias de Pago</h3>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                    <p className="text-xs font-medium text-emerald-700 mb-1">Método de Pago</p>
+                    <p className="text-base font-bold text-emerald-900">
                       {pedido.metodo_pago}
                     </p>
                   </div>
                   {pedido.fecha_pago && (
-                    <div>
-                      <p className="text-xs font-medium text-emerald-700">Fecha de pago</p>
-                      <p className="mt-1 text-sm font-semibold text-emerald-900">
-                        {format(new Date(pedido.fecha_pago), "dd 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                    <div className="bg-white rounded-lg p-4 border border-emerald-200">
+                      <p className="text-xs font-medium text-emerald-700 mb-1">Fecha de Pago</p>
+                      <p className="text-base font-bold text-emerald-900">
+                        {format(new Date(pedido.fecha_pago), "dd 'de' MMMM, yyyy", { locale: es })}
+                      </p>
+                      <p className="text-sm text-emerald-600 mt-1">
+                        {format(new Date(pedido.fecha_pago), "HH:mm 'hrs'", { locale: es })}
                       </p>
                     </div>
                   )}
                   {pedido.comprobante_pago && (
-                    <div className="md:col-span-2">
-                      <p className="text-xs font-medium text-emerald-700 mb-2">Comprobante</p>
-                      <img
-                        src={pedido.comprobante_pago}
-                        alt="Comprobante de pago"
-                        className="max-w-xs rounded-lg border border-emerald-200"
-                      />
+                    <div className="md:col-span-2 bg-white rounded-lg p-4 border border-emerald-200">
+                      <p className="text-xs font-medium text-emerald-700 mb-3">Comprobante de Pago</p>
+                      <div className="flex justify-center">
+                        <img
+                          src={pedido.comprobante_pago}
+                          alt="Comprobante de pago"
+                          className="max-w-md rounded-lg border-2 border-emerald-200 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                          onClick={() => window.open(pedido.comprobante_pago, '_blank')}
+                        />
+                      </div>
+                      <p className="text-xs text-emerald-600 mt-2 text-center">
+                        Haz clic en la imagen para ver en tamaño completo
+                      </p>
                     </div>
                   )}
+                </div>
+                {!pedido.comprobante_pago && (pedido.metodo_pago === 'EFECTIVO' || pedido.metodo_pago === 'TARJETA') && (
+                  <div className="mt-4 rounded-lg bg-amber-50 border border-amber-200 p-3">
+                    <p className="text-xs text-amber-800">
+                      <strong>Nota:</strong> Este pago fue realizado mediante {pedido.metodo_pago.toLowerCase()}. No se requiere comprobante adicional.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="glass-card rounded-xl border-2 border-amber-300 bg-amber-50 p-4">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-5 w-5 text-amber-600" />
+                  <p className="text-sm font-semibold text-amber-900">
+                    No se ha registrado información de pago para este pedido
+                  </p>
                 </div>
               </div>
             )}
