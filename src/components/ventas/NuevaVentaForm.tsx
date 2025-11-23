@@ -189,7 +189,10 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
   const onSubmit = async (data: VentaFormData) => {
     try {
       // Validaciones adicionales antes de enviar
-      if (!data.cliente_id || data.cliente_id === 0) {
+      // Verificar cliente_id del formulario o del estado
+      const clienteIdFinal = data.cliente_id || clienteSeleccionado?.id || 0
+      
+      if (!clienteIdFinal || clienteIdFinal === 0) {
         toast.error('Debes seleccionar un cliente')
         return
       }
@@ -216,9 +219,17 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
         fechaVenta = new Date(fechaVenta).toISOString()
       }
 
+      // Asegurar que cliente_id esté correctamente establecido
+      const clienteIdFinal = data.cliente_id || clienteSeleccionado?.id || 0
+      
+      if (!clienteIdFinal || clienteIdFinal === 0) {
+        toast.error('Debes seleccionar un cliente')
+        return
+      }
+
       const ventaData: VentaForm = {
         numero_factura: data.numero_factura,
-        cliente_id: data.cliente_id,
+        cliente_id: Number(clienteIdFinal),
         fecha_venta: fechaVenta,
         subtotal: Number(data.subtotal) || 0,
         descuento: Number(data.descuento) || 0,
@@ -233,6 +244,8 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
           subtotal: Number(detalle.subtotal)
         }))
       }
+      
+      console.log('Enviando venta:', { ...ventaData, detalles: ventaData.detalles.length })
 
       await ventaService.createVenta(ventaData)
       toast.success('Venta creada exitosamente')
@@ -253,7 +266,22 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       onSuccess?.()
     } catch (error: any) {
       console.error('Error al crear venta:', error)
-      const errorMessage = error?.response?.data?.message || error?.message || 'Error al crear la venta'
+      console.error('Error completo:', {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status
+      })
+      
+      let errorMessage = 'Error al crear la venta'
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+      
       toast.error(errorMessage)
     }
   }
@@ -331,8 +359,9 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                     onClick={() => {
                       setClienteSeleccionado(cliente)
                       setBusquedaCliente(cliente.nombre)
-                      setValue('cliente_id', cliente.id)
+                      setValue('cliente_id', cliente.id, { shouldValidate: true })
                       setMostrarDropdownClientes(false)
+                      console.log('Cliente seleccionado:', cliente.id, cliente.nombre)
                     }}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
                   >
