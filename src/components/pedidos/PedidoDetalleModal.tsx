@@ -276,9 +276,18 @@ export default function PedidoDetalleModal({
                   )}
                   {pedido.comprobante_pago && (() => {
                     // Construir URL completa del comprobante
-                    const comprobanteUrl = pedido.comprobante_pago.startsWith('http')
-                      ? pedido.comprobante_pago
-                      : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4001'}${pedido.comprobante_pago}`;
+                    // Si ya es una URL completa, usarla directamente
+                    // Si es una ruta relativa, construir la URL completa usando la base del API
+                    let comprobanteUrl = pedido.comprobante_pago;
+                    if (!comprobanteUrl.startsWith('http')) {
+                      // Obtener la URL base del API desde el servicio
+                      const apiBaseUrl = typeof window !== 'undefined' 
+                        ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api')
+                        : 'http://localhost:4001/api';
+                      // Remover /api del final si existe
+                      const baseUrl = apiBaseUrl.replace(/\/api\/?$/, '');
+                      comprobanteUrl = `${baseUrl}${pedido.comprobante_pago}`;
+                    }
                     
                     return (
                       <div className="md:col-span-2 bg-white rounded-lg p-4 border border-emerald-200">
