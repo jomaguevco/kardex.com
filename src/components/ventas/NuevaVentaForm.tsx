@@ -24,12 +24,18 @@ const detalleVentaSchema = z.object({
 
 const ventaSchema = z.object({
   numero_factura: z.string().min(1, 'El número de factura es requerido'),
-  cliente_id: z.number().positive('Selecciona un cliente'),
+  cliente_id: z.number().refine((val) => val > 0, {
+    message: 'Debes seleccionar un cliente'
+  }),
   fecha: z.string().min(1, 'La fecha es requerida'),
-  subtotal: z.number().positive('El subtotal debe ser mayor a 0'),
+  subtotal: z.number().refine((val) => val > 0, {
+    message: 'El subtotal debe ser mayor a 0. Agrega productos a la venta.'
+  }),
   descuento: z.number().min(0).optional(),
   impuesto: z.number().min(0).optional(),
-  total: z.number().positive('El total debe ser mayor a 0'),
+  total: z.number().refine((val) => val > 0, {
+    message: 'El total debe ser mayor a 0. Agrega productos a la venta.'
+  }),
   observaciones: z.string().optional(),
   detalles: z.array(detalleVentaSchema).min(1, 'Agrega al menos un producto')
 })
@@ -77,6 +83,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
     watch,
     setValue,
     reset,
+    trigger,
     formState: { errors, isSubmitting }
   } = useForm<VentaFormData>({
     resolver: zodResolver(ventaSchema),
@@ -95,7 +102,11 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'detalles'
+    name: 'detalles',
+    rules: {
+      minLength: 1,
+      required: 'Agrega al menos un producto'
+    }
   })
 
   const watchedDetalles = watch('detalles')
@@ -146,13 +157,25 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
       return
     }
 
-    append({
+    const nuevoDetalle = {
       producto_id: productoSeleccionado.id,
       cantidad: 1,
-      precio_unitario: productoSeleccionado.precio_venta,
+      precio_unitario: Number(productoSeleccionado.precio_venta) || 0,
       descuento: 0,
-      subtotal: productoSeleccionado.precio_venta
-    })
+      subtotal: Number(productoSeleccionado.precio_venta) || 0
+    }
+    
+    append(nuevoDetalle)
+    
+    // Asegurar que los valores se registren correctamente
+    const index = fields.length
+    setTimeout(() => {
+      setValue(`detalles.${index}.producto_id`, nuevoDetalle.producto_id, { shouldValidate: true })
+      setValue(`detalles.${index}.cantidad`, nuevoDetalle.cantidad, { shouldValidate: true })
+      setValue(`detalles.${index}.precio_unitario`, nuevoDetalle.precio_unitario, { shouldValidate: true })
+      setValue(`detalles.${index}.descuento`, nuevoDetalle.descuento, { shouldValidate: true })
+      setValue(`detalles.${index}.subtotal`, nuevoDetalle.subtotal, { shouldValidate: true })
+    }, 0)
 
     setProductosCache((prev) => ({ ...prev, [productoSeleccionado.id]: productoSeleccionado }))
     setProductoSeleccionado(null)
@@ -176,14 +199,16 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
     const descuentoValido = Number(descuento) || 0
     const subtotal = Math.max(0, (cantidadValida * precioValido) - descuentoValido)
 
-    if (campo === 'cantidad') {
-      setValue(`detalles.${index}.cantidad`, cantidadValida)
-    } else if (campo === 'precio_unitario') {
-      setValue(`detalles.${index}.precio_unitario`, precioValido)
-    } else {
-      setValue(`detalles.${index}.descuento`, descuentoValido)
+    // Actualizar todos los valores usando setValue para que se registren correctamente
+    setValue(`detalles.${index}.cantidad`, cantidadValida, { shouldValidate: true, shouldDirty: true })
+    setValue(`detalles.${index}.precio_unitario`, precioValido, { shouldValidate: true, shouldDirty: true })
+    setValue(`detalles.${index}.descuento`, descuentoValido, { shouldValidate: true, shouldDirty: true })
+    setValue(`detalles.${index}.subtotal`, subtotal, { shouldValidate: true, shouldDirty: true })
+    
+    // Asegurar que producto_id esté establecido
+    if (detalle.producto_id) {
+      setValue(`detalles.${index}.producto_id`, detalle.producto_id, { shouldValidate: true })
     }
-    setValue(`detalles.${index}.subtotal`, subtotal)
   }
 
   const onSubmit = async (data: VentaFormData) => {
@@ -289,10 +314,29 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
   return (
     <form onSubmit={handleSubmit(onSubmit, (errors) => {
       console.error('Errores de validación:', errors)
-      // Mostrar el primer error encontrado
-      const firstError = Object.values(errors)[0]
-      if (firstError) {
-        toast.error(firstError.message || 'Por favor completa todos los campos requeridos')
+      console.error('Valores del formulario:', watch())
+      console.error('Cliente seleccionado:', clienteSeleccionado)
+      
+      // Mostrar errores específicos
+      if (errors.cliente_id) {
+        toast.error('Debes seleccionar un cliente')
+      } else if (errors.detalles) {
+        toast.error('Debes agregar al menos un producto')
+      } else if (errors.subtotal) {
+        toast.error('El subtotal debe ser mayor a 0')
+      } else if (errors.total) {
+        toast.error('El total debe ser mayor a 0')
+      } else if (errors.numero_factura) {
+        toast.error('El número de factura es requerido')
+      } else if (errors.fecha) {
+        toast.error('La fecha es requerida')
+      } else {
+        // Mostrar el primer error encontrado
+        const firstError = Object.values(errors)[0]
+        if (firstError) {
+          const errorMessage = firstError.message || 'Por favor completa todos los campos requeridos'
+          toast.error(errorMessage)
+        }
       }
     })} className="space-y-6">
       {/* Información básica */}
@@ -366,9 +410,17 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                     onClick={() => {
                       setClienteSeleccionado(cliente)
                       setBusquedaCliente(cliente.nombre)
-                      setValue('cliente_id', cliente.id, { shouldValidate: true })
+                      setValue('cliente_id', cliente.id, { 
+                        shouldValidate: true,
+                        shouldDirty: true,
+                        shouldTouch: true
+                      })
                       setMostrarDropdownClientes(false)
                       console.log('Cliente seleccionado:', cliente.id, cliente.nombre)
+                      // Forzar validación del campo
+                      setTimeout(() => {
+                        trigger('cliente_id')
+                      }, 100)
                     }}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
                   >
@@ -487,6 +539,10 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
               const producto = productosCache[watchedDetalles[index]?.producto_id]
               return (
                 <div key={field.id} className="card p-4">
+                  {/* Inputs hidden para producto_id y subtotal */}
+                  <input type="hidden" {...register(`detalles.${index}.producto_id`, { valueAsNumber: true })} />
+                  <input type="hidden" {...register(`detalles.${index}.subtotal`, { valueAsNumber: true })} />
+                  
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-2 sm:gap-4 items-center">
                     <div className="md:col-span-2">
                       <p className="font-medium text-gray-900 text-base">{producto?.nombre}</p>
@@ -498,14 +554,17 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         Cantidad
                       </label>
                       <input
+                        {...register(`detalles.${index}.cantidad`, { 
+                          valueAsNumber: true,
+                          min: { value: 1, message: 'La cantidad debe ser mayor a 0' },
+                          onChange: (e) => {
+                            const val = parseInt(e.target.value, 10) || 1
+                            actualizarDetalle(index, 'cantidad', isNaN(val) || val < 1 ? 1 : Math.floor(val))
+                          }
+                        })}
                         type="number"
                         step="1"
                         min="1"
-                        value={watchedDetalles[index]?.cantidad || 0}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value, 10) || 1
-                          actualizarDetalle(index, 'cantidad', isNaN(val) || val < 1 ? 1 : Math.floor(val))
-                        }}
                         onKeyDown={(e) => {
                           // Prevenir teclas de punto decimal y coma
                           if (e.key === '.' || e.key === ',' || e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
@@ -521,14 +580,17 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         Precio
                       </label>
                       <input
+                        {...register(`detalles.${index}.precio_unitario`, { 
+                          valueAsNumber: true,
+                          min: { value: 0.01, message: 'El precio debe ser mayor a 0' },
+                          onChange: (e) => {
+                            const val = parseFloat(e.target.value) || 0
+                            actualizarDetalle(index, 'precio_unitario', isNaN(val) ? 0 : val)
+                          }
+                        })}
                         type="number"
                         step="0.01"
                         min="0"
-                        value={watchedDetalles[index]?.precio_unitario || 0}
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value) || 0
-                          actualizarDetalle(index, 'precio_unitario', isNaN(val) ? 0 : val)
-                        }}
                         className="input-field text-base"
                       />
                     </div>
@@ -538,14 +600,16 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         Descuento
                       </label>
                       <input
+                        {...register(`detalles.${index}.descuento`, { 
+                          valueAsNumber: true,
+                          onChange: (e) => {
+                            const val = parseFloat(e.target.value) || 0
+                            actualizarDetalle(index, 'descuento', isNaN(val) ? 0 : val)
+                          }
+                        })}
                         type="number"
                         step="0.01"
                         min="0"
-                        value={watchedDetalles[index]?.descuento || 0}
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value) || 0
-                          actualizarDetalle(index, 'descuento', isNaN(val) ? 0 : val)
-                        }}
                         className="input-field text-base"
                       />
                     </div>
@@ -582,6 +646,10 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
           <Calculator className="h-6 w-6 mr-2" />
           Totales
         </h3>
+        
+        {/* Inputs hidden para validación */}
+        <input type="hidden" {...register('subtotal', { valueAsNumber: true })} />
+        <input type="hidden" {...register('total', { valueAsNumber: true })} />
         
         <div className="space-y-3">
           <div className="flex justify-between">
