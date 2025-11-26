@@ -91,12 +91,14 @@ export default function ClienteNavbar() {
   }, [user?.rol])
 
   const navItems = [
-    { name: 'Inicio', href: '/cliente-portal', icon: Store },
-    { name: 'Catálogo', href: '/cliente-portal/catalogo', icon: Package },
+    { name: 'Perfil', href: '/cliente-portal/perfil', icon: User },
+    { name: 'Mi Portal', href: '/cliente-portal', icon: Store },
     { name: 'Mis Compras', href: '/cliente-portal/mis-compras', icon: ShoppingBag },
+    { name: 'Catálogo', href: '/cliente-portal/catalogo', icon: Package },
     { name: 'Mis Pedidos', href: '/cliente-portal/pedidos', icon: Receipt },
+    { name: 'Facturas', href: '/cliente-portal/facturas', icon: CreditCard },
     { name: 'Estado de Cuenta', href: '/cliente-portal/estado-cuenta', icon: CreditCard },
-    { name: 'Agente Virtual', href: '/cliente-portal/soporte', icon: MessageCircle }
+    { name: 'Soporte', href: '/cliente-portal/soporte', icon: MessageCircle }
   ]
 
   const handleLogout = () => {
@@ -264,7 +266,7 @@ export default function ClienteNavbar() {
                       </div>
                       <div className="p-2">
                         <Link
-                          href="/perfil"
+                          href="/cliente-portal/perfil"
                           className="flex items-center space-x-3 rounded-xl px-4 py-3 text-slate-700 transition hover:bg-slate-100"
                           onClick={() => setIsProfileOpen(false)}
                         >
@@ -324,7 +326,7 @@ export default function ClienteNavbar() {
               })}
               <div className="border-t border-slate-200 pt-4">
                 <Link
-                  href="/perfil"
+                  href="/cliente-portal/perfil"
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center space-x-3 rounded-xl px-4 py-3 text-slate-700 transition hover:bg-slate-100"
                 >
