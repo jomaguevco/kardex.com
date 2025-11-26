@@ -248,7 +248,7 @@ export default function ClientePortalPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2">
           <div className="p-8 flex flex-col justify-center">
             <h2 className="text-4xl font-bold text-slate-900">
-              ¡Hola, {dashboard?.cliente?.nombre || 'Cliente'}! 👋
+              ¡Hola, {user?.nombre_completo?.split(' ')[0] || user?.nombre_completo || 'Cliente'}! 👋
             </h2>
             <p className="mt-3 text-lg text-slate-600">
               Bienvenido de vuelta a tu portal personal
