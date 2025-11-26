@@ -40,14 +40,21 @@ function ComprasContent() {
   }
 
   const handleViewCompra = async (compra: Compra) => {
-    setSelectedCompra({ ...compra, detalles: compra.detalles || [] })
+    // Primero establecemos la compra con los datos básicos
+    const compraInicial = { ...compra, detalles: compra.detalles || [] }
+    setSelectedCompra(compraInicial)
     setDetallesError(null)
     setDetallesLoading(true)
+    
     try {
       const compraCompleta = await compraService.getCompraById(compra.id)
-      setSelectedCompra(compraCompleta as Compra)
+      if (compraCompleta) {
+        setSelectedCompra(compraCompleta as Compra)
+      }
     } catch (error: any) {
+      console.error('Error al cargar detalles de compra:', error)
       setDetallesError(error?.response?.data?.message || error?.message || 'No se pudo cargar el detalle de la compra')
+      // Mantener la compra inicial visible aunque haya error
     } finally {
       setDetallesLoading(false)
     }
@@ -205,8 +212,11 @@ function ComprasContent() {
       )}
 
       {selectedCompra && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/70 backdrop-blur-sm p-8 sm:p-12">
-          <div className="h-full w-full flex items-start justify-center">
+        <div 
+          className="fixed inset-0 z-[9999] overflow-hidden bg-slate-900/70 backdrop-blur-sm p-8 sm:p-12"
+          onClick={(e) => e.target === e.currentTarget && handleCloseDetalle()}
+        >
+          <div className="h-full w-full flex items-start justify-center" onClick={(e) => e.stopPropagation()}>
             <div className="glass-card w-full max-w-6xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden mx-auto mr-20 sm:mr-28">
               <div className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-start justify-between gap-4 border-b border-slate-200/50">
                 <div>
