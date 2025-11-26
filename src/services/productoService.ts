@@ -91,7 +91,7 @@ class ProductoService {
    */
   async getProductoByBarcode(codigoBarras: string): Promise<Producto> {
     const response = await apiService.get(`/productos/by-barcode/${encodeURIComponent(codigoBarras)}`);
-    return (response.data as any).data;
+    return response.data;
   }
 
   async createProducto(data: CreateProductoData): Promise<Producto> {
