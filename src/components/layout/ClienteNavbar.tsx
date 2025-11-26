@@ -227,22 +227,21 @@ export default function ClienteNavbar() {
                       : 'bg-white/10 text-white backdrop-blur-sm hover:bg-white/20'
                   }`}
                 >
-                  {getFotoPerfilUrl(user?.foto_perfil) ? (
-                    <img
-                      src={getFotoPerfilUrl(user?.foto_perfil) || ''}
-                      alt={user?.nombre_usuario || 'Cliente'}
-                      className="h-8 w-8 rounded-full object-cover border-2 border-white"
-                      onError={(e) => {
-                        // Si falla la carga, ocultar imagen y mostrar iniciales
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  ) : null}
-                  {!getFotoPerfilUrl(user?.foto_perfil) && (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-indigo-600 text-sm font-bold text-white">
+                  <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full border-2 border-white bg-gradient-to-br from-primary-500 to-indigo-600">
+                    {getFotoPerfilUrl(user?.foto_perfil) ? (
+                      <img
+                        src={getFotoPerfilUrl(user?.foto_perfil) || ''}
+                        alt={user?.nombre_usuario || 'Cliente'}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    ) : null}
+                    <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white">
                       {user?.nombre_usuario?.charAt(0).toUpperCase() || 'C'}
                     </div>
-                  )}
+                  </div>
                   <span className="text-sm font-semibold">
                     {user?.nombre_usuario || 'Cliente'}
                   </span>

@@ -74,26 +74,22 @@ export default function FotoPerfilUpload() {
       <div className="mt-6 flex items-center gap-6">
         {/* Preview de la foto */}
         <div className="relative">
-          <div className="h-32 w-32 overflow-hidden rounded-2xl border-4 border-white bg-gradient-to-br from-indigo-500 to-emerald-500 shadow-xl">
-            {fotoUrl ? (
+          <div className="relative h-32 w-32 overflow-hidden rounded-2xl border-4 border-white bg-gradient-to-br from-indigo-500 to-emerald-500 shadow-xl">
+            {/* Placeholder siempre visible como fondo */}
+            <div className="absolute inset-0 flex items-center justify-center text-white">
+              <User className="h-16 w-16" />
+            </div>
+            {/* Imagen encima del placeholder */}
+            {fotoUrl && (
               <img
                 src={fotoUrl}
                 alt="Foto de perfil"
-                className="h-full w-full object-cover"
-                style={{ objectPosition: 'center center' }}
+                className="absolute inset-0 h-full w-full object-cover"
                 onError={(e) => {
                   console.error('Error al cargar imagen:', fotoUrl)
-                  // Si falla la carga, mostrar placeholder
-                  (e.currentTarget as HTMLImageElement).style.display = 'none'
-                }}
-                onLoad={() => {
-                  console.log('Imagen cargada exitosamente:', fotoUrl)
+                  e.currentTarget.style.display = 'none'
                 }}
               />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-white">
-                <User className="h-16 w-16" />
-              </div>
             )}
           </div>
           {uploading && (
