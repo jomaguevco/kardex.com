@@ -56,30 +56,41 @@ async function handleRequest(
     const queryString = request.nextUrl.search; // Preservar query params
     const url = `${baseApiUrl}/${path}${queryString}`;
     
+    const contentType = request.headers.get('content-type') || '';
+    const isMultipart = contentType.includes('multipart/form-data');
+    
     console.log('[API Proxy]', {
       method,
       path,
       url,
-      apiUrl: API_URL,
-      baseApiUrl
+      isMultipart,
+      contentType: contentType.substring(0, 50)
     });
     
     // Preparar el body si existe
-    let body: string | undefined;
-    const contentType = request.headers.get('content-type');
+    let body: BodyInit | undefined;
     
     if (method !== 'GET' && method !== 'HEAD') {
       try {
-        body = await request.text();
+        if (isMultipart) {
+          // Para multipart/form-data, pasar el body como ArrayBuffer para preservar datos binarios
+          body = await request.arrayBuffer();
+        } else {
+          // Para otros tipos, usar texto
+          body = await request.text();
+        }
       } catch (e) {
         console.error('[API Proxy] Error reading body:', e);
       }
     }
     
     // Preparar headers
-    const headers: HeadersInit = {
-      'Content-Type': contentType || 'application/json',
-    };
+    const headers: HeadersInit = {};
+    
+    // Para multipart, preservar el content-type completo con el boundary
+    if (contentType) {
+      headers['Content-Type'] = contentType;
+    }
     
     // Copiar headers importantes (excepto host y connection)
     const authHeader = request.headers.get('authorization');
