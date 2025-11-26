@@ -41,7 +41,7 @@ export const resenaService = {
   // Obtener reseñas de un producto
   getResenasPorProducto: async (productoId: number, page = 1, limit = 10): Promise<ResenasPaginadas> => {
     const response = await api.get(`/resenas/producto/${productoId}?page=${page}&limit=${limit}`);
-    return response.data;
+    return response;
   },
 
   // Crear o actualizar reseña
@@ -53,7 +53,7 @@ export const resenaService = {
   // Obtener mi reseña para un producto
   getMiResena: async (productoId: number): Promise<Resena | null> => {
     const response = await api.get(`/resenas/mi-resena/${productoId}`);
-    return response.data.data;
+    return response.data;
   },
 
   // Eliminar reseña
