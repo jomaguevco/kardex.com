@@ -626,3 +626,196 @@ a:active,
   @apply visible opacity-100;
 }
 
+/* ========================================
+   ANIMACIONES Y TRANSFORMACIONES 3D
+   ======================================== */
+
+/* Perspectiva 3D */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+/* Transformaciones 3D */
+.translate-z-24 {
+  transform: translateZ(96px);
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg) translateZ(96px);
+}
+
+.rotate-y-90 {
+  transform: rotateY(90deg) translateZ(96px);
+}
+
+.rotate-y-n90 {
+  transform: rotateY(-90deg) translateZ(96px);
+}
+
+/* Animación de rotación 3D */
+@keyframes rotate3d {
+  0% {
+    transform: rotateX(-15deg) rotateY(0deg);
+  }
+  25% {
+    transform: rotateX(0deg) rotateY(90deg);
+  }
+  50% {
+    transform: rotateX(15deg) rotateY(180deg);
+  }
+  75% {
+    transform: rotateX(0deg) rotateY(270deg);
+  }
+  100% {
+    transform: rotateX(-15deg) rotateY(360deg);
+  }
+}
+
+.animate-rotate-3d {
+  animation: rotate3d 12s ease-in-out infinite;
+}
+
+/* Animación de flotación */
+@keyframes float3d {
+  0%, 100% {
+    transform: translateY(0px) rotateX(5deg);
+  }
+  50% {
+    transform: translateY(-20px) rotateX(-5deg);
+  }
+}
+
+.animate-float {
+  animation: float3d 4s ease-in-out infinite;
+}
+
+/* Efectos de brillo */
+@keyframes shine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-shine {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shine 3s ease-in-out infinite;
+}
+
+/* Efecto de partículas flotantes */
+@keyframes particle-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) scale(1.1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-40px) translateX(-5px) scale(0.9);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translateY(-20px) translateX(-10px) scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.animate-particle {
+  animation: particle-float 6s ease-in-out infinite;
+}
+
+/* Efecto de onda */
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-10deg);
+  }
+}
+
+.animate-wave {
+  animation: wave 2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+/* Efecto de pulsación de escala */
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 2s ease-in-out infinite;
+}
+
+/* Efecto de gradient animado */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+/* Video background overlay */
+.video-overlay {
+  position: relative;
+}
+
+.video-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+.video-overlay > * {
+  position: relative;
+  z-index: 2;
+}
+

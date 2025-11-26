@@ -42,7 +42,7 @@ export default function ClientePortalPage() {
     }
   ]
 
-  // Productos destacados
+  // Productos destacados con variedad (tecnología, electrodomésticos, periféricos, licores)
   const productosDestacados = [
     {
       id: 1,
@@ -50,31 +50,71 @@ export default function ClientePortalPage() {
       precio: 2499.00,
       imagen: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&q=80',
       descuento: 15,
-      nuevo: true
+      nuevo: true,
+      categoria: 'Tecnología'
     },
     {
       id: 2,
-      nombre: 'Laptop HP Pavilion',
-      precio: 3299.00,
-      imagen: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&q=80',
+      nombre: 'Cafetera Espresso Pro',
+      precio: 1299.00,
+      imagen: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=500&q=80',
       descuento: 20,
-      nuevo: false
+      nuevo: false,
+      categoria: 'Electrodomésticos'
     },
     {
       id: 3,
-      nombre: 'Auriculares Sony WH',
-      precio: 899.00,
-      imagen: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80',
+      nombre: 'Whisky Johnnie Walker',
+      precio: 189.00,
+      imagen: 'https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=500&q=80',
       descuento: 10,
-      nuevo: true
+      nuevo: true,
+      categoria: 'Licores'
     },
     {
       id: 4,
-      nombre: 'Smartwatch Apple',
-      precio: 1899.00,
-      imagen: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=500&q=80',
+      nombre: 'Teclado Mecánico RGB',
+      precio: 349.00,
+      imagen: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500&q=80',
       descuento: 0,
-      nuevo: false
+      nuevo: false,
+      categoria: 'Periféricos'
+    },
+    {
+      id: 5,
+      nombre: 'Refrigeradora Samsung',
+      precio: 3599.00,
+      imagen: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=500&q=80',
+      descuento: 25,
+      nuevo: false,
+      categoria: 'Electrodomésticos'
+    },
+    {
+      id: 6,
+      nombre: 'Vino Tinto Reserva',
+      precio: 89.00,
+      imagen: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=500&q=80',
+      descuento: 0,
+      nuevo: true,
+      categoria: 'Licores'
+    },
+    {
+      id: 7,
+      nombre: 'Monitor Gaming 27"',
+      precio: 1499.00,
+      imagen: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=500&q=80',
+      descuento: 15,
+      nuevo: true,
+      categoria: 'Tecnología'
+    },
+    {
+      id: 8,
+      nombre: 'Mouse Logitech Pro',
+      precio: 249.00,
+      imagen: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&q=80',
+      descuento: 5,
+      nuevo: false,
+      categoria: 'Periféricos'
     }
   ]
 
@@ -203,26 +243,52 @@ export default function ClientePortalPage() {
         </div>
       </div>
 
-      {/* Bienvenida personalizada */}
-      <div className="glass-card rounded-3xl p-8 bg-gradient-to-br from-primary-50 to-indigo-50">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-slate-900">
+      {/* Bienvenida personalizada con modelo 3D */}
+      <div className="glass-card rounded-3xl overflow-hidden bg-gradient-to-br from-primary-50 via-indigo-50 to-purple-50">
+        <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="p-8 flex flex-col justify-center">
+            <h2 className="text-4xl font-bold text-slate-900">
               ¡Hola, {dashboard?.cliente?.nombre || 'Cliente'}! 👋
             </h2>
-            <p className="mt-2 text-lg text-slate-600">
+            <p className="mt-3 text-lg text-slate-600">
               Bienvenido de vuelta a tu portal personal
             </p>
+            <div className="mt-6 flex items-center space-x-4">
+              <div className="flex items-center space-x-2 rounded-full bg-white px-4 py-2 shadow-md">
+                <Star className="h-5 w-5 text-yellow-500" />
+                <span className="font-semibold text-slate-900">Cliente Premium</span>
+              </div>
+              <div className="text-sm text-slate-600">
+                Miembro desde <span className="font-bold">2024</span>
+              </div>
+            </div>
           </div>
-          <div className="hidden md:block">
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm text-slate-600">Miembro desde</p>
-                <p className="font-bold text-slate-900">2024</p>
+          {/* Modelo 3D interactivo con CSS */}
+          <div className="relative h-[300px] lg:h-[350px] flex items-center justify-center perspective-1000">
+            <div className="relative preserve-3d animate-float">
+              {/* Caja 3D con productos */}
+              <div className="relative w-48 h-48 transform-style-3d animate-rotate-3d">
+                {/* Frente */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-2xl flex items-center justify-center backface-hidden transform translate-z-24">
+                  <ShoppingBag className="h-20 w-20 text-white" />
+                </div>
+                {/* Atrás */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-2xl flex items-center justify-center backface-hidden transform rotate-y-180 translate-z-24">
+                  <Package className="h-20 w-20 text-white" />
+                </div>
+                {/* Izquierda */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-2xl flex items-center justify-center backface-hidden transform rotate-y-n90 translate-z-24">
+                  <Gift className="h-20 w-20 text-white" />
+                </div>
+                {/* Derecha */}
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl shadow-2xl flex items-center justify-center backface-hidden transform rotate-y-90 translate-z-24">
+                  <Star className="h-20 w-20 text-white" />
+                </div>
               </div>
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-lg">
-                <Star className="h-8 w-8" />
-              </div>
+              {/* Partículas decorativas */}
+              <div className="absolute -top-8 -left-8 w-4 h-4 bg-yellow-400 rounded-full animate-ping" />
+              <div className="absolute -bottom-4 -right-8 w-3 h-3 bg-blue-400 rounded-full animate-pulse" />
+              <div className="absolute top-1/2 -right-12 w-2 h-2 bg-pink-400 rounded-full animate-bounce" />
             </div>
           </div>
         </div>
@@ -535,6 +601,112 @@ export default function ClientePortalPage() {
               <p className="text-sm text-slate-600">30 días devolución</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Sección de categorías con imágenes */}
+      <div className="glass-card rounded-3xl p-8">
+        <h2 className="mb-6 text-2xl font-bold text-slate-900">Explora por Categorías</h2>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <Link href="/cliente-portal/catalogo" className="group relative h-40 overflow-hidden rounded-2xl">
+            <img 
+              src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80" 
+              alt="Tecnología"
+              className="h-full w-full object-cover transition group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute bottom-4 left-4">
+              <h3 className="text-lg font-bold text-white">Tecnología</h3>
+              <p className="text-sm text-white/80">+50 productos</p>
+            </div>
+          </Link>
+          
+          <Link href="/cliente-portal/catalogo" className="group relative h-40 overflow-hidden rounded-2xl">
+            <img 
+              src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" 
+              alt="Electrodomésticos"
+              className="h-full w-full object-cover transition group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute bottom-4 left-4">
+              <h3 className="text-lg font-bold text-white">Electrodomésticos</h3>
+              <p className="text-sm text-white/80">+30 productos</p>
+            </div>
+          </Link>
+          
+          <Link href="/cliente-portal/catalogo" className="group relative h-40 overflow-hidden rounded-2xl">
+            <img 
+              src="https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400&q=80" 
+              alt="Licores"
+              className="h-full w-full object-cover transition group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute bottom-4 left-4">
+              <h3 className="text-lg font-bold text-white">Licores Premium</h3>
+              <p className="text-sm text-white/80">+25 productos</p>
+            </div>
+          </Link>
+          
+          <Link href="/cliente-portal/catalogo" className="group relative h-40 overflow-hidden rounded-2xl">
+            <img 
+              src="https://images.unsplash.com/photo-1625723044792-44de16ccb4e9?w=400&q=80" 
+              alt="Periféricos"
+              className="h-full w-full object-cover transition group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute bottom-4 left-4">
+              <h3 className="text-lg font-bold text-white">Periféricos</h3>
+              <p className="text-sm text-white/80">+40 productos</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Video/Animación promocional */}
+      <div className="relative h-[300px] overflow-hidden rounded-3xl">
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline
+          className="h-full w-full object-cover"
+          poster="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80"
+        >
+          <source src="https://cdn.coverr.co/videos/coverr-a-woman-shopping-online-2903/1080p.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+        <div className="absolute inset-0 flex items-center">
+          <div className="max-w-lg px-8">
+            <div className="mb-4 inline-flex items-center space-x-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm">
+              <Sparkles className="h-5 w-5 text-yellow-400" />
+              <span className="text-sm font-semibold text-white">Experiencia Premium</span>
+            </div>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Tu tienda favorita, siempre contigo
+            </h2>
+            <p className="text-lg text-white/80 mb-6">
+              Miles de productos, las mejores marcas y la mejor atención al cliente
+            </p>
+            <Link
+              href="/cliente-portal/catalogo"
+              className="inline-flex items-center space-x-2 rounded-full bg-white px-8 py-4 font-bold text-slate-900 shadow-xl transition hover:scale-105"
+            >
+              <span>Descubrir Ahora</span>
+              <ChevronRight className="h-5 w-5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Marcas destacadas */}
+      <div className="glass-card rounded-3xl p-8 text-center">
+        <h2 className="mb-6 text-xl font-bold text-slate-900">Marcas que nos respaldan</h2>
+        <div className="flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/200px-Google_2015_logo.svg.png" alt="Google" className="h-8 object-contain" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/200px-Amazon_logo.svg.png" alt="Amazon" className="h-8 object-contain" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/80px-Apple_logo_black.svg.png" alt="Apple" className="h-8 object-contain" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Sony_logo.svg/200px-Sony_logo.svg.png" alt="Sony" className="h-8 object-contain" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Samsung_Logo.svg/200px-Samsung_Logo.svg.png" alt="Samsung" className="h-6 object-contain" />
         </div>
       </div>
     </div>
