@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
-import { MessageCircle, Phone, Mail, Clock, HelpCircle, Loader2 } from 'lucide-react'
+import { MessageCircle, Phone, Mail, Clock, HelpCircle, Loader2, MapPin } from 'lucide-react'
 
 export default function SoportePage() {
   const router = useRouter()
@@ -153,6 +153,63 @@ export default function SoportePage() {
               <div>
                 <p className="text-sm font-semibold text-slate-700">Emergencias</p>
                 <p className="text-sm text-slate-600">WhatsApp 24/7</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ubícanos - Google Maps */}
+      <div className="glass-card rounded-2xl p-6">
+        <div className="flex items-start space-x-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white">
+            <MapPin className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-slate-900">Ubícanos</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Visítanos en nuestra tienda física
+            </p>
+            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* Información de dirección */}
+              <div className="space-y-3">
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="font-semibold text-slate-900">Dirección</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Av. Principal 123, Centro Comercial Plaza Norte
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    Lima, Perú
+                  </p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="font-semibold text-slate-900">Referencias</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    A una cuadra del metro, frente al parque central
+                  </p>
+                </div>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Lima+Peru"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl"
+                >
+                  <MapPin className="h-5 w-5" />
+                  <span>Abrir en Google Maps</span>
+                </a>
+              </div>
+              {/* Mapa embed */}
+              <div className="h-[300px] overflow-hidden rounded-xl border border-slate-200">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.8664557936796!2d-77.03687582395983!3d-12.046373988146156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c8b5d35662c7%3A0x15f0bda5ccbd31eb!2sPlaza%20Mayor%20de%20Lima!5e0!3m2!1sen!2spe!4v1700000000000!5m2!1sen!2spe"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Ubicación de KARDEX"
+                />
               </div>
             </div>
           </div>

@@ -24,6 +24,20 @@ export default function CatalogoPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [favorites, setFavorites] = useState<number[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
+
+  // Imagen placeholder para productos sin imagen
+  const placeholderImages = [
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80',
+    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80',
+    'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80',
+    'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&q=80',
+    'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&q=80'
+  ]
+
+  const getPlaceholderImage = (productId: number) => {
+    return placeholderImages[productId % placeholderImages.length]
+  }
 
   useEffect(() => {
     if (!isAuthenticated || user?.rol !== 'CLIENTE') {
@@ -117,6 +131,11 @@ export default function CatalogoPage() {
     // Filtrar por categoría
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(p => p.categoria_id?.toString() === selectedCategory)
+    }
+
+    // Filtrar solo favoritos
+    if (showOnlyFavorites) {
+      filtered = filtered.filter(p => favorites.includes(p.id))
     }
 
     // Ordenar
@@ -270,16 +289,27 @@ export default function CatalogoPage() {
         )}
       </div>
 
-      {/* Contador de resultados */}
+      {/* Contador de resultados y filtro de favoritos */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-600">
           Mostrando <span className="font-bold text-slate-900">{filteredProductos.length}</span> de{' '}
           <span className="font-bold text-slate-900">{productos.length}</span> productos
+          {showOnlyFavorites && (
+            <span className="ml-2 text-red-600 font-semibold">(Solo favoritos)</span>
+          )}
         </p>
         {favorites.length > 0 && (
-          <button className="flex items-center space-x-2 text-sm text-slate-600 hover:text-red-600 transition">
-            <Heart className="h-4 w-4 fill-current" />
+          <button 
+            onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+            className={`flex items-center space-x-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+              showOnlyFavorites 
+                ? 'bg-red-500 text-white shadow-lg' 
+                : 'bg-red-50 text-red-600 hover:bg-red-100'
+            }`}
+          >
+            <Heart className={`h-4 w-4 ${showOnlyFavorites ? 'fill-current' : 'fill-red-200'}`} />
             <span>{favorites.length} favoritos</span>
+            {showOnlyFavorites && <X className="h-4 w-4 ml-1" />}
           </button>
         )}
       </div>
@@ -340,15 +370,14 @@ export default function CatalogoPage() {
                 {/* Imagen del producto - Clickeable */}
                 <Link href={`/cliente-portal/producto/${producto.id}`}>
                   <div className="relative h-64 overflow-hidden bg-slate-100 cursor-pointer">
-                    {producto.imagen_url ? (
-                      <img
-                        src={producto.imagen_url}
-                        alt={producto.nombre}
-                        className="h-full w-full object-cover transition group-hover:scale-110"
-                      />
-                    ) : (
-                      <Package className="absolute inset-0 m-auto h-20 w-20 text-slate-300" />
-                    )}
+                    <img
+                      src={producto.imagen_url || getPlaceholderImage(producto.id)}
+                      alt={producto.nombre}
+                      className="h-full w-full object-cover transition group-hover:scale-110"
+                      onError={(e) => {
+                        e.currentTarget.src = getPlaceholderImage(producto.id)
+                      }}
+                    />
                     {enCarrito > 0 && (
                       <div className="absolute bottom-3 left-3 flex items-center space-x-2 rounded-full bg-emerald-500 px-3 py-1 text-sm font-bold text-white shadow-lg">
                         <Check className="h-4 w-4" />
@@ -417,15 +446,14 @@ export default function CatalogoPage() {
                 {/* Imagen - Clickeable */}
                 <Link href={`/cliente-portal/producto/${producto.id}`}>
                   <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100 cursor-pointer">
-                    {producto.imagen_url ? (
-                      <img
-                        src={producto.imagen_url}
-                        alt={producto.nombre}
-                        className="h-full w-full object-cover transition group-hover:scale-110"
-                      />
-                    ) : (
-                      <Package className="absolute inset-0 m-auto h-12 w-12 text-slate-300" />
-                    )}
+                    <img
+                      src={producto.imagen_url || getPlaceholderImage(producto.id)}
+                      alt={producto.nombre}
+                      className="h-full w-full object-cover transition group-hover:scale-110"
+                      onError={(e) => {
+                        e.currentTarget.src = getPlaceholderImage(producto.id)
+                      }}
+                    />
                   </div>
                 </Link>
 
