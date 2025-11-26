@@ -45,15 +45,22 @@ export default function FotoPerfilUpload() {
       setUploading(true)
       const response = await usuarioService.uploadFoto(file)
       
-      if (user) {
+      console.log('FotoPerfilUpload: Respuesta del servidor:', response)
+      
+      if (user && response?.foto_perfil) {
         const updatedUser = { ...user, foto_perfil: response.foto_perfil }
+        console.log('FotoPerfilUpload: Actualizando usuario con foto:', updatedUser.foto_perfil)
         setUser(updatedUser)
+        toast.success('Foto de perfil actualizada')
+      } else {
+        console.error('FotoPerfilUpload: No se recibió foto_perfil en respuesta:', response)
+        toast.error('Error: No se recibió la URL de la foto')
       }
 
-      toast.success('Foto de perfil actualizada')
       setPreview(null)
     } catch (error: any) {
-      toast.error(error?.message || 'Error al subir la foto')
+      console.error('FotoPerfilUpload: Error al subir:', error)
+      toast.error(error?.response?.data?.message || error?.message || 'Error al subir la foto')
       setPreview(null)
     } finally {
       setUploading(false)
