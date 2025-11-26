@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 
-export default function OAuthCallbackPage() {
+function OAuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { setUser, setToken } = useAuthStore()
@@ -57,30 +57,46 @@ export default function OAuthCallbackPage() {
   }, [searchParams, router, setUser, setToken])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="text-center">
-        {status === 'loading' && (
-          <>
-            <Loader2 className="mx-auto h-16 w-16 text-white animate-spin" />
-            <p className="mt-4 text-xl text-white">Procesando autenticación...</p>
-          </>
-        )}
+    <div className="text-center">
+      {status === 'loading' && (
+        <>
+          <Loader2 className="mx-auto h-16 w-16 text-white animate-spin" />
+          <p className="mt-4 text-xl text-white">Procesando autenticación...</p>
+        </>
+      )}
 
-        {status === 'success' && (
-          <>
-            <CheckCircle className="mx-auto h-16 w-16 text-emerald-400" />
-            <p className="mt-4 text-xl text-white">{message}</p>
-          </>
-        )}
+      {status === 'success' && (
+        <>
+          <CheckCircle className="mx-auto h-16 w-16 text-emerald-400" />
+          <p className="mt-4 text-xl text-white">{message}</p>
+        </>
+      )}
 
-        {status === 'error' && (
-          <>
-            <XCircle className="mx-auto h-16 w-16 text-red-400" />
-            <p className="mt-4 text-xl text-white">{message}</p>
-          </>
-        )}
-      </div>
+      {status === 'error' && (
+        <>
+          <XCircle className="mx-auto h-16 w-16 text-red-400" />
+          <p className="mt-4 text-xl text-white">{message}</p>
+        </>
+      )}
     </div>
   )
 }
 
+function LoadingFallback() {
+  return (
+    <div className="text-center">
+      <Loader2 className="mx-auto h-16 w-16 text-white animate-spin" />
+      <p className="mt-4 text-xl text-white">Cargando...</p>
+    </div>
+  )
+}
+
+export default function OAuthCallbackPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Suspense fallback={<LoadingFallback />}>
+        <OAuthCallbackContent />
+      </Suspense>
+    </div>
+  )
+}
