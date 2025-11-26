@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, ChangeEvent, FormEvent } from 'react'
+import { useState, ChangeEvent, FormEvent, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
-import { Plus, Sparkles, Package, X } from 'lucide-react'
+import { Plus, Sparkles, Package, X, Camera, Upload, Loader2, ImagePlus } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import ProductosFilters from '@/components/productos/ProductosFilters'
 import ProductosTable from '@/components/productos/ProductosTable'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import BarcodeCameraScanner from '@/components/ui/BarcodeCameraScanner'
 import { productoService, CreateProductoData } from '@/services/productoService'
 import { Producto, ProductoFilters } from '@/types'
 
@@ -28,6 +29,7 @@ type ProductoFormState = {
   stock_minimo: string
   stock_maximo: string
   punto_reorden: string
+  imagen_url: string
 }
 
 const initialFormState: ProductoFormState = {
@@ -41,7 +43,8 @@ const initialFormState: ProductoFormState = {
   stock_actual: '',
   stock_minimo: '',
   stock_maximo: '',
-  punto_reorden: ''
+  punto_reorden: '',
+  imagen_url: ''
 }
 
 const DEFAULT_FILTERS: ProductoFilters = {
@@ -68,6 +71,9 @@ function ProductosContent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Producto | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
+  const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFiltersChange = (nextFilters: ProductoFilters) => {
     setFilters(prev => {
@@ -118,8 +124,60 @@ function ProductosContent() {
     stock_maximo:
       producto.stock_maximo !== undefined ? String(producto.stock_maximo) : '',
     punto_reorden:
-      producto.punto_reorden !== undefined ? String(producto.punto_reorden) : ''
+      producto.punto_reorden !== undefined ? String(producto.punto_reorden) : '',
+    imagen_url: producto.imagen_url ?? ''
   })
+
+  const handleBarcodeScanned = (code: string) => {
+    setFormData(prev => ({ ...prev, codigo_barras: code }))
+    setIsScannerOpen(false)
+    toast.success(`Código escaneado: ${code}`)
+  }
+
+  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor selecciona una imagen válida')
+      return
+    }
+
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('La imagen no debe superar los 5MB')
+      return
+    }
+
+    setIsUploadingImage(true)
+    try {
+      // Subir a Cloudinary a través del backend
+      const formData = new FormData()
+      formData.append('imagen', file)
+      
+      const response = await fetch('/api-proxy/productos/upload-imagen', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Error al subir la imagen')
+      }
+
+      const data = await response.json()
+      setFormData(prev => ({ ...prev, imagen_url: data.url }))
+      toast.success('Imagen subida correctamente')
+    } catch (error) {
+      console.error('Error al subir imagen:', error)
+      toast.error('Error al subir la imagen')
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
 
   const openCreateModal = () => {
     setEditingProduct(null)
@@ -171,7 +229,8 @@ function ProductosContent() {
       nombre: formData.nombre.trim(),
       descripcion: formData.descripcion.trim() || undefined,
       codigo_barras: formData.codigo_barras.trim() || undefined,
-      precio_venta: precioVenta
+      precio_venta: precioVenta,
+      imagen_url: formData.imagen_url.trim() || undefined
     }
 
     const precioCompra = parseDecimal(formData.precio_compra)
@@ -524,13 +583,23 @@ function ProductosContent() {
                     <label className="block text-sm font-medium text-slate-700">
                       Código de barras
                     </label>
-                    <input
-                      type="text"
-                      value={formData.codigo_barras}
-                      onChange={handleInputChange('codigo_barras')}
-                      className="input-field"
-                      placeholder="EAN / UPC"
-                    />
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={formData.codigo_barras}
+                        onChange={handleInputChange('codigo_barras')}
+                        className="input-field flex-1"
+                        placeholder="EAN / UPC"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setIsScannerOpen(true)}
+                        className="flex items-center justify-center px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg transition"
+                        title="Escanear con cámara"
+                      >
+                        <Camera className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-slate-700">
@@ -554,6 +623,83 @@ function ProductosContent() {
                       className="input-field min-h-[96px]"
                       placeholder="Comparte características relevantes, presentaciones o notas internas"
                     />
+                  </div>
+                  
+                  {/* Campo de imagen */}
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Imagen del producto
+                    </label>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      {/* Preview de imagen */}
+                      <div className="flex-shrink-0">
+                        {formData.imagen_url ? (
+                          <div className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-slate-200 group">
+                            <img
+                              src={formData.imagen_url}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, imagen_url: '' }))}
+                              className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center"
+                            >
+                              <X className="h-6 w-6 text-white" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="w-32 h-32 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50">
+                            <ImagePlus className="h-8 w-8 text-slate-400" />
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Opciones de subida */}
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1">URL de imagen</label>
+                          <input
+                            type="url"
+                            value={formData.imagen_url}
+                            onChange={handleInputChange('imagen_url')}
+                            className="input-field text-sm"
+                            placeholder="https://ejemplo.com/imagen.jpg"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-400">o</span>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploadingImage}
+                            className="flex items-center space-x-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm disabled:opacity-50"
+                          >
+                            {isUploadingImage ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>Subiendo...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="h-4 w-4" />
+                                <span>Subir imagen</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate-400">
+                          Formatos: JPG, PNG, WEBP. Máximo 5MB.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -691,6 +837,15 @@ function ProductosContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Escáner de código de barras */}
+      {isScannerOpen && (
+        <BarcodeCameraScanner
+          isOpen={isScannerOpen}
+          onScan={handleBarcodeScanned}
+          onClose={() => setIsScannerOpen(false)}
+        />
       )}
     </div>
   )
