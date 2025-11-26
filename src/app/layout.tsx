@@ -20,6 +20,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="scroll-smooth" style={{ margin: 0, padding: 0, marginTop: 0, paddingTop: 0, top: 0, height: '100%', overflowX: 'hidden' }}>
+      <head>
+        {/* Google Identity Services */}
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+      </head>
       <body className={`${inter.className} bg-slate-950/95 antialiased`} style={{ margin: 0, padding: 0, marginTop: 0, paddingTop: 0, top: 0, height: '100%', overflowX: 'hidden', position: 'relative' }}> 
         <Providers>{children}</Providers>
       </body>

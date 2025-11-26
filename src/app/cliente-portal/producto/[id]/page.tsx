@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import clientePortalService from '@/services/clientePortalService'
+import resenaService, { Resena, EstadisticasResenas } from '@/services/resenaService'
 import {
   ArrowLeft, ShoppingCart, Heart, Share2, Star,
   Package, Truck, Shield, Check, Minus, Plus,
-  Loader2, Zap, TrendingUp, Info, AlertCircle
+  Loader2, Zap, TrendingUp, Info, AlertCircle,
+  Send, User, MessageSquare, ThumbsUp
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ClienteNavbar from '@/components/layout/ClienteNavbar'
@@ -22,6 +24,13 @@ export default function DetalleProductoPage() {
   const [selectedImage, setSelectedImage] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [carrito, setCarrito] = useState<any[]>([])
+  // Estados para reseñas
+  const [resenas, setResenas] = useState<Resena[]>([])
+  const [estadisticas, setEstadisticas] = useState<EstadisticasResenas | null>(null)
+  const [miResena, setMiResena] = useState<Resena | null>(null)
+  const [nuevaResena, setNuevaResena] = useState({ puntuacion: 5, comentario: '' })
+  const [enviandoResena, setEnviandoResena] = useState(false)
+  const [cargandoResenas, setCargandoResenas] = useState(true)
 
   useEffect(() => {
     if (!isAuthenticated || user?.rol !== 'CLIENTE') {
@@ -43,7 +52,66 @@ export default function DetalleProductoPage() {
     }
 
     fetchProducto()
+    fetchResenas()
   }, [isAuthenticated, user, router, params.id])
+
+  const fetchResenas = async () => {
+    try {
+      setCargandoResenas(true)
+      const response = await resenaService.getResenasPorProducto(Number(params.id))
+      setResenas(response.data)
+      setEstadisticas(response.estadisticas)
+      
+      // Verificar si el usuario ya dejó una reseña
+      const miResenaData = await resenaService.getMiResena(Number(params.id))
+      if (miResenaData) {
+        setMiResena(miResenaData)
+        setNuevaResena({ puntuacion: miResenaData.puntuacion, comentario: miResenaData.comentario || '' })
+      }
+    } catch (error) {
+      console.error('Error al cargar reseñas:', error)
+    } finally {
+      setCargandoResenas(false)
+    }
+  }
+
+  const enviarResena = async () => {
+    if (!nuevaResena.comentario.trim()) {
+      toast.error('Por favor, escribe un comentario para tu reseña')
+      return
+    }
+
+    try {
+      setEnviandoResena(true)
+      await resenaService.crearResena({
+        producto_id: Number(params.id),
+        puntuacion: nuevaResena.puntuacion,
+        comentario: nuevaResena.comentario
+      })
+      toast.success(miResena ? 'Reseña actualizada' : 'Reseña enviada')
+      fetchResenas()
+    } catch (error) {
+      console.error('Error al enviar reseña:', error)
+      toast.error('Error al enviar la reseña')
+    } finally {
+      setEnviandoResena(false)
+    }
+  }
+
+  const eliminarMiResena = async () => {
+    if (!miResena) return
+    
+    try {
+      await resenaService.eliminarResena(miResena.id)
+      toast.success('Reseña eliminada')
+      setMiResena(null)
+      setNuevaResena({ puntuacion: 5, comentario: '' })
+      fetchResenas()
+    } catch (error) {
+      console.error('Error al eliminar reseña:', error)
+      toast.error('Error al eliminar la reseña')
+    }
+  }
 
   const fetchProducto = async () => {
     try {
@@ -282,19 +350,21 @@ export default function DetalleProductoPage() {
                 </button>
               </div>
 
-              {/* Rating (placeholder) */}
+              {/* Rating real */}
               <div className="mt-4 flex items-center space-x-2">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       className={`h-5 w-5 ${
-                        i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'
+                        i < Math.round(estadisticas?.promedio || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'
                       }`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-slate-600">(4.0) · 24 reseñas</span>
+                <span className="text-sm text-slate-600">
+                  ({estadisticas?.promedio?.toFixed(1) || '0.0'}) · {estadisticas?.totalResenas || 0} reseñas
+                </span>
               </div>
             </div>
 
@@ -438,6 +508,228 @@ export default function DetalleProductoPage() {
                   <p className="text-xs text-purple-700">24-48 horas</p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sección de Reseñas */}
+        <div className="mt-16" id="resenas">
+          <h2 className="mb-8 text-3xl font-bold text-slate-900 flex items-center">
+            <MessageSquare className="mr-3 h-8 w-8 text-primary-600" />
+            Reseñas y Opiniones
+          </h2>
+
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {/* Estadísticas de reseñas */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-8 space-y-6">
+                {/* Resumen */}
+                <div className="rounded-3xl bg-gradient-to-br from-primary-50 to-indigo-100 p-6 shadow-lg">
+                  <div className="text-center">
+                    <p className="text-6xl font-bold text-primary-600">
+                      {estadisticas?.promedio?.toFixed(1) || '0.0'}
+                    </p>
+                    <div className="mt-2 flex justify-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-6 w-6 ${
+                            i < Math.round(estadisticas?.promedio || 0) 
+                              ? 'fill-yellow-400 text-yellow-400' 
+                              : 'text-slate-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p className="mt-2 text-sm text-slate-600">
+                      Basado en {estadisticas?.totalResenas || 0} reseñas
+                    </p>
+                  </div>
+
+                  {/* Distribución */}
+                  <div className="mt-6 space-y-2">
+                    {[5, 4, 3, 2, 1].map(stars => {
+                      const count = estadisticas?.distribucion?.[stars as keyof typeof estadisticas.distribucion] || 0
+                      const total = estadisticas?.totalResenas || 1
+                      const percentage = (count / total) * 100
+                      return (
+                        <div key={stars} className="flex items-center space-x-3">
+                          <span className="w-8 text-sm font-medium text-slate-600">{stars}★</span>
+                          <div className="flex-grow h-3 rounded-full bg-white/50 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 transition-all duration-500"
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                          <span className="w-8 text-xs text-slate-500">{count}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Formulario de reseña */}
+                <div className="rounded-3xl border-2 border-slate-200 bg-white p-6 shadow-lg">
+                  <h3 className="mb-4 text-lg font-bold text-slate-900">
+                    {miResena ? '✏️ Editar tu reseña' : '⭐ Deja tu reseña'}
+                  </h3>
+
+                  {/* Selector de estrellas */}
+                  <div className="mb-4">
+                    <p className="mb-2 text-sm font-medium text-slate-600">Tu puntuación:</p>
+                    <div className="flex space-x-1">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          onClick={() => setNuevaResena(prev => ({ ...prev, puntuacion: star }))}
+                          className="transition-transform hover:scale-110"
+                        >
+                          <Star
+                            className={`h-10 w-10 transition ${
+                              star <= nuevaResena.puntuacion
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-slate-300 hover:text-yellow-300'
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {nuevaResena.puntuacion === 1 && 'Muy malo'}
+                      {nuevaResena.puntuacion === 2 && 'Malo'}
+                      {nuevaResena.puntuacion === 3 && 'Regular'}
+                      {nuevaResena.puntuacion === 4 && 'Bueno'}
+                      {nuevaResena.puntuacion === 5 && 'Excelente'}
+                    </p>
+                  </div>
+
+                  {/* Campo de comentario */}
+                  <div className="mb-4">
+                    <label className="mb-2 block text-sm font-medium text-slate-600">
+                      Tu opinión:
+                    </label>
+                    <textarea
+                      value={nuevaResena.comentario}
+                      onChange={(e) => setNuevaResena(prev => ({ ...prev, comentario: e.target.value }))}
+                      placeholder="Cuéntanos tu experiencia con este producto..."
+                      rows={4}
+                      className="w-full rounded-xl border-2 border-slate-200 p-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none"
+                    />
+                  </div>
+
+                  {/* Botones */}
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={enviarResena}
+                      disabled={enviandoResena || !nuevaResena.comentario.trim()}
+                      className="flex-grow flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-primary-600 to-indigo-600 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {enviandoResena ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <>
+                          <Send className="h-5 w-5" />
+                          <span>{miResena ? 'Actualizar' : 'Enviar'}</span>
+                        </>
+                      )}
+                    </button>
+                    {miResena && (
+                      <button
+                        onClick={eliminarMiResena}
+                        className="rounded-xl border-2 border-red-200 px-4 py-3 text-red-600 transition hover:bg-red-50"
+                      >
+                        Eliminar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Lista de reseñas */}
+            <div className="lg:col-span-2">
+              {cargandoResenas ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+                </div>
+              ) : resenas.length === 0 ? (
+                <div className="rounded-3xl bg-slate-50 p-12 text-center">
+                  <MessageSquare className="mx-auto h-16 w-16 text-slate-300" />
+                  <h3 className="mt-4 text-xl font-bold text-slate-700">Sin reseñas aún</h3>
+                  <p className="mt-2 text-slate-500">¡Sé el primero en compartir tu opinión!</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {resenas.map((resena) => (
+                    <div
+                      key={resena.id}
+                      className={`rounded-2xl border-2 p-6 transition hover:shadow-lg ${
+                        resena.usuario_id === user?.id 
+                          ? 'border-primary-200 bg-primary-50/50' 
+                          : 'border-slate-200 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-4">
+                          {resena.usuario?.foto_perfil ? (
+                            <img
+                              src={resena.usuario.foto_perfil}
+                              alt={resena.usuario.nombre_completo}
+                              className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-md"
+                            />
+                          ) : (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-indigo-500 text-white font-bold shadow-md">
+                              {resena.usuario?.nombre_completo?.charAt(0) || 'U'}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-bold text-slate-900">
+                              {resena.usuario?.nombre_completo || 'Usuario'}
+                              {resena.usuario_id === user?.id && (
+                                <span className="ml-2 text-xs font-normal text-primary-600 bg-primary-100 px-2 py-1 rounded-full">
+                                  Tu reseña
+                                </span>
+                              )}
+                            </p>
+                            <div className="flex items-center space-x-2">
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < resena.puntuacion 
+                                        ? 'fill-yellow-400 text-yellow-400' 
+                                        : 'text-slate-300'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-xs text-slate-500">
+                                {new Date(resena.fecha_creacion).toLocaleDateString('es-PE', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="mt-4 text-slate-700 leading-relaxed">
+                        {resena.comentario}
+                      </p>
+
+                      <div className="mt-4 flex items-center space-x-4 text-sm text-slate-500">
+                        <button className="flex items-center space-x-1 hover:text-primary-600 transition">
+                          <ThumbsUp className="h-4 w-4" />
+                          <span>Útil</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
