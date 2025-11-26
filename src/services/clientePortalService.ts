@@ -91,6 +91,16 @@ class ClientePortalService {
   async getDashboard(): Promise<any> {
     return await apiService.get('/cliente-portal/dashboard');
   }
+
+  /**
+   * Descargar PDF de factura
+   */
+  async descargarFacturaPDF(ventaId: number): Promise<Blob> {
+    const response = await apiService.get(`/ventas/${ventaId}/pdf`, {
+      responseType: 'blob'
+    });
+    return response as unknown as Blob;
+  }
 }
 
 export default new ClientePortalService();

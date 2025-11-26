@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
 import clientePortalService from '@/services/clientePortalService'
-import { Receipt, Loader2, Calendar, Download } from 'lucide-react'
+import { Receipt, Loader2, Calendar, Download, CheckCircle } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export default function FacturasPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
   const [facturas, setFacturas] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [descargando, setDescargando] = useState<number | null>(null)
 
   useEffect(() => {
     if (!isAuthenticated || user?.rol !== 'CLIENTE') {
@@ -31,6 +33,31 @@ export default function FacturasPage() {
       console.error('Error al cargar facturas:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleDescargarPDF = async (factura: any) => {
+    try {
+      setDescargando(factura.id)
+      
+      const blob = await clientePortalService.descargarFacturaPDF(factura.id)
+      
+      // Crear URL del blob y descargar
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `factura-${factura.numero_factura}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('Factura descargada correctamente')
+    } catch (error: any) {
+      console.error('Error al descargar factura:', error)
+      toast.error('Error al descargar la factura')
+    } finally {
+      setDescargando(null)
     }
   }
 
@@ -117,11 +144,21 @@ export default function FacturasPage() {
               </div>
 
               <button
-                onClick={() => alert('Función de descarga en desarrollo')}
-                className="mt-4 flex w-full items-center justify-center space-x-2 rounded-xl bg-slate-100 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+                onClick={() => handleDescargarPDF(factura)}
+                disabled={descargando === factura.id}
+                className="mt-4 flex w-full items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 py-3 text-sm font-semibold text-white shadow-lg transition hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Download className="h-4 w-4" />
-                <span>Descargar PDF</span>
+                {descargando === factura.id ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Descargando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" />
+                    <span>Descargar PDF</span>
+                  </>
+                )}
               </button>
             </div>
           ))}
