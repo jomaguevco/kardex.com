@@ -38,6 +38,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   const handleLogout = () => {
     logout()
     setShowUserMenu(false)
+    router.push('/')
   }
 
   const handleConfigClick = () => {

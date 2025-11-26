@@ -267,11 +267,10 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
               // Si no existe, lo agrega con cantidad 1
               agregarProducto(producto, 1)
             }}
-            placeholder="Escanea código de barras (se agrega automáticamente)..."
-            className="mb-2"
+            placeholder="Escanea código de barras..."
           />
-          <p className="text-xs text-gray-500 mt-1 mb-2">
-            ⚡ Escanea y el producto se agrega automáticamente. Ajusta cantidades después si es necesario.
+          <p className="text-xs text-slate-500 mt-1 mb-2">
+            ⚡ Escanea y el producto se agrega automáticamente. Ajusta cantidades después.
           </p>
           
           {/* Búsqueda manual por nombre */}

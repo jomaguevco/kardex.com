@@ -58,7 +58,17 @@ export default function HomePage() {
       const redirectPath = getRedirectPath()
       router.push(redirectPath)
     } catch (err: any) {
-      setError(err?.message || 'Error al iniciar sesi&#243;n. Intenta nuevamente.')
+      // Mostrar mensaje amigable para errores de autenticación
+      const statusCode = err?.response?.status
+      if (statusCode === 401 || err?.message?.includes('401')) {
+        setError('Usuario o contraseña incorrectos')
+      } else if (statusCode === 403) {
+        setError('No tienes permiso para acceder')
+      } else if (err?.message?.includes('Credenciales')) {
+        setError('Usuario o contraseña incorrectos')
+      } else {
+        setError('Error al iniciar sesión. Intenta nuevamente.')
+      }
     } finally {
       setIsLoading(false)
     }

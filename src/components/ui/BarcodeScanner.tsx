@@ -136,9 +136,9 @@ export default function BarcodeScanner({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Barcode className="h-5 w-5 text-gray-400" />
+      <div className="relative flex items-center rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/50 transition-colors focus-within:border-indigo-500 focus-within:bg-white">
+        <div className="flex-shrink-0 pl-4 pr-2">
+          <Barcode className="h-5 w-5 text-indigo-500" />
         </div>
         <input
           ref={inputRef}
@@ -149,14 +149,13 @@ export default function BarcodeScanner({
           disabled={disabled || isSearching}
           placeholder={placeholder}
           className={`
-            input-field pl-10 pr-10
+            flex-1 bg-transparent border-0 py-3 pr-10 text-sm placeholder-slate-500 focus:outline-none focus:ring-0
             ${isSearching ? 'opacity-50 cursor-wait' : ''}
-            ${productoEncontrado ? 'border-green-500 bg-green-50' : ''}
             ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}
           `}
           autoComplete="off"
         />
-        <div className="absolute inset-y-0 right-0 pr-3 flex items-center gap-2">
+        <div className="flex-shrink-0 pr-3 flex items-center gap-2">
           {isSearching && (
             <LoadingSpinner size="sm" />
           )}

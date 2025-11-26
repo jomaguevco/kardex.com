@@ -56,12 +56,12 @@ class ClienteService {
 
   async createCliente(data: CreateClienteData): Promise<Cliente> {
     const response = await apiService.post('/clientes', data);
-    return (response.data as any).data;
+    return (response as any).data;
   }
 
   async updateCliente(id: number, data: UpdateClienteData): Promise<Cliente> {
     const response = await apiService.put(`/clientes/${id}`, data);
-    return (response.data as any).data;
+    return (response as any).data;
   }
 
   async deleteCliente(id: number): Promise<void> {

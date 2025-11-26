@@ -271,21 +271,21 @@ export default function NotificacionesPanel({ isOpen, onClose, onUpdate }: Notif
                 >
                   {/* Indicador de no leída */}
                   {!notif.leida && (
-                    <div className="absolute left-2 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-primary-600" />
+                    <div className="absolute left-2 top-6 h-2 w-2 rounded-full bg-primary-600" />
                   )}
 
-                  <div className="flex items-start space-x-3 pl-4">
+                  <div className="flex items-start gap-3 pl-4">
                     {/* Icono */}
-                    <div className={`rounded-full p-2 ${getColorTipo(notif.tipo)}`}>
+                    <div className={`flex-shrink-0 rounded-full p-2 ${getColorTipo(notif.tipo)}`}>
                       {getIconoTipo(notif.tipo)}
                     </div>
 
                     {/* Contenido */}
-                    <div className="flex-grow">
-                      <h3 className="font-semibold text-slate-900">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <h3 className="font-semibold text-slate-900 truncate">
                         {notif.titulo}
                       </h3>
-                      <p className="mt-1 text-sm text-slate-600">
+                      <p className="mt-1 text-sm text-slate-600 line-clamp-2 break-words">
                         {notif.mensaje}
                       </p>
                       <p className="mt-2 text-xs text-slate-500">
@@ -297,11 +297,11 @@ export default function NotificacionesPanel({ isOpen, onClose, onUpdate }: Notif
                     </div>
 
                     {/* Acciones */}
-                    <div className="flex space-x-1 opacity-0 transition group-hover:opacity-100">
+                    <div className="flex-shrink-0 flex gap-1 opacity-0 transition group-hover:opacity-100">
                       {!notif.leida && (
                         <button
                           onClick={() => marcarComoLeida(notif.id)}
-                          className="rounded-lg bg-emerald-100 p-2 text-emerald-600 transition hover:bg-emerald-200"
+                          className="rounded-lg bg-emerald-100 p-1.5 text-emerald-600 transition hover:bg-emerald-200"
                           title="Marcar como leída"
                         >
                           <Check className="h-4 w-4" />
@@ -309,7 +309,7 @@ export default function NotificacionesPanel({ isOpen, onClose, onUpdate }: Notif
                       )}
                       <button
                         onClick={() => eliminarNotificacion(notif.id)}
-                        className="rounded-lg bg-red-100 p-2 text-red-600 transition hover:bg-red-200"
+                        className="rounded-lg bg-red-100 p-1.5 text-red-600 transition hover:bg-red-200"
                         title="Eliminar"
                       >
                         <Trash2 className="h-4 w-4" />
