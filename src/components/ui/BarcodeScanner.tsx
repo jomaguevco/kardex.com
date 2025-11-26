@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Barcode, Search, X } from 'lucide-react'
+import { Barcode, Search, X, Camera } from 'lucide-react'
 import { productoService } from '@/services/productoService'
 import { Producto } from '@/types'
 import toast from 'react-hot-toast'
 import LoadingSpinner from './LoadingSpinner'
+import BarcodeCameraScanner from './BarcodeCameraScanner'
 
 interface BarcodeScannerProps {
   onProductFound: (producto: Producto) => void
@@ -27,6 +28,7 @@ export default function BarcodeScanner({
   const [codigoBarras, setCodigoBarras] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [productoEncontrado, setProductoEncontrado] = useState<Producto | null>(null)
+  const [showCameraScanner, setShowCameraScanner] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -134,6 +136,11 @@ export default function BarcodeScanner({
     }
   }
 
+  const handleCameraScan = (codigo: string) => {
+    setShowCameraScanner(false)
+    buscarProducto(codigo)
+  }
+
   return (
     <div className={`relative ${className}`}>
       <div className="relative flex items-center rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/50 transition-colors focus-within:border-indigo-500 focus-within:bg-white">
@@ -169,6 +176,17 @@ export default function BarcodeScanner({
               <X className="h-5 w-5" />
             </button>
           )}
+          {!disabled && !isSearching && (
+            <button
+              type="button"
+              onClick={() => setShowCameraScanner(true)}
+              className="p-1.5 rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition"
+              tabIndex={-1}
+              title="Escanear con cámara"
+            >
+              <Camera className="h-5 w-5" />
+            </button>
+          )}
         </div>
       </div>
       
@@ -188,6 +206,14 @@ export default function BarcodeScanner({
             </div>
           </div>
         </div>
+      )}
+
+      {showCameraScanner && (
+        <BarcodeCameraScanner
+          onScan={handleCameraScan}
+          onClose={() => setShowCameraScanner(false)}
+          isOpen={showCameraScanner}
+        />
       )}
     </div>
   )
