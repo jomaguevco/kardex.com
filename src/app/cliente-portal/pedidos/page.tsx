@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useClienteAuth } from '@/hooks/useClienteAuth'
 import pedidoService from '@/services/pedidoService'
 import { ClipboardList, Loader2, Calendar, Package, Eye } from 'lucide-react'
@@ -8,6 +9,7 @@ import PedidoDetalleModalCliente from '@/components/pedidos/PedidoDetalleModalCl
 import { Pedido } from '@/services/pedidoService'
 
 export default function PedidosPage() {
+  const router = useRouter()
   const { user, isLoading: authLoading, isAuthorized } = useClienteAuth()
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -88,7 +90,7 @@ export default function PedidosPage() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [isAuthenticated, user])
+  }, [isAuthorized])
 
   const getEstadoBadge = (pedido: Pedido) => {
     // Si tiene fecha_envio, mostrar como EN_CAMINO para el cliente
