@@ -171,31 +171,106 @@ export default function CatalogoPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header con carrito flotante */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-indigo-600 bg-clip-text text-transparent">
-            Catálogo de Productos
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Descubre {productos.length} productos increíbles
-          </p>
+      {/* Banner Hero animado */}
+      <div className="relative h-[280px] overflow-hidden rounded-3xl shadow-2xl">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+          poster="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80"
+        >
+          <source src="https://cdn.coverr.co/videos/coverr-shopping-mall-escalator-2951/1080p.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 via-purple-900/80 to-pink-900/70" />
+        
+        {/* Partículas decorativas */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(10)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white/20 animate-pulse"
+              style={{
+                width: Math.random() * 6 + 3 + 'px',
+                height: Math.random() * 6 + 3 + 'px',
+                left: Math.random() * 100 + '%',
+                top: Math.random() * 100 + '%',
+                animationDelay: Math.random() * 2 + 's',
+              }}
+            />
+          ))}
         </div>
-        {carrito.length > 0 && (
-          <button
-            onClick={() => router.push('/cliente-portal/pedidos/nuevo')}
-            className="group relative flex items-center space-x-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 font-bold text-white shadow-2xl transition hover:scale-105 hover:shadow-3xl"
-          >
-            <div className="relative">
-              <ShoppingCart className="h-6 w-6" />
-              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold animate-pulse">
-                {carrito.reduce((acc, item) => acc + item.cantidad, 0)}
-              </span>
+
+        <div className="absolute inset-0 flex items-center justify-between px-8 lg:px-12">
+          <div className="max-w-xl">
+            <div className="mb-4 inline-flex items-center space-x-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm">
+              <Zap className="h-5 w-5 text-yellow-400" />
+              <span className="text-sm font-semibold text-white">Ofertas Exclusivas</span>
             </div>
-            <span>Ver Carrito</span>
-            <div className="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-emerald-400 animate-ping" />
+            <h1 className="text-4xl lg:text-5xl font-bold text-white drop-shadow-lg mb-4">
+              Encuentra lo que <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">necesitas</span>
+            </h1>
+            <p className="text-lg text-white/80 mb-6">
+              Explora nuestra colección de {productos.length} productos premium
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+                <Star className="h-4 w-4 text-yellow-400" />
+                <span className="text-sm text-white">Envío gratis +S/200</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+                <Check className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm text-white">Garantía 30 días</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Carrito flotante */}
+          {carrito.length > 0 && (
+            <button
+              onClick={() => router.push('/cliente-portal/pedidos/nuevo')}
+              className="group relative flex items-center space-x-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 px-8 py-4 font-bold text-white shadow-2xl transition hover:scale-105 hover:bg-white/20"
+            >
+              <div className="relative">
+                <ShoppingCart className="h-6 w-6" />
+                <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-red-500 text-xs font-bold animate-pulse">
+                  {carrito.reduce((acc, item) => acc + item.cantidad, 0)}
+                </span>
+              </div>
+              <div className="text-left">
+                <span className="block text-sm opacity-80">Tu Carrito</span>
+                <span className="block font-bold">S/ {carrito.reduce((acc, item) => acc + (item.precio_venta * item.cantidad), 0).toFixed(2)}</span>
+              </div>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Categorías rápidas con imágenes */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { name: 'Tecnología', image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80', color: 'from-blue-600 to-indigo-600' },
+          { name: 'Electrodomésticos', image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80', color: 'from-emerald-600 to-teal-600' },
+          { name: 'Licores', image: 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400&q=80', color: 'from-purple-600 to-pink-600' },
+          { name: 'Periféricos', image: 'https://images.unsplash.com/photo-1625723044792-44de16ccb4e9?w=400&q=80', color: 'from-orange-600 to-red-600' },
+        ].map((cat, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedCategory('all')}
+            className="group relative h-28 overflow-hidden rounded-2xl"
+          >
+            <img 
+              src={cat.image}
+              alt={cat.name}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div className={`absolute inset-0 bg-gradient-to-t ${cat.color} opacity-80 group-hover:opacity-90 transition`} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-lg font-bold text-white drop-shadow-lg">{cat.name}</span>
+            </div>
           </button>
-        )}
+        ))}
       </div>
 
       {/* Barra de búsqueda y filtros mejorada */}
@@ -337,14 +412,15 @@ export default function CatalogoPage() {
             const stockBajo = producto.stock_actual > 0 && producto.stock_actual <= producto.stock_minimo
 
             return viewMode === 'grid' ? (
-              // Vista de cuadrícula
+              // Vista de cuadrícula con efecto 3D
               <div
                 key={producto.id}
-                className="glass-card group relative overflow-hidden rounded-3xl transition hover:shadow-2xl"
+                className="group perspective-1000"
               >
+                <div className="glass-card relative overflow-hidden rounded-3xl transition-all duration-500 transform-gpu group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:rotate-y-2 group-hover:-rotate-x-2">
                 {/* Badge de stock */}
                 {sinStock && (
-                  <div className="absolute left-3 top-3 z-10 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                  <div className="absolute left-3 top-3 z-10 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow-lg animate-pulse">
                     Sin Stock
                   </div>
                 )}
@@ -435,6 +511,7 @@ export default function CatalogoPage() {
                       <ShoppingCart className="h-5 w-5" />
                     </button>
                   </div>
+                </div>
                 </div>
               </div>
             ) : (

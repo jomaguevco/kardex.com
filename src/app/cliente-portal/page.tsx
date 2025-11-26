@@ -13,9 +13,23 @@ import Link from 'next/link'
 export default function ClientePortalPage() {
   const { user, isLoading: authLoading, isAuthorized } = useClienteAuth()
   const [dashboard, setDashboard] = useState<any>(null)
+  const [productosDestacados, setProductosDestacados] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [currentPromoSlide, setCurrentPromoSlide] = useState(0)
+
+  // Placeholder images para productos sin imagen
+  const placeholderImages = [
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80',
+    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80',
+    'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80',
+    'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&q=80',
+    'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&q=80'
+  ]
+
+  const getPlaceholderImage = (index: number) => {
+    return placeholderImages[index % placeholderImages.length]
+  }
 
   // Banners promocionales con imágenes de Unsplash
   const banners = [
@@ -39,82 +53,6 @@ export default function ClientePortalPage() {
       image: 'https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?w=1200&q=80',
       color: 'from-emerald-600 to-teal-600',
       cta: 'Comprar Ahora'
-    }
-  ]
-
-  // Productos destacados con variedad (tecnología, electrodomésticos, periféricos, licores)
-  const productosDestacados = [
-    {
-      id: 1,
-      nombre: 'Smartphone Galaxy S23',
-      precio: 2499.00,
-      imagen: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&q=80',
-      descuento: 15,
-      nuevo: true,
-      categoria: 'Tecnología'
-    },
-    {
-      id: 2,
-      nombre: 'Cafetera Espresso Pro',
-      precio: 1299.00,
-      imagen: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=500&q=80',
-      descuento: 20,
-      nuevo: false,
-      categoria: 'Electrodomésticos'
-    },
-    {
-      id: 3,
-      nombre: 'Whisky Johnnie Walker',
-      precio: 189.00,
-      imagen: 'https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=500&q=80',
-      descuento: 10,
-      nuevo: true,
-      categoria: 'Licores'
-    },
-    {
-      id: 4,
-      nombre: 'Teclado Mecánico RGB',
-      precio: 349.00,
-      imagen: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500&q=80',
-      descuento: 0,
-      nuevo: false,
-      categoria: 'Periféricos'
-    },
-    {
-      id: 5,
-      nombre: 'Refrigeradora Samsung',
-      precio: 3599.00,
-      imagen: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=500&q=80',
-      descuento: 25,
-      nuevo: false,
-      categoria: 'Electrodomésticos'
-    },
-    {
-      id: 6,
-      nombre: 'Vino Tinto Reserva',
-      precio: 89.00,
-      imagen: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=500&q=80',
-      descuento: 0,
-      nuevo: true,
-      categoria: 'Licores'
-    },
-    {
-      id: 7,
-      nombre: 'Monitor Gaming 27"',
-      precio: 1499.00,
-      imagen: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=500&q=80',
-      descuento: 15,
-      nuevo: true,
-      categoria: 'Tecnología'
-    },
-    {
-      id: 8,
-      nombre: 'Mouse Logitech Pro',
-      precio: 249.00,
-      imagen: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&q=80',
-      descuento: 5,
-      nuevo: false,
-      categoria: 'Periféricos'
     }
   ]
 
@@ -142,9 +80,23 @@ export default function ClientePortalPage() {
 
   const fetchDashboard = async () => {
     try {
+      // Obtener estado de cuenta
       const response = await clientePortalService.getEstadoCuenta()
       if (response.success) {
         setDashboard(response.data)
+      }
+
+      // Obtener productos del catálogo para mostrar productos reales
+      const catalogoResponse = await clientePortalService.getCatalogo()
+      if (catalogoResponse.success && catalogoResponse.data) {
+        // Tomar los primeros 8 productos para destacados
+        const productosReales = catalogoResponse.data.slice(0, 8).map((producto: any, index: number) => ({
+          ...producto,
+          imagen: producto.imagen_url || getPlaceholderImage(index),
+          descuento: Math.random() > 0.5 ? Math.floor(Math.random() * 25) + 5 : 0,
+          nuevo: Math.random() > 0.7
+        }))
+        setProductosDestacados(productosReales)
       }
     } catch (error) {
       console.error('Error al cargar dashboard:', error)
@@ -389,11 +341,11 @@ export default function ClientePortalPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {productosDestacados.map((producto) => (
+          {productosDestacados.map((producto, index) => (
             <Link
               key={producto.id}
-              href="/cliente-portal/catalogo"
-              className="group relative overflow-hidden rounded-2xl bg-white shadow-lg transition hover:shadow-2xl"
+              href={`/cliente-portal/producto/${producto.id}`}
+              className="group relative overflow-hidden rounded-2xl bg-white shadow-lg transition hover:shadow-2xl hover:scale-[1.02]"
             >
               {producto.nuevo && (
                 <div className="absolute left-3 top-3 z-10 flex items-center space-x-1 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
@@ -408,16 +360,20 @@ export default function ClientePortalPage() {
               )}
               <div className="relative h-48 overflow-hidden bg-slate-100">
                 <img
-                  src={producto.imagen}
+                  src={producto.imagen_url || producto.imagen || getPlaceholderImage(index)}
                   alt={producto.nombre}
                   className="h-full w-full object-cover transition group-hover:scale-110"
+                  onError={(e) => {
+                    e.currentTarget.src = getPlaceholderImage(index)
+                  }}
                 />
                 <button className="absolute bottom-3 right-3 rounded-full bg-white p-2 shadow-lg transition hover:bg-red-50 hover:text-red-600">
                   <Heart className="h-5 w-5" />
                 </button>
               </div>
               <div className="p-4">
-                <h3 className="font-bold text-slate-900 group-hover:text-primary-600 transition">
+                <p className="text-xs text-slate-500 font-medium">{producto.codigo_interno}</p>
+                <h3 className="font-bold text-slate-900 group-hover:text-primary-600 transition line-clamp-1">
                   {producto.nombre}
                 </h3>
                 <div className="mt-2 flex items-center justify-between">
@@ -425,21 +381,21 @@ export default function ClientePortalPage() {
                     {producto.descuento > 0 ? (
                       <div>
                         <p className="text-sm text-slate-500 line-through">
-                          S/ {producto.precio.toFixed(2)}
+                          S/ {Number(producto.precio_venta || producto.precio || 0).toFixed(2)}
                         </p>
                         <p className="text-xl font-bold text-primary-600">
-                          S/ {(producto.precio * (1 - producto.descuento / 100)).toFixed(2)}
+                          S/ {(Number(producto.precio_venta || producto.precio || 0) * (1 - producto.descuento / 100)).toFixed(2)}
                         </p>
                       </div>
                     ) : (
                       <p className="text-xl font-bold text-primary-600">
-                        S/ {producto.precio.toFixed(2)}
+                        S/ {Number(producto.precio_venta || producto.precio || 0).toFixed(2)}
                       </p>
                     )}
                   </div>
-                  <button className="rounded-full bg-primary-600 p-2 text-white transition hover:bg-primary-700">
+                  <div className="rounded-full bg-primary-600 p-2 text-white transition hover:bg-primary-700">
                     <ShoppingCart className="h-5 w-5" />
-                  </button>
+                  </div>
                 </div>
               </div>
             </Link>

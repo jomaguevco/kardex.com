@@ -5,11 +5,14 @@ import { useClienteAuth } from '@/hooks/useClienteAuth'
 import { useAuthStore } from '@/store/authStore'
 import { 
   Sparkles, User, Shield, Bell, Camera, Upload, X, 
-  Save, Loader2, Eye, EyeOff, Check
+  Save, Loader2, Eye, EyeOff, Check, Mail, Phone,
+  Award, Star, TrendingUp, Calendar, Settings, Zap,
+  Heart, ShoppingBag, Package
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import usuarioService from '@/services/usuarioService'
 import { getFotoPerfilUrl } from '@/utils/fotoPerfil'
+import Link from 'next/link'
 
 export default function ClientePerfilPage() {
   const { user: clienteUser, isLoading: authLoading, isAuthorized } = useClienteAuth()
@@ -35,6 +38,18 @@ export default function ClientePerfilPage() {
   // Estados para preferencias
   const [notificacionesHabilitadas, setNotificacionesHabilitadas] = useState(true)
   const [guardandoPreferencias, setGuardandoPreferencias] = useState(false)
+
+  // Calcular progreso del perfil
+  const calcularProgresoPerfil = () => {
+    let completado = 0
+    if (user?.nombre_completo) completado += 25
+    if (user?.email) completado += 25
+    if (user?.telefono) completado += 25
+    if (user?.foto_perfil) completado += 25
+    return completado
+  }
+
+  const progresoPerfil = calcularProgresoPerfil()
 
   useEffect(() => {
     if (user) {
@@ -202,151 +217,259 @@ export default function ClientePerfilPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="relative h-[280px] overflow-hidden rounded-3xl shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-white px-6">
-            <div className="mb-4 inline-flex items-center space-x-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm">
-              <Sparkles className="h-5 w-5" />
-              <span className="text-sm font-semibold">Mi Perfil</span>
-            </div>
-            <h1 className="text-4xl font-bold drop-shadow-lg mb-4">
-              Gestiona tu información personal
-            </h1>
-            <p className="text-lg mb-6 drop-shadow-md text-white/90">
-              Actualiza tus datos, cambia tu contraseña y personaliza tus preferencias
-            </p>
-            
-            {/* Info del usuario */}
-            <div className="inline-flex items-center gap-4 rounded-2xl border border-white/30 bg-white/10 px-5 py-3 backdrop-blur-sm">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                <User className="h-6 w-6" />
+      {/* Header con banner animado */}
+      <div className="relative h-[350px] overflow-hidden rounded-3xl shadow-2xl">
+        {/* Video de fondo */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+          poster="https://images.unsplash.com/photo-1557683316-973673baf926?w=1920&q=80"
+        >
+          <source src="https://cdn.coverr.co/videos/coverr-gradient-blue-and-purple-5766/1080p.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 via-purple-900/80 to-pink-900/90" />
+        
+        {/* Partículas decorativas */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(15)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white/20 animate-pulse"
+              style={{
+                width: Math.random() * 8 + 4 + 'px',
+                height: Math.random() * 8 + 4 + 'px',
+                left: Math.random() * 100 + '%',
+                top: Math.random() * 100 + '%',
+                animationDelay: Math.random() * 3 + 's',
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="absolute inset-0 flex items-center">
+          <div className="container mx-auto px-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+              {/* Info del usuario con avatar grande */}
+              <div className="flex items-center gap-6">
+                {/* Avatar grande */}
+                <div className="relative group">
+                  <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 opacity-75 blur-lg group-hover:opacity-100 transition animate-pulse" />
+                  <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-white/30 bg-gradient-to-br from-indigo-500 to-purple-500 shadow-2xl">
+                    <div className="absolute inset-0 flex items-center justify-center text-white">
+                      <User className="h-16 w-16" />
+                    </div>
+                    {fotoUrl && (
+                      <img
+                        src={fotoUrl}
+                        alt="Foto de perfil"
+                        className="absolute inset-0 h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    )}
+                  </div>
+                  {/* Botón de cambiar foto */}
+                  <label
+                    htmlFor="foto-input-header"
+                    className="absolute -bottom-1 -right-1 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white shadow-lg transition hover:scale-110"
+                  >
+                    <Camera className="h-5 w-5 text-indigo-600" />
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="foto-input-header"
+                    disabled={uploading}
+                  />
+                </div>
+
+                <div className="text-white">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-3xl font-bold">{user?.nombre_completo}</h1>
+                    <div className="flex items-center gap-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-1">
+                      <Star className="h-4 w-4" />
+                      <span className="text-xs font-bold">Premium</span>
+                    </div>
+                  </div>
+                  <p className="text-white/70 text-lg">@{user?.nombre_usuario}</p>
+                  <div className="flex items-center gap-4 mt-3">
+                    {email && (
+                      <div className="flex items-center gap-2 text-white/60 text-sm">
+                        <Mail className="h-4 w-4" />
+                        <span>{email}</span>
+                      </div>
+                    )}
+                    {telefono && (
+                      <div className="flex items-center gap-2 text-white/60 text-sm">
+                        <Phone className="h-4 w-4" />
+                        <span>{telefono}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="text-left">
-                <p className="font-semibold">{user?.nombre_completo}</p>
-                <p className="text-sm text-white/70">@{user?.nombre_usuario} · {user?.rol}</p>
+
+              {/* Progreso del perfil */}
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 shadow-lg">
+                    <Award className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white">Perfil Completo</h3>
+                    <p className="text-white/60 text-sm">{progresoPerfil}% completado</p>
+                  </div>
+                </div>
+                {/* Barra de progreso animada */}
+                <div className="h-3 bg-white/20 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 rounded-full transition-all duration-1000 ease-out"
+                    style={{ width: `${progresoPerfil}%` }}
+                  />
+                </div>
+                <div className="mt-3 flex justify-between text-xs text-white/60">
+                  <span>Básico</span>
+                  <span>Completo</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Foto de perfil */}
-      <div className="glass-card rounded-3xl p-8">
-        <h3 className="text-xl font-bold text-slate-900">Foto de perfil</h3>
-        <p className="mt-1 text-slate-600">Personaliza tu imagen de perfil</p>
-
-        <div className="mt-6 flex flex-col sm:flex-row items-center gap-6">
-          {/* Preview de la foto */}
-          <div className="relative">
-            <div className="relative h-32 w-32 overflow-hidden rounded-2xl border-4 border-white bg-gradient-to-br from-indigo-500 to-purple-500 shadow-xl">
-              <div className="absolute inset-0 flex items-center justify-center text-white">
-                <User className="h-16 w-16" />
+      {/* Estadísticas rápidas */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { icon: ShoppingBag, label: 'Compras', value: '12', color: 'from-blue-500 to-indigo-600' },
+          { icon: Heart, label: 'Favoritos', value: '8', color: 'from-pink-500 to-rose-600' },
+          { icon: Package, label: 'Productos', value: '45', color: 'from-emerald-500 to-teal-600' },
+          { icon: TrendingUp, label: 'Ahorro', value: 'S/150', color: 'from-orange-500 to-red-600' },
+        ].map((stat, index) => (
+          <div 
+            key={index}
+            className="glass-card rounded-2xl p-5 group hover:scale-105 transition-all duration-300"
+          >
+            <div className="flex items-center gap-4">
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${stat.color} shadow-lg transition-transform group-hover:scale-110`}>
+                <stat.icon className="h-6 w-6 text-white" />
               </div>
-              {fotoUrl && (
-                <img
-                  src={fotoUrl}
-                  alt="Foto de perfil"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              )}
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+                <p className="text-sm text-slate-500">{stat.label}</p>
+              </div>
             </div>
-            {uploading && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-slate-950/50 backdrop-blur-sm">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
-              </div>
-            )}
           </div>
+        ))}
+      </div>
 
-          {/* Botones */}
-          <div className="flex flex-col gap-3">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-              id="foto-input"
-              disabled={uploading}
-            />
-            <label
-              htmlFor="foto-input"
-              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl hover:scale-105 disabled:opacity-50"
-            >
-              <Upload className="h-5 w-5" />
-              {user?.foto_perfil ? 'Cambiar foto' : 'Subir foto'}
-            </label>
-
-            {user?.foto_perfil && (
-              <button
-                onClick={handleEliminarFoto}
-                disabled={uploading}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-                Eliminar foto
-              </button>
-            )}
-
-            <p className="text-sm text-slate-500">
-              JPG, PNG o GIF. Máximo 5MB.
-            </p>
+      {/* Accesos rápidos */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link href="/cliente-portal/mis-compras" className="glass-card rounded-2xl p-6 group hover:shadow-xl transition-all">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg group-hover:scale-110 transition">
+              <ShoppingBag className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900">Mis Compras</h3>
+              <p className="text-sm text-slate-500">Ver historial de compras</p>
+            </div>
           </div>
-        </div>
+        </Link>
+        <Link href="/cliente-portal/facturas" className="glass-card rounded-2xl p-6 group hover:shadow-xl transition-all">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg group-hover:scale-110 transition">
+              <Package className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900">Mis Facturas</h3>
+              <p className="text-sm text-slate-500">Descargar comprobantes</p>
+            </div>
+          </div>
+        </Link>
+        <Link href="/cliente-portal/soporte" className="glass-card rounded-2xl p-6 group hover:shadow-xl transition-all">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg group-hover:scale-110 transition">
+              <Zap className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900">Soporte</h3>
+              <p className="text-sm text-slate-500">Obtener ayuda</p>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Grid de formularios */}
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Información personal */}
-        <div className="glass-card rounded-3xl p-8">
-          <h3 className="text-xl font-bold text-slate-900">Información personal</h3>
-          <p className="mt-1 text-slate-600">Actualiza tus datos personales</p>
-
-          <form onSubmit={handleGuardarPerfil} className="mt-6 space-y-5">
+        <div className="glass-card rounded-3xl p-8 hover:shadow-xl transition-all">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
+              <User className="h-7 w-7 text-white" />
+            </div>
             <div>
+              <h3 className="text-xl font-bold text-slate-900">Información personal</h3>
+              <p className="text-slate-500">Actualiza tus datos personales</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleGuardarPerfil} className="space-y-5">
+            <div className="group">
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Nombre completo *
               </label>
-              <input
-                type="text"
-                value={nombreCompleto}
-                onChange={(e) => setNombreCompleto(e.target.value)}
-                className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
-                required
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={nombreCompleto}
+                  onChange={(e) => setNombreCompleto(e.target.value)}
+                  className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 pl-12 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+                  required
+                />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+              </div>
             </div>
 
-            <div>
+            <div className="group">
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Correo electrónico
               </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
-              />
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 pl-12 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+                />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+              </div>
             </div>
 
-            <div>
+            <div className="group">
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Teléfono
               </label>
-              <input
-                type="tel"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
-              />
+              <div className="relative">
+                <input
+                  type="tel"
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                  className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 pl-12 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+                />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+              </div>
             </div>
 
             <button
               type="submit"
               disabled={guardandoPerfil}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 font-semibold text-white shadow-lg transition hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
             >
               {guardandoPerfil ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -359,11 +482,18 @@ export default function ClientePerfilPage() {
         </div>
 
         {/* Seguridad */}
-        <div className="glass-card rounded-3xl p-8">
-          <h3 className="text-xl font-bold text-slate-900">Seguridad</h3>
-          <p className="mt-1 text-slate-600">Cambia tu contraseña periódicamente</p>
+        <div className="glass-card rounded-3xl p-8 hover:shadow-xl transition-all">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg">
+              <Shield className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-slate-900">Seguridad</h3>
+              <p className="text-slate-500">Cambia tu contraseña periódicamente</p>
+            </div>
+          </div>
 
-          <form onSubmit={handleCambiarContrasena} className="mt-6 space-y-5">
+          <form onSubmit={handleCambiarContrasena} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Contraseña actual *
@@ -373,13 +503,13 @@ export default function ClientePerfilPage() {
                   type={mostrarContrasenas ? 'text' : 'password'}
                   value={contrasenaActual}
                   onChange={(e) => setContrasenaActual(e.target.value)}
-                  className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 pr-12 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 pr-12 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarContrasenas(!mostrarContrasenas)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
                 >
                   {mostrarContrasenas ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -394,7 +524,7 @@ export default function ClientePerfilPage() {
                 type={mostrarContrasenas ? 'text' : 'password'}
                 value={nuevaContrasena}
                 onChange={(e) => setNuevaContrasena(e.target.value)}
-                className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
                 required
                 minLength={6}
               />
@@ -408,7 +538,7 @@ export default function ClientePerfilPage() {
                 type={mostrarContrasenas ? 'text' : 'password'}
                 value={confirmarContrasena}
                 onChange={(e) => setConfirmarContrasena(e.target.value)}
-                className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 text-slate-900 transition focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
                 required
               />
               {confirmarContrasena && nuevaContrasena === confirmarContrasena && (
@@ -421,7 +551,7 @@ export default function ClientePerfilPage() {
             <button
               type="submit"
               disabled={guardandoContrasena}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:shadow-xl disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 font-semibold text-white shadow-lg transition hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
             >
               {guardandoContrasena ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -435,12 +565,19 @@ export default function ClientePerfilPage() {
       </div>
 
       {/* Preferencias */}
-      <div className="glass-card rounded-3xl p-8">
-        <h3 className="text-xl font-bold text-slate-900">Preferencias</h3>
-        <p className="mt-1 text-slate-600">Personaliza tu experiencia en el sistema</p>
+      <div className="glass-card rounded-3xl p-8 hover:shadow-xl transition-all">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg">
+            <Settings className="h-7 w-7 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-slate-900">Preferencias</h3>
+            <p className="text-slate-500">Personaliza tu experiencia en el sistema</p>
+          </div>
+        </div>
 
-        <div className="mt-6 space-y-4">
-          <div className="flex items-center justify-between rounded-2xl border-2 border-slate-100 bg-gradient-to-r from-slate-50 to-indigo-50/50 p-5 transition hover:shadow-lg">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between rounded-2xl border-2 border-slate-100 bg-gradient-to-r from-slate-50 to-indigo-50/50 p-5 transition hover:shadow-lg hover:border-indigo-200">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg">
                 <Bell className="h-6 w-6" />
@@ -476,9 +613,23 @@ export default function ClientePerfilPage() {
               Próximamente
             </span>
           </div>
+
+          <div className="flex items-center justify-between rounded-2xl border-2 border-slate-100 bg-slate-50/50 p-5 opacity-60">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-lg">
+                <Calendar className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900">Recordatorios de compra</p>
+                <p className="text-sm text-slate-600">Te avisamos cuando tus productos favoritos estén disponibles</p>
+              </div>
+            </div>
+            <span className="rounded-full bg-gradient-to-r from-orange-100 to-red-100 px-4 py-2 text-sm font-semibold text-orange-700">
+              Próximamente
+            </span>
+          </div>
         </div>
       </div>
     </div>
   )
 }
-

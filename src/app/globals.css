@@ -819,3 +819,44 @@ a:active,
   z-index: 2;
 }
 
+/* Animación shake para errores */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Animación de partículas mejorada */
+@keyframes particle-float-login {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-100vh) translateX(20px);
+    opacity: 0.8;
+  }
+}
+
+.animate-particle-login {
+  animation: particle-float-login 15s ease-in-out infinite;
+}
+
+/* Efecto hover 3D para tarjetas */
+.group-hover\:rotate-y-2:hover {
+  transform: perspective(1000px) rotateY(2deg);
+}
+
+.group-hover\:-rotate-x-2:hover {
+  transform: perspective(1000px) rotateX(-2deg);
+}
+
+/* Combinación de ambas rotaciones */
+.group:hover .group-hover\:rotate-y-2.group-hover\:-rotate-x-2 {
+  transform: perspective(1000px) rotateY(2deg) rotateX(-2deg);
+}
+
