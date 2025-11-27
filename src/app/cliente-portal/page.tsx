@@ -297,7 +297,7 @@ export default function ClientePortalPage() {
             <div>
               <p className="text-sm font-medium text-slate-600">Productos Únicos</p>
               <p className="mt-2 text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {dashboard?.productosMasComprados?.length || 0}
+                {dashboard?.productosUnicos || 0}
               </p>
               <p className="mt-1 text-xs text-purple-600 flex items-center">
                 <Package className="h-3 w-3 mr-1" />
@@ -315,11 +315,11 @@ export default function ClientePortalPage() {
             <div>
               <p className="text-sm font-medium text-slate-600">Pedidos Activos</p>
               <p className="mt-2 text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                0
+                {dashboard?.pedidosActivos || 0}
               </p>
               <p className="mt-1 text-xs text-slate-600 flex items-center">
                 <Clock className="h-3 w-3 mr-1" />
-                Todos entregados
+                {dashboard?.pedidosActivos > 0 ? 'En proceso' : 'Todos entregados'}
               </p>
             </div>
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-lg transition group-hover:scale-110">

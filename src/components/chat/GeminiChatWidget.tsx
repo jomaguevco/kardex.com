@@ -163,6 +163,20 @@ export default function GeminiChatWidget() {
     return date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
   }
 
+  // Limpiar markdown básico del texto
+  const cleanMarkdown = (text: string): string => {
+    if (!text) return ''
+    // Remover asteriscos de negrita/cursiva
+    let cleaned = text.replace(/\*\*(.*?)\*\*/g, '$1') // **texto** -> texto
+    cleaned = cleaned.replace(/\*(.*?)\*/g, '$1') // *texto* -> texto
+    cleaned = cleaned.replace(/_(.*?)_/g, '$1') // _texto_ -> texto
+    // Remover guiones de listas y reemplazar con saltos de línea
+    cleaned = cleaned.replace(/^[\s]*[-*]\s+/gm, '• ') // - item -> • item
+    // Limpiar espacios múltiples
+    cleaned = cleaned.replace(/\n{3,}/g, '\n\n') // Máximo 2 saltos de línea seguidos
+    return cleaned.trim()
+  }
+
   // Solo mostrar para clientes
   if (user?.rol !== 'CLIENTE') return null
 
@@ -284,7 +298,7 @@ export default function GeminiChatWidget() {
                             : 'rounded-tl-none bg-white text-slate-700'
                         }`}
                       >
-                        <p className="whitespace-pre-wrap text-sm">{msg.parts}</p>
+                        <p className="whitespace-pre-wrap text-sm">{cleanMarkdown(msg.parts)}</p>
                         <p
                           className={`mt-2 text-xs ${
                             msg.role === 'user' ? 'text-white/70' : 'text-slate-400'
