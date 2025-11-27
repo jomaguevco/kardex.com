@@ -181,16 +181,30 @@ export default function PedidoDetalleModalCliente({
                       </p>
                     </div>
                   )}
-                  {pedido.comprobante_pago && (
-                    <div className="md:col-span-2">
-                      <p className="text-xs font-medium text-emerald-700 mb-2">Comprobante</p>
-                      <img
-                        src={pedido.comprobante_pago}
-                        alt="Comprobante de pago"
-                        className="max-w-xs rounded-lg border border-emerald-200"
-                      />
-                    </div>
-                  )}
+                  {pedido.comprobante_pago && (() => {
+                    // Construir URL completa del comprobante
+                    let comprobanteUrl = pedido.comprobante_pago;
+                    if (!comprobanteUrl.startsWith('http')) {
+                      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+                      const baseUrl = backendUrl.replace(/\/api\/?$/, '');
+                      comprobanteUrl = `${baseUrl}${pedido.comprobante_pago}`;
+                    }
+                    return (
+                      <div className="md:col-span-2">
+                        <p className="text-xs font-medium text-emerald-700 mb-2">Comprobante</p>
+                        <img
+                          src={comprobanteUrl}
+                          alt="Comprobante de pago"
+                          className="max-w-xs rounded-lg border border-emerald-200 cursor-pointer hover:shadow-lg transition-shadow"
+                          onClick={() => window.open(comprobanteUrl, '_blank')}
+                          onError={(e) => {
+                            console.error('Error al cargar comprobante:', comprobanteUrl);
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             )}

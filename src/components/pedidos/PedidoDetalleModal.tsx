@@ -277,16 +277,16 @@ export default function PedidoDetalleModal({
                   {pedido.comprobante_pago && (() => {
                     // Construir URL completa del comprobante
                     // Si ya es una URL completa, usarla directamente
-                    // Si es una ruta relativa, construir la URL completa usando la base del API
+                    // Si es una ruta relativa, construir la URL completa usando la base del backend
                     let comprobanteUrl = pedido.comprobante_pago;
                     if (!comprobanteUrl.startsWith('http')) {
-                      // Obtener la URL base del API desde el servicio
-                      const apiBaseUrl = typeof window !== 'undefined' 
-                        ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api')
-                        : 'http://localhost:4001/api';
-                      // Remover /api del final si existe
-                      const baseUrl = apiBaseUrl.replace(/\/api\/?$/, '');
+                      // Para producción usar la URL del backend de Railway directamente
+                      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+                      // Remover /api del final para obtener la URL base del servidor
+                      const baseUrl = backendUrl.replace(/\/api\/?$/, '');
+                      // La ruta del comprobante ya incluye /uploads/
                       comprobanteUrl = `${baseUrl}${pedido.comprobante_pago}`;
+                      console.log('URL del comprobante construida:', comprobanteUrl);
                     }
                     
                     return (

@@ -32,13 +32,13 @@ const METODOS_PAGO: { value: MetodoPago; label: string; icon: any; description: 
     value: 'YAPE',
     label: 'Yape',
     icon: Smartphone,
-    description: 'Pago mediante Yape'
+    description: 'Yapea al 995052729'
   },
   {
     value: 'PLIN',
     label: 'Plin',
     icon: Smartphone,
-    description: 'Pago mediante Plin'
+    description: 'Plin al 995052729'
   }
 ]
 

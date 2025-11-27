@@ -237,8 +237,8 @@ function KardexContent() {
                         <td className="px-6 py-4 text-sm text-slate-500">{new Date(movimiento.fecha_movimiento).toLocaleString()}</td>
                         <td className="px-6 py-4 text-sm text-slate-700">{getProductoNombre(productos, movimiento.producto_id)}</td>
                         <td className="px-6 py-4 text-sm"><span className={badgeClass}>{label}</span></td>
-                        <td className="px-6 py-4 text-right text-sm text-slate-600">{movimiento.cantidad}</td>
-                        <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">{movimiento.stock_nuevo}</td>
+                        <td className="px-6 py-4 text-right text-sm text-slate-600">{Math.round(Number(movimiento.cantidad))}</td>
+                        <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">{Math.round(Number(movimiento.stock_nuevo))}</td>
                         <td className="px-6 py-4 text-sm text-slate-500">{movimiento.numero_documento || movimiento.documento_referencia}</td>
                       </tr>
                     )
@@ -295,10 +295,10 @@ function KardexProductoDetalle({ producto, data }: { producto: Producto; data: K
                 <tr key={movimiento.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 text-sm text-slate-500">{new Date(movimiento.fecha_movimiento).toLocaleString()}</td>
                   <td className="px-6 py-4 text-sm"><span className={badgeClass}>{label}</span></td>
-                  <td className="px-6 py-4 text-right text-sm text-slate-600">{movimiento.cantidad}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-600">{Math.round(Number(movimiento.cantidad))}</td>
                   <td className="px-6 py-4 text-right text-sm text-slate-600">${Number(movimiento.precio_unitario).toFixed(2)}</td>
-                  <td className="px-6 py-4 text-right text-sm text-slate-600">{movimiento.stock_anterior}</td>
-                  <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">{movimiento.stock_nuevo}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-600">{Math.round(Number(movimiento.stock_anterior))}</td>
+                  <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">{Math.round(Number(movimiento.stock_nuevo))}</td>
                   <td className="px-6 py-4 text-sm text-slate-500">{movimiento.numero_documento || movimiento.documento_referencia}</td>
                 </tr>
               )

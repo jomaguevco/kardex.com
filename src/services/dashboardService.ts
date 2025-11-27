@@ -13,23 +13,23 @@ export interface DashboardStats {
 class DashboardService {
   async getDashboardStats(): Promise<DashboardStats> {
     try {
+      // apiService.get() ya devuelve response.data de axios
       // Obtener estadísticas de ventas
       const ventasResponse = await apiService.get('/ventas/estadisticas');
-      const ventasStats = ventasResponse.data?.data || {};
+      const ventasStats = ventasResponse?.data || ventasResponse || {};
 
       // Obtener estadísticas de compras
       const comprasResponse = await apiService.get('/compras/estadisticas');
-      const comprasStats = comprasResponse.data?.data || {};
+      const comprasStats = comprasResponse?.data || comprasResponse || {};
 
       // Obtener productos con stock bajo
       const stockBajoResponse = await apiService.get('/productos/stock-bajo');
-      const productosStockBajo = Array.isArray(stockBajoResponse.data?.data) 
-        ? stockBajoResponse.data.data.length 
-        : 0;
+      const stockBajoData = stockBajoResponse?.data || stockBajoResponse || [];
+      const productosStockBajo = Array.isArray(stockBajoData) ? stockBajoData.length : 0;
 
       // Obtener total de productos
       const productosResponse = await apiService.get('/productos?limit=1');
-      const totalProductos = productosResponse.data?.pagination?.total || 0;
+      const totalProductos = productosResponse?.pagination?.total || 0;
 
       // Calcular ventas del día
       const hoy = new Date();
@@ -37,7 +37,8 @@ class DashboardService {
       const hoyStr = hoy.toISOString().split('T')[0];
       
       const ventasHoyResponse = await apiService.get(`/ventas/estadisticas?fecha_inicio=${hoyStr}&fecha_fin=${hoyStr}`);
-      const ventasDelDia = ventasHoyResponse.data?.data?.total_monto || 0;
+      const ventasHoyData = ventasHoyResponse?.data || ventasHoyResponse || {};
+      const ventasDelDia = ventasHoyData?.total_monto || 0;
 
       // Calcular ventas del mes
       const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -45,7 +46,8 @@ class DashboardService {
       const finMesStr = hoy.toISOString().split('T')[0];
       
       const ventasMesResponse = await apiService.get(`/ventas/estadisticas?fecha_inicio=${inicioMesStr}&fecha_fin=${finMesStr}`);
-      const ventasDelMes = ventasMesResponse.data?.data?.total_ventas || 0;
+      const ventasMesData = ventasMesResponse?.data || ventasMesResponse || {};
+      const ventasDelMes = ventasMesData?.total_ventas || 0;
 
       // Calcular crecimiento (simplificado - comparar con mes anterior)
       const inicioMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
@@ -54,7 +56,8 @@ class DashboardService {
       const finMesAnteriorStr = finMesAnterior.toISOString().split('T')[0];
       
       const ventasMesAnteriorResponse = await apiService.get(`/ventas/estadisticas?fecha_inicio=${inicioMesAnteriorStr}&fecha_fin=${finMesAnteriorStr}`);
-      const ventasMesAnterior = ventasMesAnteriorResponse.data?.data?.total_ventas || 0;
+      const ventasMesAnteriorData = ventasMesAnteriorResponse?.data || ventasMesAnteriorResponse || {};
+      const ventasMesAnterior = ventasMesAnteriorData?.total_ventas || 0;
       
       const crecimiento = ventasMesAnterior > 0 
         ? ((ventasDelMes - ventasMesAnterior) / ventasMesAnterior) * 100 

@@ -55,6 +55,14 @@ export default function HomePage() {
   const handleGoogleLogin = async () => {
     setOauthLoading('google')
     try {
+      // Verificar que el client_id esté configurado
+      const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+      if (!googleClientId) {
+        toast.error('Google Sign-In no está configurado. Contacta al administrador.')
+        setOauthLoading(null)
+        return
+      }
+
       // Usar Google Identity Services para obtener credenciales
       const google = (window as any).google
       if (!google) {
@@ -64,7 +72,7 @@ export default function HomePage() {
       }
 
       google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        client_id: googleClientId,
         callback: async (response: any) => {
           try {
             // Decodificar el JWT de Google para obtener información del usuario
