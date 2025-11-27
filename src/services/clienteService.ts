@@ -25,6 +25,7 @@ export interface CreateClienteData {
   email?: string;
   contacto?: string;
   tipo_cliente?: 'NATURAL' | 'JURIDICA';
+  activo?: boolean;
 }
 
 export interface UpdateClienteData extends Partial<CreateClienteData> {}
@@ -44,8 +45,14 @@ class ClienteService {
     page?: number;
     limit?: number;
     search?: string;
+    includeInactivos?: boolean;
   }): Promise<ClientesResponse> {
-    const response = await apiService.get('/clientes', { params });
+    const response = await apiService.get('/clientes', { 
+      params: {
+        ...params,
+        includeInactivos: params?.includeInactivos ? 'true' : undefined
+      }
+    });
     return response.data as ClientesResponse;
   }
 

@@ -3,12 +3,13 @@
 import { useMemo, useState, ChangeEvent, FormEvent } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Sparkles, Users, Plus, Phone, Mail, Building2, MapPin, X } from 'lucide-react'
+import { Sparkles, Users, Plus, Phone, Mail, Building2, MapPin, X, Eye, EyeOff } from 'lucide-react'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Layout from '@/components/layout/Layout'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import TableWrapper from '@/components/ui/TableWrapper'
 import { clienteService, Cliente, CreateClienteData } from '@/services/clienteService'
+import { useAuthStore } from '@/store/authStore'
 
 const initialFormState: CreateClienteData = {
   nombre: '',
@@ -18,7 +19,8 @@ const initialFormState: CreateClienteData = {
   telefono: '',
   email: '',
   contacto: '',
-  tipo_cliente: 'NATURAL'
+  tipo_cliente: 'NATURAL',
+  activo: false // Los nuevos clientes se crean como inactivos
 }
 
 const tipoClienteOptions = [
@@ -45,7 +47,10 @@ export default function ClientesPage() {
 
 function ClientesContent() {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
+  const esAdministrador = user?.rol === 'ADMINISTRADOR'
   const [searchTerm, setSearchTerm] = useState('')
+  const [mostrarInactivos, setMostrarInactivos] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<CreateClienteData>(initialFormState)
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null)
@@ -112,11 +117,12 @@ function ClientesContent() {
   }
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['clientes', searchTerm],
+    queryKey: ['clientes', searchTerm, mostrarInactivos],
     queryFn: () =>
       clienteService.getClientes({
         limit: 200,
-        search: searchTerm.trim() || undefined
+        search: searchTerm.trim() || undefined,
+        includeInactivos: esAdministrador && mostrarInactivos
       })
   })
 
@@ -125,8 +131,9 @@ function ClientesContent() {
   const resumenEstado = useMemo(() => {
     const total = clientes.length
     const activos = clientes.filter((cliente) => cliente.activo).length
+    const inactivos = clientes.filter((cliente) => !cliente.activo).length
     const juridicos = clientes.filter((cliente) => cliente.tipo_cliente === 'JURIDICA').length
-    return { total, activos, juridicos }
+    return { total, activos, inactivos, juridicos }
   }, [clientes])
 
   const handleInputChange = (field: keyof CreateClienteData) => (
@@ -153,7 +160,8 @@ function ClientesContent() {
       telefono: cliente.telefono ?? '',
       email: cliente.email ?? '',
       contacto: cliente.contacto ?? '',
-      tipo_cliente: cliente.tipo_cliente
+      tipo_cliente: cliente.tipo_cliente,
+      activo: cliente.activo ?? true
     })
     setValidationErrors({})
     setIsModalOpen(true)
@@ -255,6 +263,12 @@ function ClientesContent() {
                 <span>Activos</span>
                 <span className="font-semibold">{resumenEstado.activos}</span>
               </div>
+              {mostrarInactivos && resumenEstado.inactivos > 0 && (
+                <div className="flex items-center justify-between rounded-2xl bg-white/10 p-3">
+                  <span>Inactivos</span>
+                  <span className="font-semibold">{resumenEstado.inactivos}</span>
+                </div>
+              )}
               <div className="flex items-center justify-between rounded-2xl bg-white/10 p-3">
                 <span>Personas jurídicas</span>
                 <span className="font-semibold">{resumenEstado.juridicos}</span>
@@ -290,8 +304,22 @@ function ClientesContent() {
           </div>
           <div className="card p-5 text-sm text-slate-600">
             <p className="font-medium text-slate-800">Acciones rápidas</p>
-            <div className="mt-3 text-slate-500">
-              <p>Usa el botón "Nuevo cliente" en la parte superior para agregar un nuevo cliente al sistema.</p>
+            <div className="mt-3 space-y-2">
+              <p className="text-slate-500">Usa el botón "Nuevo cliente" en la parte superior para agregar un nuevo cliente al sistema.</p>
+              {esAdministrador && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={mostrarInactivos}
+                    onChange={(e) => setMostrarInactivos(e.target.checked)}
+                    className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                    {mostrarInactivos ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                    Mostrar clientes inactivos
+                  </span>
+                </label>
+              )}
             </div>
           </div>
         </div>
@@ -339,14 +367,25 @@ function ClientesContent() {
                     </tr>
                   ) : (
                     filteredClientes.map((cliente) => (
-                      <tr key={cliente.id} className="transition hover:bg-slate-50">
+                      <tr key={cliente.id} className={`transition hover:bg-slate-50 ${!cliente.activo ? 'opacity-60 bg-slate-50' : ''}`}>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 text-sm font-semibold text-white shadow-sm">
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-semibold text-white shadow-sm ${
+                              !cliente.activo 
+                                ? 'bg-gradient-to-br from-slate-400 to-slate-500' 
+                                : 'bg-gradient-to-br from-emerald-500 to-sky-500'
+                            }`}>
                               {cliente.nombre.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-slate-900">{cliente.nombre}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold text-slate-900">{cliente.nombre}</p>
+                                {!cliente.activo && (
+                                  <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                                    Inactivo
+                                  </span>
+                                )}
+                              </div>
                               {cliente.email && (
                                 <p className="text-xs text-slate-500">{cliente.email}</p>
                               )}
@@ -551,6 +590,23 @@ function ClientesContent() {
                     className="input-field"
                   />
                 </div>
+
+                {editingCliente && esAdministrador && (
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={formData.activo ?? true}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, activo: e.target.checked }))}
+                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span className="text-sm font-medium text-slate-700">Cliente activo</span>
+                    </label>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Los clientes inactivos no pueden acceder al portal web
+                    </p>
+                  </div>
+                )}
               </div>
 
               </form>

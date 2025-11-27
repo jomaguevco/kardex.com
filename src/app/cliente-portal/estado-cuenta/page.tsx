@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
 import clientePortalService from '@/services/clientePortalService'
-import { TrendingUp, Loader2, Package, ShoppingBag, DollarSign, FileDown, CreditCard, X, Copy, Check, Smartphone, Building } from 'lucide-react'
+import { TrendingUp, Loader2, Package, ShoppingBag, DollarSign, FileDown, CreditCard, X, Copy, Check, Smartphone, Building, MessageCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function EstadoCuentaPage() {
@@ -401,4 +401,3 @@ export default function EstadoCuentaPage() {
     </div>
   )
 }
-

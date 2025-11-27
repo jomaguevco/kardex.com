@@ -42,6 +42,17 @@ export default function FacturasPage() {
       
       const blob = await clientePortalService.descargarFacturaPDF(factura.id)
       
+      // Verificar que el blob sea válido y no esté vacío
+      if (!blob || blob.size === 0) {
+        toast.error('El PDF recibido está vacío')
+        return
+      }
+      
+      // Verificar que sea un PDF válido
+      if (blob.type && !blob.type.includes('pdf') && !blob.type.includes('application/octet-stream')) {
+        console.warn('Tipo de archivo inesperado:', blob.type)
+      }
+      
       // Crear URL del blob y descargar
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
@@ -55,7 +66,8 @@ export default function FacturasPage() {
       toast.success('Factura descargada correctamente')
     } catch (error: any) {
       console.error('Error al descargar factura:', error)
-      toast.error('Error al descargar la factura')
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al descargar la factura'
+      toast.error(errorMessage)
     } finally {
       setDescargando(null)
     }

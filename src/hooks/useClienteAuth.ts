@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
+import clientePortalService from '@/services/clientePortalService'
+import toast from 'react-hot-toast'
 
 /**
  * Hook personalizado para manejar autenticación de cliente
@@ -40,7 +42,22 @@ export function useClienteAuth() {
         const currentUser = currentState?.user || (userStr ? JSON.parse(userStr) : null)
         
         if (hasAuth && currentUser && currentUser.rol === 'CLIENTE') {
-          setIsAuthorized(true)
+          // Verificar que el cliente esté activo
+          try {
+            const estadoResponse = await clientePortalService.verificarClienteActivo()
+            if (estadoResponse.success && estadoResponse.data.activo) {
+              setIsAuthorized(true)
+            } else {
+              // Cliente inactivo
+              setIsAuthorized(false)
+              toast.error('Tu cuenta está inactiva. Contacta al administrador para más información.')
+              router.push('/')
+            }
+          } catch (error: any) {
+            console.error('Error al verificar estado del cliente:', error)
+            // Si hay error, permitir acceso pero registrar el error
+            setIsAuthorized(true)
+          }
         } else {
           setIsAuthorized(false)
           router.push('/')

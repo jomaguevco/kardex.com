@@ -103,7 +103,9 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
       const nuevaCantidad = (detalleExistente.cantidad || 1) + cantidadIncremental
       const precio = detalleExistente.precio_unitario || productoAAgregar.precio_compra || productoAAgregar.precio_venta
       const descuento = detalleExistente.descuento || 0
-      const nuevoSubtotal = (nuevaCantidad * precio) - descuento
+      // Lógica del backend: precio_real = precio_unitario - descuento, subtotal = precio_real * cantidad
+      const precioReal = Math.max(0, precio - descuento)
+      const nuevoSubtotal = precioReal * nuevaCantidad
       
       setValue(`detalles.${productoExistenteIndex}.cantidad`, nuevaCantidad)
       setValue(`detalles.${productoExistenteIndex}.subtotal`, nuevoSubtotal)
@@ -140,10 +142,12 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
     const descuentoDetalle = campo === 'descuento' ? Math.max(0, valorNum || 0) : (Number(detalle.descuento) || 0)
     
     // Calcular subtotal asegurándonos de que todos los valores sean números válidos
+    // Lógica del backend: precio_real = precio_unitario - descuento, subtotal = precio_real * cantidad
     const cantidadValida = Number(cantidad) || 0
     const precioValido = Number(precio) || 0
     const descuentoValido = Number(descuentoDetalle) || 0
-    const subtotal = Math.max(0, (cantidadValida * precioValido) - descuentoValido)
+    const precioReal = Math.max(0, precioValido - descuentoValido)
+    const subtotal = precioReal * cantidadValida
 
     if (campo === 'cantidad') {
       setValue(`detalles.${index}.cantidad`, cantidadValida)
@@ -188,7 +192,8 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
           producto_id: detalle.producto_id,
           cantidad: detalle.cantidad,
           precio_unitario: detalle.precio_unitario,
-          descuento: detalle.descuento
+          descuento: detalle.descuento || 0,
+          subtotal: detalle.subtotal
         }))
       })
 

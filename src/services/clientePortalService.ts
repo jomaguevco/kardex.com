@@ -93,14 +93,35 @@ class ClientePortalService {
   }
 
   /**
+   * Verificar si el cliente está activo por DNI
+   */
+  async verificarClienteActivo(): Promise<{ success: boolean; data: { activo: boolean; cliente_id: number; nombre: string } }> {
+    return await apiService.get('/cliente-portal/verificar-activo');
+  }
+
+  /**
    * Descargar PDF de factura
    */
   async descargarFacturaPDF(ventaId: number): Promise<Blob> {
     const response = await apiService.get(`/ventas/${ventaId}/pdf`, {
       responseType: 'blob'
     });
-    // response es el objeto axios completo, los datos están en response.data
-    return response.data as Blob;
+    
+    // Cuando responseType es 'blob', axios retorna response.data como Blob
+    // apiService.get retorna response completo cuando es blob, así que necesitamos response.data
+    if (!response || !(response as any).data) {
+      throw new Error('No se recibió un PDF válido del servidor');
+    }
+    
+    // Crear un blob explícitamente para asegurar que sea válido
+    const blob = new Blob([(response as any).data], { type: 'application/pdf' });
+    
+    // Verificar que el blob no esté vacío
+    if (blob.size === 0) {
+      throw new Error('El PDF recibido está vacío');
+    }
+    
+    return blob;
   }
 }
 
