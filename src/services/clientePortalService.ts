@@ -103,23 +103,45 @@ class ClientePortalService {
    * Descargar PDF de factura
    */
   async descargarFacturaPDF(ventaId: number): Promise<Blob> {
-    const response = await apiService.get(`/ventas/${ventaId}/pdf`, {
-      responseType: 'blob'
+    // Importar axios dinámicamente
+    const axios = (await import('axios')).default;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+    
+    const response = await axios.get(`${apiUrl}/ventas/${ventaId}/pdf`, {
+      responseType: 'blob',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      timeout: 30000
     });
     
-    // Cuando responseType es 'blob', axios retorna response.data como Blob
-    // apiService.get retorna response completo cuando es blob, así que necesitamos response.data
-    if (!response || !(response as any).data) {
+    // Verificar que la respuesta sea un blob válido
+    if (!response || !response.data) {
       throw new Error('No se recibió un PDF válido del servidor');
     }
     
-    // Crear un blob explícitamente para asegurar que sea válido
-    const blob = new Blob([(response as any).data], { type: 'application/pdf' });
-    
     // Verificar que el blob no esté vacío
-    if (blob.size === 0) {
+    if (response.data.size === 0) {
       throw new Error('El PDF recibido está vacío');
     }
+    
+    // Verificar que sea un PDF válido leyendo los primeros bytes
+    const firstBytes = await response.data.slice(0, 4).arrayBuffer();
+    const uint8Array = new Uint8Array(firstBytes);
+    const header = String.fromCharCode(...uint8Array);
+    
+    if (header !== '%PDF') {
+      // Si no es un PDF válido, puede ser un JSON con error
+      const text = await response.data.text();
+      try {
+        const errorData = JSON.parse(text);
+        throw new Error(errorData.message || 'Error al generar el PDF');
+      } catch {
+        throw new Error('El archivo recibido no es un PDF válido');
+      }
+    }
+    
+    // Crear un blob explícitamente para asegurar que sea válido
+    const blob = new Blob([response.data], { type: 'application/pdf' });
     
     return blob;
   }

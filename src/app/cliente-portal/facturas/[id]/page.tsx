@@ -70,8 +70,28 @@ export default function DetalleFacturaPage() {
     }
   }
 
-  const handleDescargarPDF = () => {
-    toast.success('Descarga de PDF próximamente disponible')
+  const handleDescargarPDF = async () => {
+    if (!factura) return
+    
+    try {
+      const blob = await clientePortalService.descargarFacturaPDF(factura.id)
+      
+      // Crear URL del blob y descargar
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `factura-${factura.numero_factura}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('Factura descargada correctamente')
+    } catch (error: any) {
+      console.error('Error al descargar factura:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al descargar la factura'
+      toast.error(errorMessage)
+    }
   }
 
   if (isLoading) {
