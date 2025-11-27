@@ -93,8 +93,14 @@ export default function PedidosPage() {
   }, [isAuthorized])
 
   const getEstadoBadge = (pedido: Pedido) => {
-    // Si tiene fecha_envio, mostrar como EN_CAMINO para el cliente
-    const estadoParaCliente = pedido.fecha_envio ? 'EN_CAMINO' : pedido.estado
+    // Determinar el estado para mostrar al cliente
+    // ENTREGADO siempre tiene prioridad sobre fecha_envio
+    let estadoParaCliente = pedido.estado
+    
+    // Solo mostrar como EN_CAMINO si tiene fecha_envio Y NO está entregado
+    if (pedido.fecha_envio && pedido.estado !== 'ENTREGADO') {
+      estadoParaCliente = 'EN_CAMINO'
+    }
 
     const badges: Record<string, string> = {
       PENDIENTE: 'bg-yellow-100 text-yellow-800',
@@ -111,7 +117,12 @@ export default function PedidosPage() {
   }
 
   const getEstadoLabel = (pedido: Pedido) => {
-    // Si tiene fecha_envio, mostrar como EN_CAMINO para el cliente
+    // ENTREGADO siempre tiene prioridad
+    if (pedido.estado === 'ENTREGADO') {
+      return 'Entregado'
+    }
+    
+    // Si tiene fecha_envio pero no está entregado, mostrar como EN_CAMINO
     if (pedido.fecha_envio) {
       return 'En camino'
     }

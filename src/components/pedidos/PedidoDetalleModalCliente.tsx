@@ -211,16 +211,35 @@ export default function PedidoDetalleModalCliente({
 
             {/* Información de envío (si existe) */}
             {pedido.fecha_envio && (
-              <div className="glass-card rounded-xl border border-blue-200 bg-blue-50 p-4">
+              <div className={`glass-card rounded-xl border p-4 ${
+                pedido.estado === 'ENTREGADO' 
+                  ? 'border-green-200 bg-green-50' 
+                  : 'border-blue-200 bg-blue-50'
+              }`}>
                 <div className="flex items-start space-x-3">
-                  <Truck className="mt-1 h-5 w-5 text-blue-600" />
+                  {pedido.estado === 'ENTREGADO' ? (
+                    <CheckCircle className="mt-1 h-5 w-5 text-green-600" />
+                  ) : (
+                    <Truck className="mt-1 h-5 w-5 text-blue-600" />
+                  )}
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-blue-900">Pedido en camino</h3>
-                    <p className="mt-1 text-sm text-blue-700">
-                      Tu pedido fue enviado el {format(new Date(pedido.fecha_envio), "dd 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                    <h3 className={`text-sm font-semibold ${
+                      pedido.estado === 'ENTREGADO' ? 'text-green-900' : 'text-blue-900'
+                    }`}>
+                      {pedido.estado === 'ENTREGADO' ? '¡Pedido entregado!' : 'Pedido en camino'}
+                    </h3>
+                    <p className={`mt-1 text-sm ${
+                      pedido.estado === 'ENTREGADO' ? 'text-green-700' : 'text-blue-700'
+                    }`}>
+                      {pedido.estado === 'ENTREGADO' 
+                        ? `Tu pedido fue entregado. Enviado el ${format(new Date(pedido.fecha_envio), "dd 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}`
+                        : `Tu pedido fue enviado el ${format(new Date(pedido.fecha_envio), "dd 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}`
+                      }
                     </p>
                     {pedido.venta?.numero_factura && (
-                      <p className="mt-1 text-xs text-blue-600">
+                      <p className={`mt-1 text-xs ${
+                        pedido.estado === 'ENTREGADO' ? 'text-green-600' : 'text-blue-600'
+                      }`}>
                         Factura: {pedido.venta.numero_factura}
                       </p>
                     )}
