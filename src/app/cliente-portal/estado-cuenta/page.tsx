@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
 import clientePortalService from '@/services/clientePortalService'
-import { TrendingUp, Loader2, Package, ShoppingBag, DollarSign, FileDown, CreditCard, X, Copy, Check, Smartphone, Building, MessageCircle } from 'lucide-react'
+import { TrendingUp, Loader2, Package, ShoppingBag, DollarSign, FileDown, CreditCard, X, Copy, Check, Smartphone, Building } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function EstadoCuentaPage() {
@@ -297,9 +297,15 @@ export default function EstadoCuentaPage() {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Yape */}
                   <div className="border border-purple-200 rounded-xl p-4 text-center">
-                    <div className="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-2">
-                      <span className="text-2xl font-bold text-purple-600">Y</span>
-                    </div>
+                    {configPagos?.yape?.qr_url && (
+                      <div className="w-32 h-32 mx-auto mb-3 bg-white rounded-lg p-2 border border-purple-200">
+                        <img 
+                          src={configPagos.yape.qr_url} 
+                          alt="QR Yape" 
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
                     <p className="font-semibold text-slate-900 dark:text-white">Yape</p>
                     <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
                       {configPagos?.yape?.numero || '999888777'}
@@ -314,9 +320,15 @@ export default function EstadoCuentaPage() {
                   </div>
                   {/* Plin */}
                   <div className="border border-teal-200 rounded-xl p-4 text-center">
-                    <div className="w-16 h-16 mx-auto bg-teal-100 rounded-full flex items-center justify-center mb-2">
-                      <span className="text-2xl font-bold text-teal-600">P</span>
-                    </div>
+                    {configPagos?.plin?.qr_url && (
+                      <div className="w-32 h-32 mx-auto mb-3 bg-white rounded-lg p-2 border border-teal-200">
+                        <img 
+                          src={configPagos.plin.qr_url} 
+                          alt="QR Plin" 
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
                     <p className="font-semibold text-slate-900 dark:text-white">Plin</p>
                     <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
                       {configPagos?.plin?.numero || '999888777'}
@@ -340,8 +352,7 @@ export default function EstadoCuentaPage() {
                 </h3>
                 <div className="space-y-3">
                   {(configPagos?.cuentas_bancarias || [
-                    { banco: 'BCP', tipo: 'Cuenta Corriente', numero: '191-2345678-0-12', cci: '00219100234567801234', titular: 'KARDEX S.A.C.' },
-                    { banco: 'Interbank', tipo: 'Cuenta Corriente', numero: '200-3001234567', cci: '00320000301234567812', titular: 'KARDEX S.A.C.' }
+                    { banco: 'BCP', tipo: 'Cuenta Corriente', numero: '30572053360058', cci: '00230572053360058', titular: 'KARDEX S.A.C.' }
                   ]).map((cuenta: any, index: number) => (
                     <div key={index} className="border border-slate-200 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-2">
