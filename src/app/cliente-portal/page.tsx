@@ -253,7 +253,7 @@ export default function ClientePortalPage() {
             <div>
               <p className="text-sm font-medium text-slate-600">Total Compras</p>
               <p className="mt-2 text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                {dashboard?.resumen?.total_compras || 0}
+                {dashboard?.totalCompras || 0}
               </p>
               <p className="mt-1 text-xs text-emerald-600 flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
@@ -271,7 +271,7 @@ export default function ClientePortalPage() {
             <div>
               <p className="text-sm font-medium text-slate-600">Total Gastado</p>
               <p className="mt-2 text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                S/ {Number(dashboard?.resumen?.total_gastado || 0).toFixed(0)}
+                S/ {Number(dashboard?.totalGastado || 0).toFixed(0)}
               </p>
               <p className="mt-1 text-xs text-emerald-600 flex items-center">
                 <Zap className="h-3 w-3 mr-1" />
@@ -289,7 +289,7 @@ export default function ClientePortalPage() {
             <div>
               <p className="text-sm font-medium text-slate-600">Productos Únicos</p>
               <p className="mt-2 text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {dashboard?.productos_mas_comprados?.length || 0}
+                {dashboard?.productosMasComprados?.length || 0}
               </p>
               <p className="mt-1 text-xs text-purple-600 flex items-center">
                 <Package className="h-3 w-3 mr-1" />
@@ -487,14 +487,14 @@ export default function ClientePortalPage() {
       </div>
 
       {/* Tus productos favoritos */}
-      {dashboard?.productos_mas_comprados && dashboard.productos_mas_comprados.length > 0 && (
+      {dashboard?.productosMasComprados && dashboard.productosMasComprados.length > 0 && (
         <div className="glass-card rounded-3xl p-8">
           <h2 className="mb-6 text-2xl font-bold text-slate-900 flex items-center">
             <Heart className="mr-2 h-6 w-6 text-red-500" />
             Tus Productos Favoritos
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {dashboard.productos_mas_comprados.slice(0, 4).map((item: any, index: number) => (
+            {dashboard.productosMasComprados.slice(0, 4).map((item: any, index: number) => (
               <div
                 key={item.producto_id}
                 className="group flex items-center space-x-4 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100 p-4 transition hover:from-primary-50 hover:to-indigo-50 hover:shadow-lg"
