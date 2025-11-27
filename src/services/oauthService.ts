@@ -24,7 +24,8 @@ export const oauthService = {
   // Verificar qué proveedores están habilitados
   getStatus: async (): Promise<{ providers: OAuthStatus }> => {
     const response = await api.get('/oauth/status');
-    return response.data;
+    // api.get() ya devuelve response.data de axios
+    return response;
   },
 
   // Login con token OAuth (para Google Sign-In del lado del cliente)
@@ -37,7 +38,8 @@ export const oauthService = {
     oauth_id: string;
   }): Promise<OAuthLoginResponse> => {
     const response = await api.post('/oauth/token', data);
-    return response.data;
+    // api.post() ya devuelve response.data de axios
+    return response;
   },
 
   // Vincular cuenta OAuth a usuario existente
@@ -48,13 +50,13 @@ export const oauthService = {
     foto_perfil?: string;
   }): Promise<{ success: boolean; message: string }> => {
     const response = await api.post('/oauth/link', data);
-    return response.data;
+    return response;
   },
 
   // Desvincular cuenta OAuth
   unlinkAccount: async (): Promise<{ success: boolean; message: string }> => {
     const response = await api.delete('/oauth/unlink');
-    return response.data;
+    return response;
   },
 
   // URL para iniciar autenticación OAuth del lado del servidor
