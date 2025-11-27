@@ -6,6 +6,7 @@ export interface DashboardStats {
   totalProductos: number;
   productosStockBajo: number;
   ventasDelDia: number;
+  transaccionesDelDia: number;
   ventasDelMes: number;
   crecimiento: number;
 }
@@ -39,6 +40,7 @@ class DashboardService {
       const ventasHoyResponse = await apiService.get(`/ventas/estadisticas?fecha_inicio=${hoyStr}&fecha_fin=${hoyStr}`);
       const ventasHoyData = ventasHoyResponse?.data || ventasHoyResponse || {};
       const ventasDelDia = ventasHoyData?.total_monto || 0;
+      const transaccionesDelDia = ventasHoyData?.total_ventas || 0;
 
       // Calcular ventas del mes
       const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -69,6 +71,7 @@ class DashboardService {
         totalProductos,
         productosStockBajo,
         ventasDelDia,
+        transaccionesDelDia,
         ventasDelMes,
         crecimiento
       };
@@ -81,6 +84,7 @@ class DashboardService {
         totalProductos: 0,
         productosStockBajo: 0,
         ventasDelDia: 0,
+        transaccionesDelDia: 0,
         ventasDelMes: 0,
         crecimiento: 0
       };

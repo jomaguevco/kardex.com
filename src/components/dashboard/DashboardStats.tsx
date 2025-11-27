@@ -74,13 +74,13 @@ export default function DashboardStats() {
     {
       title: 'Ventas del Día',
       value: `$${Number(statsData?.ventasDelDia || 0).toFixed(2)}`,
-      change: statsData?.crecimiento ? `${statsData.crecimiento > 0 ? '+' : ''}${statsData.crecimiento.toFixed(1)}% vs mes anterior` : undefined,
-      changeType: (statsData?.crecimiento || 0) > 0 ? 'positive' : (statsData?.crecimiento || 0) < 0 ? 'negative' : 'neutral' as const,
+      change: statsData?.transaccionesDelDia ? `${statsData.transaccionesDelDia} transacciones hoy` : 'Sin ventas hoy',
+      changeType: (statsData?.transaccionesDelDia || 0) > 0 ? 'positive' : 'neutral' as const,
       icon: DollarSign,
       color: 'bg-green-500'
     },
     {
-      title: 'Ventas Totales',
+      title: 'Ventas del Mes',
       value: statsData?.ventasDelMes?.toString() || '0',
       change: statsData?.crecimiento ? `${statsData.crecimiento > 0 ? '+' : ''}${statsData.crecimiento.toFixed(1)}% vs mes anterior` : undefined,
       changeType: (statsData?.crecimiento || 0) > 0 ? 'positive' : (statsData?.crecimiento || 0) < 0 ? 'negative' : 'neutral' as const,

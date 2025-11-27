@@ -12,6 +12,7 @@ import ProductosFilters from '@/components/productos/ProductosFilters'
 import ProductosTable from '@/components/productos/ProductosTable'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import BarcodeCameraScanner from '@/components/ui/BarcodeCameraScanner'
+import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal'
 import { productoService, CreateProductoData } from '@/services/productoService'
 import { Producto, ProductoFilters } from '@/types'
 
@@ -73,6 +74,9 @@ function ProductosContent() {
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<Producto | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFiltersChange = (nextFilters: ProductoFilters) => {
@@ -315,21 +319,27 @@ function ProductosContent() {
     }
   }
 
-  const handleDeleteProduct = async (producto: Producto) => {
-    const confirmDelete = window.confirm(
-      `¿Deseas eliminar el producto "${producto.nombre}"?`
-    )
+  const handleDeleteClick = (producto: Producto) => {
+    setProductToDelete(producto)
+    setIsDeleteModalOpen(true)
+  }
 
-    if (!confirmDelete) return
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete) return
 
+    setIsDeleting(true)
     try {
-      await productoService.deleteProducto(producto.id)
+      await productoService.deleteProducto(productToDelete.id)
       toast.success('Producto eliminado correctamente')
       await queryClient.invalidateQueries({ queryKey: ['productos'] })
+      setIsDeleteModalOpen(false)
+      setProductToDelete(null)
     } catch (error: any) {
       const message =
         error?.response?.data?.message || error?.message || 'No se pudo eliminar el producto'
       toast.error(message)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -442,7 +452,7 @@ function ProductosContent() {
             onFiltersChange={handleFiltersChange}
             onView={openViewModal}
             onEdit={openEditModal}
-            onDelete={handleDeleteProduct}
+            onDelete={handleDeleteClick}
           />
         </div>
       </div>
@@ -847,6 +857,20 @@ function ProductosContent() {
           onClose={() => setIsScannerOpen(false)}
         />
       )}
+
+      {/* Modal de confirmación de eliminación */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setProductToDelete(null)
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Eliminar producto"
+        message="¿Estás seguro de que deseas eliminar este producto? Esta acción eliminará también todo el historial de movimientos asociado."
+        itemName={productToDelete?.nombre}
+        isLoading={isDeleting}
+      />
     </div>
   )
 }

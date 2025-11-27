@@ -54,6 +54,62 @@ function ClientesContent() {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [clienteToDelete, setClienteToDelete] = useState<Cliente | null>(null)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+
+  // Funciones de validación
+  const validateEmail = (email: string): boolean => {
+    if (!email) return true // Email es opcional
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const validateTelefono = (telefono: string): boolean => {
+    if (!telefono) return true // Teléfono es opcional
+    // Acepta números de 9 dígitos (Perú) o formato internacional
+    const telefonoRegex = /^(\+?51)?[0-9]{9}$/
+    return telefonoRegex.test(telefono.replace(/\s/g, ''))
+  }
+
+  const validateDocumento = (numero: string, tipo: string): boolean => {
+    if (!numero) return false
+    const cleaned = numero.replace(/\s/g, '')
+    if (tipo === 'DNI') return /^[0-9]{8}$/.test(cleaned)
+    if (tipo === 'RUC') return /^[0-9]{11}$/.test(cleaned)
+    if (tipo === 'CE') return /^[A-Z0-9]{9,12}$/i.test(cleaned)
+    if (tipo === 'PASAPORTE') return /^[A-Z0-9]{6,12}$/i.test(cleaned)
+    return true
+  }
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {}
+    
+    if (!formData.nombre.trim()) {
+      errors.nombre = 'El nombre es requerido'
+    }
+    
+    if (!formData.numero_documento.trim()) {
+      errors.numero_documento = 'El número de documento es requerido'
+    } else if (!validateDocumento(formData.numero_documento, formData.tipo_documento)) {
+      if (formData.tipo_documento === 'DNI') {
+        errors.numero_documento = 'El DNI debe tener 8 dígitos'
+      } else if (formData.tipo_documento === 'RUC') {
+        errors.numero_documento = 'El RUC debe tener 11 dígitos'
+      } else {
+        errors.numero_documento = 'Formato de documento inválido'
+      }
+    }
+    
+    if (formData.email && !validateEmail(formData.email)) {
+      errors.email = 'El formato del email no es válido'
+    }
+    
+    if (formData.telefono && !validateTelefono(formData.telefono)) {
+      errors.telefono = 'El teléfono debe tener 9 dígitos'
+    }
+    
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['clientes', searchTerm],
@@ -83,6 +139,7 @@ function ClientesContent() {
   const handleCreateCliente = () => {
     setEditingCliente(null)
     setFormData(initialFormState)
+    setValidationErrors({})
     setIsModalOpen(true)
   }
 
@@ -98,6 +155,7 @@ function ClientesContent() {
       contacto: cliente.contacto ?? '',
       tipo_cliente: cliente.tipo_cliente
     })
+    setValidationErrors({})
     setIsModalOpen(true)
   }
 
@@ -128,8 +186,8 @@ function ClientesContent() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!formData.nombre.trim() || !formData.numero_documento.trim()) {
-      toast.error('Completa nombre y número de documento')
+    if (!validateForm()) {
+      toast.error('Por favor corrige los errores del formulario')
       return
     }
 
@@ -412,10 +470,17 @@ function ClientesContent() {
                   <input
                     type="text"
                     value={formData.numero_documento}
-                    onChange={handleInputChange('numero_documento')}
-                    className="input-field"
+                    onChange={(e) => {
+                      handleInputChange('numero_documento')(e)
+                      setValidationErrors(prev => ({ ...prev, numero_documento: '' }))
+                    }}
+                    className={`input-field ${validationErrors.numero_documento ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                     required
+                    placeholder={formData.tipo_documento === 'DNI' ? '8 dígitos' : formData.tipo_documento === 'RUC' ? '11 dígitos' : ''}
                   />
+                  {validationErrors.numero_documento && (
+                    <p className="mt-1 text-xs text-red-600">{validationErrors.numero_documento}</p>
+                  )}
                 </div>
 
                 <div>
@@ -438,9 +503,16 @@ function ClientesContent() {
                   <input
                     type="text"
                     value={formData.telefono}
-                    onChange={handleInputChange('telefono')}
-                    className="input-field"
+                    onChange={(e) => {
+                      handleInputChange('telefono')(e)
+                      setValidationErrors(prev => ({ ...prev, telefono: '' }))
+                    }}
+                    className={`input-field ${validationErrors.telefono ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+                    placeholder="9 dígitos"
                   />
+                  {validationErrors.telefono && (
+                    <p className="mt-1 text-xs text-red-600">{validationErrors.telefono}</p>
+                  )}
                 </div>
 
                 <div>
@@ -448,9 +520,16 @@ function ClientesContent() {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={handleInputChange('email')}
-                    className="input-field"
+                    onChange={(e) => {
+                      handleInputChange('email')(e)
+                      setValidationErrors(prev => ({ ...prev, email: '' }))
+                    }}
+                    className={`input-field ${validationErrors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+                    placeholder="ejemplo@correo.com"
                   />
+                  {validationErrors.email && (
+                    <p className="mt-1 text-xs text-red-600">{validationErrors.email}</p>
+                  )}
                 </div>
 
                 <div className="sm:col-span-2">

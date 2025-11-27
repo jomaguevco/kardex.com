@@ -548,28 +548,40 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                   <LoadingSpinner size="sm" />
                 </div>
               ) : (
-                productosData?.productos.map((producto) => (
+                productosData?.productos.map((producto) => {
+                  const stockBajo = producto.stock_actual <= (producto.stock_minimo || 5)
+                  const sinStock = producto.stock_actual <= 0
+                  return (
                   <div
                     key={producto.id}
                     className={cn(
-                      'cursor-pointer border-b border-slate-100 p-3 transition hover:bg-slate-50 last:border-b-0',
-                      productoSeleccionado?.id === producto.id && 'bg-emerald-50'
+                      'cursor-pointer border-b border-slate-100 p-3 transition last:border-b-0',
+                      productoSeleccionado?.id === producto.id && 'bg-emerald-50',
+                      sinStock ? 'opacity-50 cursor-not-allowed bg-red-50' : 'hover:bg-slate-50'
                     )}
-                    onClick={() => setProductoSeleccionado(producto as any)}
+                    onClick={() => !sinStock && setProductoSeleccionado(producto as any)}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-slate-900">{producto.nombre}</p>
-                        <p className="text-xs text-slate-500">
-                          {producto.codigo_interno} - Stock: {producto.stock_actual}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-slate-500">{producto.codigo_interno}</p>
+                          <span className={cn(
+                            'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                            sinStock ? 'bg-red-100 text-red-700' :
+                            stockBajo ? 'bg-amber-100 text-amber-700' :
+                            'bg-emerald-100 text-emerald-700'
+                          )}>
+                            {sinStock ? 'Sin stock' : `Stock: ${producto.stock_actual}`}
+                          </span>
+                        </div>
                       </div>
                       <p className="font-semibold text-emerald-600">
                         ${Number(producto.precio_venta).toFixed(2)}
                       </p>
                     </div>
                   </div>
-                ))
+                )})
               )}
             </div>
           )}
@@ -608,7 +620,17 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 lg:items-center">
                     <div className="lg:col-span-2">
                       <p className="font-semibold text-slate-900">{producto?.nombre}</p>
-                      <p className="text-xs text-slate-500">{producto?.codigo_interno}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-slate-500">{producto?.codigo_interno}</p>
+                        <span className={cn(
+                          'text-xs font-medium',
+                          (producto?.stock_actual || 0) < (watchedDetalles[index]?.cantidad || 0) 
+                            ? 'text-red-600' 
+                            : 'text-emerald-600'
+                        )}>
+                          (Stock: {producto?.stock_actual || 0})
+                        </span>
+                      </div>
                     </div>
                     
                     <div>
@@ -617,6 +639,7 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                         type="number"
                         step="1"
                         min="1"
+                        max={producto?.stock_actual || 999}
                         value={watchedDetalles[index]?.cantidad || 1}
                         onChange={(e) => {
                           const val = parseInt(e.target.value, 10) || 1
@@ -627,8 +650,16 @@ export default function NuevaVentaForm({ onSuccess, onCancel }: NuevaVentaFormPr
                             e.preventDefault()
                           }
                         }}
-                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        className={cn(
+                          "w-full rounded-lg border bg-white px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2",
+                          (producto?.stock_actual || 0) < (watchedDetalles[index]?.cantidad || 0)
+                            ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                            : "border-slate-300 focus:border-blue-500 focus:ring-blue-500/20"
+                        )}
                       />
+                      {(producto?.stock_actual || 0) < (watchedDetalles[index]?.cantidad || 0) && (
+                        <p className="mt-1 text-xs text-red-600">⚠️ Excede stock disponible</p>
+                      )}
                     </div>
                     
                     <div>
