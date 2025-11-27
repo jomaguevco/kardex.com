@@ -121,6 +121,23 @@ export default function NotificacionesPanel({ isOpen, onClose, onUpdate }: Notif
     }
   }
 
+  const eliminarTodasLasNotificaciones = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notificaciones/eliminar-todas`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (response.ok) {
+        setNotificaciones([])
+        onUpdate?.()
+      }
+    } catch (error) {
+      console.error('Error al eliminar todas las notificaciones:', error)
+    }
+  }
+
   const getIconoTipo = (tipo: string) => {
     switch (tipo.toLowerCase()) {
       case 'pedido':
@@ -232,26 +249,35 @@ export default function NotificacionesPanel({ isOpen, onClose, onUpdate }: Notif
         </div>
 
         {/* Acciones rápidas */}
-        {noLeidas > 0 && (
-          <div className="border-b border-slate-200 bg-slate-50 p-3">
+        {notificaciones.length > 0 && (
+          <div className="border-b border-slate-200 bg-white p-3 flex items-center justify-between">
+            {noLeidas > 0 && (
+              <button
+                onClick={marcarTodasComoLeidas}
+                className="flex items-center space-x-2 text-sm font-semibold text-primary-600 transition hover:text-primary-700"
+              >
+                <Check className="h-4 w-4" />
+                <span>Marcar todas como leídas</span>
+              </button>
+            )}
             <button
-              onClick={marcarTodasComoLeidas}
-              className="flex items-center space-x-2 text-sm font-semibold text-primary-600 transition hover:text-primary-700"
+              onClick={eliminarTodasLasNotificaciones}
+              className="flex items-center space-x-2 text-sm font-semibold text-red-600 transition hover:text-red-700 ml-auto"
             >
-              <Check className="h-4 w-4" />
-              <span>Marcar todas como leídas</span>
+              <Trash2 className="h-4 w-4" />
+              <span>Eliminar todas</span>
             </button>
           </div>
         )}
 
         {/* Lista de notificaciones */}
-        <div className="h-[calc(100vh-200px)] overflow-y-auto">
+        <div className="h-[calc(100vh-200px)] overflow-y-auto bg-white">
           {isLoading ? (
-            <div className="flex h-64 items-center justify-center">
+            <div className="flex h-64 items-center justify-center bg-white">
               <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
             </div>
           ) : notificacionesFiltradas.length === 0 ? (
-            <div className="flex h-64 flex-col items-center justify-center p-8 text-center">
+            <div className="flex h-64 flex-col items-center justify-center p-8 text-center bg-white">
               <Bell className="h-16 w-16 text-slate-300" />
               <p className="mt-4 font-semibold text-slate-900">
                 {filter === 'unread' ? 'No tienes notificaciones sin leer' : 'No tienes notificaciones'}
@@ -261,12 +287,12 @@ export default function NotificacionesPanel({ isOpen, onClose, onUpdate }: Notif
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-200">
+            <div className="divide-y divide-slate-200 bg-white">
               {notificacionesFiltradas.map((notif) => (
                 <div
                   key={notif.id}
-                  className={`group relative p-4 transition hover:bg-slate-50 ${
-                    !notif.leida ? 'bg-primary-50/50' : ''
+                  className={`group relative p-4 transition bg-white ${
+                    !notif.leida ? 'bg-blue-50' : 'hover:bg-slate-50'
                   }`}
                 >
                   {/* Indicador de no leída */}
