@@ -42,4 +42,4 @@ const nextConfig = {
   // },
 }
 
-module.exports = nextConfig
+module.exports = nextConfig// Deploy Wed Nov 26 21:16:27 -05 2025
