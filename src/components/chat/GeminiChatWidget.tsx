@@ -99,9 +99,15 @@ export default function GeminiChatWidget() {
         })
       })
 
+      // Verificar si la respuesta es exitosa
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }))
+        throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`)
+      }
+
       const data = await response.json()
       
-      if (data.success) {
+      if (data.success && data.data?.message) {
         const modelMessage: Message = {
           role: 'model',
           parts: data.data.message,
@@ -109,19 +115,35 @@ export default function GeminiChatWidget() {
         }
         setMessages(prev => [...prev, modelMessage])
       } else {
-        // Mensaje de error
+        // Mensaje de error del servidor
         const errorMessage: Message = {
           role: 'model',
-          parts: '❌ Lo siento, hubo un error al procesar tu consulta. Por favor intenta de nuevo.',
+          parts: `❌ ${data.message || 'Lo siento, hubo un error al procesar tu consulta. Por favor intenta de nuevo.'}`,
           timestamp: new Date()
         }
         setMessages(prev => [...prev, errorMessage])
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en chat:', error)
+      
+      // Mensaje de error más específico
+      let errorText = '❌ No se pudo conectar con el asistente. Verifica tu conexión e intenta de nuevo.'
+      
+      if (error?.message) {
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          errorText = '❌ Error de conexión. Verifica tu internet e intenta de nuevo.'
+        } else if (error.message.includes('401') || error.message.includes('403')) {
+          errorText = '❌ Error de autenticación. Por favor recarga la página e intenta de nuevo.'
+        } else if (error.message.includes('500')) {
+          errorText = '❌ Error del servidor. Por favor intenta más tarde o contacta a soporte.'
+        } else {
+          errorText = `❌ ${error.message}`
+        }
+      }
+      
       const errorMessage: Message = {
         role: 'model',
-        parts: '❌ No se pudo conectar con el asistente. Verifica tu conexión e intenta de nuevo.',
+        parts: errorText,
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
