@@ -30,6 +30,11 @@ function KardexContent() {
   const [isConsulting, setIsConsulting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [filtros, setFiltros] = useState({ producto_id: '', fecha_inicio: '', fecha_fin: '' })
+  const [filtrosTabla, setFiltrosTabla] = useState({ 
+    tipo_movimiento: '', 
+    fecha_inicio: '', 
+    fecha_fin: '' 
+  })
 
   useEffect(() => {
     loadData()
@@ -82,6 +87,47 @@ function KardexContent() {
     const productosUnicos = new Set(movimientos.map((mov) => mov.producto_id)).size
     return { entradas, salidas, productosUnicos }
   }, [movimientos])
+
+  // Filtrar movimientos para la tabla general
+  const movimientosFiltrados = useMemo(() => {
+    return movimientos.filter((mov) => {
+      // Filtro por tipo de movimiento
+      if (filtrosTabla.tipo_movimiento) {
+        if (filtrosTabla.tipo_movimiento === 'ENTRADA' && !mov.tipo_movimiento.includes('ENTRADA')) {
+          return false
+        }
+        if (filtrosTabla.tipo_movimiento === 'SALIDA' && !mov.tipo_movimiento.includes('SALIDA')) {
+          return false
+        }
+      }
+      
+      // Filtro por fecha inicio
+      if (filtrosTabla.fecha_inicio) {
+        const fechaMov = new Date(mov.fecha_movimiento)
+        const fechaInicio = new Date(filtrosTabla.fecha_inicio)
+        fechaInicio.setHours(0, 0, 0, 0)
+        if (fechaMov < fechaInicio) {
+          return false
+        }
+      }
+      
+      // Filtro por fecha fin
+      if (filtrosTabla.fecha_fin) {
+        const fechaMov = new Date(mov.fecha_movimiento)
+        const fechaFin = new Date(filtrosTabla.fecha_fin)
+        fechaFin.setHours(23, 59, 59, 999)
+        if (fechaMov > fechaFin) {
+          return false
+        }
+      }
+      
+      return true
+    })
+  }, [movimientos, filtrosTabla])
+
+  const limpiarFiltrosTabla = () => {
+    setFiltrosTabla({ tipo_movimiento: '', fecha_inicio: '', fecha_fin: '' })
+  }
 
   return (
     <div className="space-y-10 animate-fade-in">
@@ -193,7 +239,14 @@ function KardexContent() {
           <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">Movimientos recientes</h2>
-              <p className="text-sm text-slate-500">Visualiza las últimas entradas, salidas y ajustes que afectan tu inventario.</p>
+              <p className="text-sm text-slate-500">
+                Visualiza las últimas entradas, salidas y ajustes que afectan tu inventario.
+                {movimientosFiltrados.length !== movimientos.length && (
+                  <span className="ml-2 text-indigo-600">
+                    (Mostrando {movimientosFiltrados.length} de {movimientos.length})
+                  </span>
+                )}
+              </p>
             </div>
             <button
               onClick={loadData}
@@ -202,6 +255,50 @@ function KardexContent() {
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} /> Actualizar
             </button>
           </header>
+
+          {/* Filtros para la tabla */}
+          <div className="grid gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3 sm:grid-cols-[1fr_1fr_1fr_auto]">
+            <div>
+              <label className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Filter className="h-3 w-3" /> Tipo
+              </label>
+              <select
+                value={filtrosTabla.tipo_movimiento}
+                onChange={(e) => setFiltrosTabla({ ...filtrosTabla, tipo_movimiento: e.target.value })}
+                className="input-field mt-1 text-sm"
+              >
+                <option value="">Todos los tipos</option>
+                <option value="ENTRADA">Solo entradas</option>
+                <option value="SALIDA">Solo salidas</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Desde</label>
+              <input
+                type="date"
+                value={filtrosTabla.fecha_inicio}
+                onChange={(e) => setFiltrosTabla({ ...filtrosTabla, fecha_inicio: e.target.value })}
+                className="input-field mt-1 text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hasta</label>
+              <input
+                type="date"
+                value={filtrosTabla.fecha_fin}
+                onChange={(e) => setFiltrosTabla({ ...filtrosTabla, fecha_fin: e.target.value })}
+                className="input-field mt-1 text-sm"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={limpiarFiltrosTabla}
+                className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-800"
+              >
+                Limpiar
+              </button>
+            </div>
+          </div>
 
           {error && !isLoading && (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
@@ -214,8 +311,8 @@ function KardexContent() {
               <LoadingSpinner size="lg" />
               <p className="mt-3">Cargando movimientos...</p>
             </div>
-          ) : movimientos.length === 0 ? (
-            <EmptyState message="Todavía no registraste movimientos en el inventario." />
+          ) : movimientosFiltrados.length === 0 ? (
+            <EmptyState message={movimientos.length === 0 ? "Todavía no registraste movimientos en el inventario." : "No hay movimientos que coincidan con los filtros aplicados."} />
           ) : (
             <div className="overflow-hidden rounded-2xl border border-slate-100">
               <table className="min-w-full divide-y divide-slate-200">
@@ -230,14 +327,14 @@ function KardexContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {movimientos.map((movimiento) => {
+                  {movimientosFiltrados.map((movimiento) => {
                     const { badgeClass, label } = getMovimientoBadge(movimiento.tipo_movimiento)
                     return (
                       <tr key={movimiento.id} className="hover:bg-slate-50">
                         <td className="px-6 py-4 text-sm text-slate-500">{new Date(movimiento.fecha_movimiento).toLocaleString()}</td>
                         <td className="px-6 py-4 text-sm text-slate-700">{getProductoNombre(productos, movimiento.producto_id)}</td>
                         <td className="px-6 py-4 text-sm"><span className={badgeClass}>{label}</span></td>
-                        <td className="px-6 py-4 text-right text-sm text-slate-600">{Math.round(Number(movimiento.cantidad))}</td>
+                        <td className="px-6 py-4 text-right text-sm text-slate-600">{Math.abs(Math.round(Number(movimiento.cantidad)))}</td>
                         <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">{Math.round(Number(movimiento.stock_nuevo))}</td>
                         <td className="px-6 py-4 text-sm text-slate-500">{movimiento.numero_documento || movimiento.documento_referencia}</td>
                       </tr>
@@ -295,9 +392,9 @@ function KardexProductoDetalle({ producto, data }: { producto: Producto; data: K
                 <tr key={movimiento.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 text-sm text-slate-500">{new Date(movimiento.fecha_movimiento).toLocaleString()}</td>
                   <td className="px-6 py-4 text-sm"><span className={badgeClass}>{label}</span></td>
-                  <td className="px-6 py-4 text-right text-sm text-slate-600">{Math.round(Number(movimiento.cantidad))}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-600">{Math.abs(Math.round(Number(movimiento.cantidad)))}</td>
                   <td className="px-6 py-4 text-right text-sm text-slate-600">${Number(movimiento.precio_unitario).toFixed(2)}</td>
-                  <td className="px-6 py-4 text-right text-sm text-slate-600">{Math.round(Number(movimiento.stock_anterior))}</td>
+                  <td className="px-6 py-4 text-right text-sm text-slate-600">{Math.abs(Math.round(Number(movimiento.stock_anterior)))}</td>
                   <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">{Math.round(Number(movimiento.stock_nuevo))}</td>
                   <td className="px-6 py-4 text-sm text-slate-500">{movimiento.numero_documento || movimiento.documento_referencia}</td>
                 </tr>

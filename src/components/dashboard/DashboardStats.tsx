@@ -88,7 +88,7 @@ export default function DashboardStats() {
       color: 'bg-blue-500'
     },
     {
-      title: 'Productos',
+      title: 'Total Productos',
       value: statsData?.totalProductos?.toString() || '0',
       change: statsData?.productosStockBajo ? `${statsData.productosStockBajo} con stock bajo` : 'Stock actualizado',
       changeType: (statsData?.productosStockBajo || 0) > 0 ? 'negative' : 'neutral' as const,

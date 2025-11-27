@@ -29,7 +29,7 @@ class DashboardService {
 
       // Obtener total de productos
       const productosResponse = await apiService.get('/productos?limit=1');
-      const totalProductos = productosResponse?.pagination?.total || 0;
+      const totalProductos = productosResponse?.data?.pagination?.total || 0;
 
       // Calcular ventas del día
       const hoy = new Date();
