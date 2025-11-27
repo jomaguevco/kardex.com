@@ -9,13 +9,15 @@ import { getFotoPerfilUrl } from '@/utils/fotoPerfil'
 import {
   Store, ShoppingBag, Package, Receipt, CreditCard,
   MessageCircle, User, LogOut, Bell, ShoppingCart,
-  Menu, X, Heart, ChevronDown
+  Menu, X, Heart, ChevronDown, Sun, Moon
 } from 'lucide-react'
+import { useThemeStore } from '@/store/themeStore'
 
 export default function ClienteNavbar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuthStore()
+  const { isDark, toggleTheme, setDark } = useThemeStore()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotificacionesOpen, setIsNotificacionesOpen] = useState(false)
@@ -23,6 +25,17 @@ export default function ClienteNavbar() {
   const [cartCount, setCartCount] = useState(0)
   const [favoritesCount, setFavoritesCount] = useState(0)
   const [notificacionesCount, setNotificacionesCount] = useState(0)
+
+  // Cargar tema al montar
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('kardex-theme')
+    if (savedTheme) {
+      const parsed = JSON.parse(savedTheme)
+      if (parsed?.state?.isDark) {
+        setDark(true)
+      }
+    }
+  }, [setDark])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -168,6 +181,23 @@ export default function ClienteNavbar() {
 
             {/* Acciones rápidas */}
             <div className="flex items-center space-x-3">
+              {/* Toggle Tema Oscuro */}
+              <button
+                onClick={toggleTheme}
+                className={`relative rounded-xl p-2 transition ${
+                  scrolled
+                    ? 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700'
+                    : 'text-white hover:bg-white/10'
+                }`}
+                title={isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+              >
+                {isDark ? (
+                  <Sun className="h-6 w-6" />
+                ) : (
+                  <Moon className="h-6 w-6" />
+                )}
+              </button>
+
               {/* Favoritos */}
               <Link
                 href="/cliente-portal/catalogo"

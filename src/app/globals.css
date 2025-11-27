@@ -860,3 +860,188 @@ a:active,
   transform: perspective(1000px) rotateY(2deg) rotateX(-2deg);
 }
 
+/* ========================================
+   TEMA OSCURO - PORTAL DEL CLIENTE
+   ======================================== */
+
+/* Variables CSS para tema oscuro */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-color: #e2e8f0;
+  --card-bg: rgba(255, 255, 255, 0.82);
+}
+
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --border-color: #334155;
+  --card-bg: rgba(30, 41, 59, 0.9);
+}
+
+/* Estilos base para modo oscuro */
+.dark body {
+  background: radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.15), transparent 55%),
+    radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.15), transparent 45%),
+    linear-gradient(180deg, #0f172a 0%, #1e293b 35%, #0f172a 100%) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Glass card en modo oscuro */
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(71, 85, 105, 0.3) !important;
+}
+
+/* Tarjetas en modo oscuro */
+.dark .card,
+.dark .bg-white {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Textos en modo oscuro */
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+/* Inputs en modo oscuro */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  background-color: #1e293b !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Tablas en modo oscuro */
+.dark .table th {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+}
+
+.dark .table td {
+  color: #f1f5f9 !important;
+}
+
+.dark .table tbody tr {
+  border-color: #334155 !important;
+}
+
+.dark .table tbody tr:hover {
+  background-color: #334155 !important;
+}
+
+/* Bordes en modo oscuro */
+.dark .border-slate-200,
+.dark .border-slate-100 {
+  border-color: #334155 !important;
+}
+
+/* Fondos degradados en modo oscuro */
+.dark .bg-gradient-to-br.from-slate-50 {
+  background: linear-gradient(to bottom right, #1e293b, #0f172a) !important;
+}
+
+/* Scrollbar en modo oscuro */
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Hover states en modo oscuro */
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-slate-50:hover {
+  background-color: #334155 !important;
+}
+
+/* Badge en modo oscuro */
+.dark .badge-primary {
+  background-color: rgba(99, 102, 241, 0.2) !important;
+  color: #a5b4fc !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.dark .badge-success {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  color: #86efac !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+.dark .badge-warning {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fcd34d !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.dark .badge-danger {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Sombras en modo oscuro */
+.dark .shadow-lg,
+.dark .shadow-xl,
+.dark .shadow-2xl {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Botones outline en modo oscuro */
+.dark .btn-outline {
+  border-color: #475569 !important;
+  color: #cbd5e1 !important;
+}
+
+.dark .btn-outline:hover {
+  background-color: #334155 !important;
+  border-color: #64748b !important;
+}
+
+/* Transición suave al cambiar de tema */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+}
+
