@@ -5,22 +5,13 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from 'react-hot-toast'
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
-import WhatsAppButton from './layout/WhatsAppButton'
+// WhatsAppButton removido - El portal del cliente ya tiene su propio botón de WhatsApp en el layout
+// Esto evita el círculo verde duplicado en el medio
 
 function WhatsAppButtonWrapper() {
-  const { user } = useAuthStore()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Solo mostrar para usuarios con rol CLIENTE
-  if (!mounted || !user || user.rol !== 'CLIENTE') {
-    return null
-  }
-
-  return <WhatsAppButton />
+  // Deshabilitado: El portal del cliente ya tiene su propio botón de WhatsApp en el layout
+  // Este componente causaba un círculo verde duplicado en el medio
+  return null
 }
 
 function AuthInitializer() {
