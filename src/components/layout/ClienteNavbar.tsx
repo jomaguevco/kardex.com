@@ -269,10 +269,11 @@ export default function ClienteNavbar() {
                           e.currentTarget.style.display = 'none'
                         }}
                       />
-                    ) : null}
-                    <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white">
-                      {user?.nombre_usuario?.charAt(0).toUpperCase() || 'C'}
-                    </div>
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white">
+                        {user?.nombre_usuario?.charAt(0).toUpperCase() || 'C'}
+                      </div>
+                    )}
                   </div>
                   <span className="text-sm font-semibold">
                     {user?.nombre_usuario || 'Cliente'}

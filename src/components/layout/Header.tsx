@@ -110,10 +110,11 @@ export default function Header({ onMenuToggle }: HeaderProps) {
                       e.currentTarget.style.display = 'none'
                     }}
                   />
-                ) : null}
-                <div className="absolute inset-0 flex items-center justify-center text-white">
-                  <User className="h-4 w-4" />
-                </div>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-white">
+                    <User className="h-4 w-4" />
+                  </div>
+                )}
               </div>
               <div className="hidden text-left sm:block">
                 <p className="text-xs font-semibold text-slate-800">{user?.nombre_completo}</p>
