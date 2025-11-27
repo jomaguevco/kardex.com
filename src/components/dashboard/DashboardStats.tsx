@@ -82,8 +82,10 @@ export default function DashboardStats() {
     {
       title: 'Ventas del Mes',
       value: statsData?.ventasDelMes?.toString() || '0',
-      change: statsData?.crecimiento ? `${statsData.crecimiento > 0 ? '+' : ''}${statsData.crecimiento.toFixed(1)}% vs mes anterior` : undefined,
-      changeType: (statsData?.crecimiento || 0) > 0 ? 'positive' : (statsData?.crecimiento || 0) < 0 ? 'negative' : 'neutral' as const,
+      change: statsData?.ventasMesAnterior !== undefined 
+        ? `${statsData.ventasMesAnterior} ventas mes anterior` 
+        : 'Primer mes de registro',
+      changeType: 'neutral' as const,
       icon: ShoppingCart,
       color: 'bg-blue-500'
     },

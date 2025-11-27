@@ -99,7 +99,8 @@ class ClientePortalService {
     const response = await apiService.get(`/ventas/${ventaId}/pdf`, {
       responseType: 'blob'
     });
-    return response as unknown as Blob;
+    // response es el objeto axios completo, los datos están en response.data
+    return response.data as Blob;
   }
 }
 

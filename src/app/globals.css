@@ -1045,3 +1045,158 @@ a:active,
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
 }
 
+/* ========================================
+   MEJORAS ADICIONALES TEMA OSCURO
+   ======================================== */
+
+/* Labels y textos de formularios */
+.dark label,
+.dark .label {
+  color: #e2e8f0 !important;
+}
+
+/* Fondos de secciones */
+.dark .bg-slate-50,
+.dark .bg-slate-100,
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  background-color: #1e293b !important;
+}
+
+/* Iconos en inputs - quitar fondos problemáticos */
+.dark .absolute.text-slate-400,
+.dark .absolute.text-gray-400 {
+  color: #64748b !important;
+}
+
+/* Fondos de modals y dropdowns */
+.dark [role="dialog"],
+.dark [role="menu"],
+.dark .dropdown-content {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Headers y títulos */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: #f1f5f9 !important;
+}
+
+/* Párrafos y textos */
+.dark p {
+  color: #cbd5e1 !important;
+}
+
+/* Links */
+.dark a:not(.btn-primary):not(.btn-secondary):not([class*="bg-"]) {
+  color: #93c5fd !important;
+}
+
+/* Fondos de pills/chips */
+.dark .bg-blue-50,
+.dark .bg-green-50,
+.dark .bg-red-50,
+.dark .bg-yellow-50,
+.dark .bg-purple-50,
+.dark .bg-indigo-50,
+.dark .bg-emerald-50,
+.dark .bg-orange-50 {
+  background-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+/* Textos de colores en modo oscuro */
+.dark .text-blue-600,
+.dark .text-blue-700 {
+  color: #93c5fd !important;
+}
+
+.dark .text-green-600,
+.dark .text-green-700,
+.dark .text-emerald-600,
+.dark .text-emerald-700 {
+  color: #86efac !important;
+}
+
+.dark .text-red-600,
+.dark .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+/* Cards de producto y estadísticas */
+.dark [class*="rounded-2xl"][class*="p-6"],
+.dark [class*="rounded-xl"][class*="p-4"] {
+  background-color: rgba(30, 41, 59, 0.9) !important;
+}
+
+/* Bordes adicionales */
+.dark .border,
+.dark .border-t,
+.dark .border-b,
+.dark .border-l,
+.dark .border-r {
+  border-color: #334155 !important;
+}
+
+/* Separadores */
+.dark hr,
+.dark .divide-y > *,
+.dark .divide-x > * {
+  border-color: #334155 !important;
+}
+
+/* Fondos de alertas */
+.dark .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .bg-green-100 {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.dark .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.dark .bg-yellow-100 {
+  background-color: rgba(234, 179, 8, 0.2) !important;
+}
+
+/* Gradient text en modo oscuro */
+.dark .bg-clip-text {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+/* Select options */
+.dark select option {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+/* Tooltips */
+.dark .tooltip {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
+/* Popovers */
+.dark [data-radix-popper-content-wrapper] {
+  --tw-bg-opacity: 1;
+  background-color: #1e293b !important;
+}
+
+/* Skeleton loader */
+.dark .skeleton,
+.dark .animate-pulse {
+  background-color: #334155 !important;
+}
+
+/* Switch/Toggle backgrounds */
+.dark [role="switch"] {
+  background-color: #475569 !important;
+}
+
+.dark [role="switch"][data-state="checked"] {
+  background-color: #6366f1 !important;
+}
+

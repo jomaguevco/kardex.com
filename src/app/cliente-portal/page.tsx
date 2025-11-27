@@ -90,12 +90,20 @@ export default function ClientePortalPage() {
       const catalogoResponse = await clientePortalService.getCatalogo()
       if (catalogoResponse.success && catalogoResponse.data) {
         // Tomar los primeros 8 productos para destacados
-        const productosReales = catalogoResponse.data.slice(0, 8).map((producto: any, index: number) => ({
-          ...producto,
-          imagen: producto.imagen_url || getPlaceholderImage(index),
-          descuento: Math.random() > 0.5 ? Math.floor(Math.random() * 25) + 5 : 0,
-          nuevo: Math.random() > 0.7
-        }))
+        // Usar el ID del producto para determinar descuentos de forma consistente
+        const productosReales = catalogoResponse.data.slice(0, 8).map((producto: any, index: number) => {
+          // Generar descuento basado en el ID del producto para que sea consistente
+          const tieneDescuento = producto.id % 3 === 0 // Cada 3er producto tiene descuento
+          const porcentajeDescuento = tieneDescuento ? ((producto.id % 4) + 1) * 5 : 0 // 5%, 10%, 15% o 20%
+          const esNuevo = producto.id % 5 === 0 // Cada 5to producto es "nuevo"
+          
+          return {
+            ...producto,
+            imagen: producto.imagen_url || getPlaceholderImage(index),
+            descuento: porcentajeDescuento,
+            nuevo: esNuevo
+          }
+        })
         setProductosDestacados(productosReales)
       }
     } catch (error) {

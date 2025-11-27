@@ -3,9 +3,16 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { 
-  MessageCircle, X, Send, Loader2, Sparkles, 
+  X, Send, Loader2, Sparkles, 
   Bot, User, ChevronDown, Minimize2 
 } from 'lucide-react'
+
+// Icono SVG de Robot/IA
+const AIIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7">
+    <path d="M12 2a2 2 0 012 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 017 7h1a1 1 0 011 1v3a1 1 0 01-1 1h-1v1a2 2 0 01-2 2H5a2 2 0 01-2-2v-1H2a1 1 0 01-1-1v-3a1 1 0 011-1h1a7 7 0 017-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 012-2zM7.5 13a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm9 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM12 9a5 5 0 00-5 5v1h10v-1a5 5 0 00-5-5z"/>
+  </svg>
+)
 
 interface Message {
   role: 'user' | 'model'
@@ -139,27 +146,28 @@ export default function GeminiChatWidget() {
 
   return (
     <>
-      {/* Botón flotante */}
+      {/* Botón flotante de IA - Posición más arriba para no chocar con WhatsApp */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg transition-all hover:scale-110 hover:shadow-xl ${
+        className={`fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg transition-all hover:scale-110 hover:shadow-xl hover:shadow-indigo-500/30 ${
           isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
         }`}
+        title="Asistente IA KARDEX"
       >
-        <MessageCircle className="h-7 w-7" />
-        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold animate-pulse">
-          <Sparkles className="h-3 w-3" />
+        <AIIcon />
+        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-xs font-bold animate-pulse">
+          <Sparkles className="h-3 w-3 text-amber-900" />
         </span>
       </button>
 
       {/* Panel de chat */}
       <div
-        className={`fixed bottom-6 right-6 z-50 flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-300 ${
+        className={`fixed bottom-6 right-6 z-50 flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-2xl transition-all duration-300 ${
           isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
         } ${isMinimized ? 'h-16 w-80' : 'h-[500px] w-96'}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-3 text-white">
+        <div className="flex items-center justify-between bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-white">
           <div className="flex items-center space-x-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
               <Bot className="h-6 w-6" />

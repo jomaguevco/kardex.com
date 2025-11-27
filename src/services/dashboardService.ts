@@ -73,6 +73,7 @@ class DashboardService {
         ventasDelDia,
         transaccionesDelDia,
         ventasDelMes,
+        ventasMesAnterior,
         crecimiento
       };
     } catch (error) {
@@ -86,6 +87,7 @@ class DashboardService {
         ventasDelDia: 0,
         transaccionesDelDia: 0,
         ventasDelMes: 0,
+        ventasMesAnterior: 0,
         crecimiento: 0
       };
     }
