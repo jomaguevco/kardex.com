@@ -64,8 +64,35 @@ export default function HomePage() {
     setOauthLoading('google')
     try {
       // Usar el flujo de OAuth del servidor (más confiable y funciona en todos los navegadores)
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4001'
-      const googleAuthUrl = `${backendUrl}/api/oauth/google`
+      // Construir la URL del backend de forma consistente
+      let backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'
+      
+      // Si la URL incluye /api, removerlo para obtener la base
+      if (backendBaseUrl.endsWith('/api')) {
+        backendBaseUrl = backendBaseUrl.replace('/api', '')
+      } else if (backendBaseUrl.includes('/api/')) {
+        backendBaseUrl = backendBaseUrl.split('/api')[0]
+      }
+      
+      // Asegurar que no termine con /
+      backendBaseUrl = backendBaseUrl.replace(/\/$/, '')
+      
+      const googleAuthUrl = `${backendBaseUrl}/api/oauth/google`
+      
+      console.log('[Google Login] Redirigiendo a:', googleAuthUrl)
+      
+      // Verificar que el backend esté disponible antes de redirigir
+      try {
+        const healthCheck = await apiService.get('/health')
+        if (!healthCheck) {
+          throw new Error('Backend no disponible')
+        }
+      } catch (healthError) {
+        console.error('[Google Login] Error de health check:', healthError)
+        toast.error('El servidor no está disponible. Por favor, verifica que el backend esté corriendo en el puerto 4001.')
+        setOauthLoading(null)
+        return
+      }
       
       // Redirigir a la URL de autenticación de Google
       // El servidor manejará el flujo completo y redirigirá de vuelta a /oauth/callback
@@ -80,7 +107,7 @@ export default function HomePage() {
       setGoogleTimeoutId(timeoutId)
     } catch (error: any) {
       console.error('Error iniciando Google Sign-In:', error)
-      toast.error(error?.message || 'Error al iniciar sesión con Google')
+      toast.error(error?.message || 'Error al iniciar sesión con Google. Verifica que el backend esté corriendo.')
       setOauthLoading(null)
     }
   }
