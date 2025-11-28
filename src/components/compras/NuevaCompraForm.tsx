@@ -27,10 +27,10 @@ const detalleSchema = z.object({
 const compraSchema = z.object({
   proveedor_id: z.number().positive('Selecciona un proveedor'),
   fecha: z.string().min(1, 'La fecha es requerida'),
-  subtotal: z.number().positive('El subtotal debe ser mayor a 0'),
-  descuento: z.number().min(0).optional(),
-  impuesto: z.number().min(0).optional(),
-  total: z.number().positive('El total debe ser mayor a 0'),
+  subtotal: z.number().min(0.01, 'El subtotal debe ser mayor a 0'),
+  descuento: z.union([z.number().min(0), z.nan()]).optional().transform(val => isNaN(val) ? 0 : val),
+  impuesto: z.union([z.number().min(0), z.nan()]).optional().transform(val => isNaN(val) ? 0 : val),
+  total: z.number().min(0.01, 'El total debe ser mayor a 0'),
   observaciones: z.string().optional(),
   detalles: z.array(detalleSchema).min(1, 'Agrega al menos un producto')
 })
@@ -296,9 +296,41 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
   // Manejar errores de validación del formulario
   const onError = (errors: any) => {
     console.error('Errores de validación:', errors)
-    const firstError = Object.values(errors)[0] as any
-    if (firstError?.message) {
-      toast.error(firstError.message)
+    
+    // Construir mensaje de error más descriptivo
+    const errorMessages: string[] = []
+    
+    if (errors.proveedor_id) {
+      errorMessages.push('Selecciona un proveedor')
+    }
+    if (errors.fecha) {
+      errorMessages.push('La fecha es requerida')
+    }
+    if (errors.subtotal) {
+      errorMessages.push(`Subtotal: ${errors.subtotal.message}`)
+    }
+    if (errors.total) {
+      errorMessages.push(`Total: ${errors.total.message}`)
+    }
+    if (errors.detalles) {
+      if (errors.detalles.message) {
+        errorMessages.push(errors.detalles.message)
+      }
+      // Verificar errores en cada detalle
+      if (Array.isArray(errors.detalles)) {
+        errors.detalles.forEach((error: any, index: number) => {
+          if (error) {
+            if (error.producto_id) errorMessages.push(`Producto ${index + 1}: ${error.producto_id.message}`)
+            if (error.cantidad) errorMessages.push(`Producto ${index + 1}: ${error.cantidad.message}`)
+            if (error.precio_unitario) errorMessages.push(`Producto ${index + 1}: ${error.precio_unitario.message}`)
+            if (error.subtotal) errorMessages.push(`Producto ${index + 1}: ${error.subtotal.message}`)
+          }
+        })
+      }
+    }
+    
+    if (errorMessages.length > 0) {
+      toast.error(errorMessages[0])
     } else {
       toast.error('Por favor completa todos los campos requeridos')
     }
@@ -316,8 +348,14 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
     const impuestoValido = Number(impuesto) || 0
     const totalCalculado = subtotalCalculado - descuentoValido + impuestoValido
     
-    setValue('subtotal', subtotalCalculado, { shouldValidate: true })
-    setValue('total', Math.max(0, totalCalculado), { shouldValidate: true })
+    // Asegurar que los valores sean números válidos y mayores a 0
+    const subtotalFinal = Math.max(0.01, subtotalCalculado)
+    const totalFinal = Math.max(0.01, totalCalculado)
+    
+    setValue('subtotal', subtotalFinal, { shouldValidate: false, shouldDirty: true })
+    setValue('total', totalFinal, { shouldValidate: false, shouldDirty: true })
+    setValue('descuento', descuentoValido, { shouldValidate: false })
+    setValue('impuesto', impuestoValido, { shouldValidate: false })
   }, [detalles, descuento, impuesto, setValue])
 
   useEffect(() => {
@@ -537,7 +575,13 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
               type="number"
               step="0.01"
               min={0}
-              {...register('descuento', { valueAsNumber: true })}
+              {...register('descuento', { 
+                valueAsNumber: true,
+                setValueAs: (v) => {
+                  const num = parseFloat(v)
+                  return isNaN(num) ? 0 : num
+                }
+              })}
               className="w-24 text-right font-semibold border-b border-slate-300 focus:border-indigo-500 focus:outline-none"
             />
           </div>
@@ -547,7 +591,13 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
               type="number"
               step="0.01"
               min={0}
-              {...register('impuesto', { valueAsNumber: true })}
+              {...register('impuesto', { 
+                valueAsNumber: true,
+                setValueAs: (v) => {
+                  const num = parseFloat(v)
+                  return isNaN(num) ? 0 : num
+                }
+              })}
               className="w-24 text-right font-semibold border-b border-slate-300 focus:border-indigo-500 focus:outline-none"
             />
           </div>
@@ -568,11 +618,25 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
         <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
           <p className="text-sm font-semibold text-rose-600 mb-2">Errores de validación:</p>
           <ul className="list-disc list-inside text-xs text-rose-600 space-y-1">
-            {errors.proveedor_id && <li>{errors.proveedor_id.message}</li>}
-            {errors.fecha && <li>{errors.fecha.message}</li>}
-            {errors.subtotal && <li>{errors.subtotal.message}</li>}
-            {errors.total && <li>{errors.total.message}</li>}
-            {errors.detalles && <li>{errors.detalles.message}</li>}
+            {errors.proveedor_id && <li>Proveedor: {errors.proveedor_id.message}</li>}
+            {errors.fecha && <li>Fecha: {errors.fecha.message}</li>}
+            {errors.subtotal && <li>Subtotal: {errors.subtotal.message}</li>}
+            {errors.total && <li>Total: {errors.total.message}</li>}
+            {errors.descuento && <li>Descuento: {errors.descuento.message}</li>}
+            {errors.impuesto && <li>Impuesto: {errors.impuesto.message}</li>}
+            {errors.detalles && (
+              <li>
+                Productos: {errors.detalles.message}
+                {errors.detalles.root && <span className="block ml-4">- {errors.detalles.root.message}</span>}
+                {Array.isArray(errors.detalles) && errors.detalles.map((error: any, index: number) => (
+                  error && (
+                    <span key={index} className="block ml-4">
+                      Producto {index + 1}: {error.producto_id?.message || error.cantidad?.message || error.precio_unitario?.message || error.subtotal?.message || 'Error en el producto'}
+                    </span>
+                  )
+                ))}
+              </li>
+            )}
           </ul>
         </div>
       )}
