@@ -440,11 +440,11 @@ export default function CatalogoPage() {
                 <Link href={`/cliente-portal/producto/${producto.id}`}>
                   <div className="relative h-64 overflow-hidden bg-slate-100 cursor-pointer">
                     <img
-                      src={producto.imagen_url || getPlaceholderImage(producto.id)}
+                      src={producto.imagen_url || getPlaceholderImage()}
                       alt={producto.nombre}
                       className="h-full w-full object-cover transition group-hover:scale-110"
                       onError={(e) => {
-                        e.currentTarget.src = getPlaceholderImage(producto.id)
+                        e.currentTarget.src = getPlaceholderImage()
                       }}
                     />
                     {enCarrito > 0 && (
@@ -517,11 +517,11 @@ export default function CatalogoPage() {
                 <Link href={`/cliente-portal/producto/${producto.id}`}>
                   <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100 cursor-pointer">
                     <img
-                      src={producto.imagen_url || getPlaceholderImage(producto.id)}
+                      src={producto.imagen_url || getPlaceholderImage()}
                       alt={producto.nombre}
                       className="h-full w-full object-cover transition group-hover:scale-110"
                       onError={(e) => {
-                        e.currentTarget.src = getPlaceholderImage(producto.id)
+                        e.currentTarget.src = getPlaceholderImage()
                       }}
                     />
                   </div>
