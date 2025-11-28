@@ -17,20 +17,29 @@ import { CompraForm } from '@/types'
 import { cn } from '@/utils/cn'
 
 const detalleSchema = z.object({
-  producto_id: z.number().positive('Selecciona un producto'),
-  cantidad: z.number().int('La cantidad debe ser un número entero').positive('La cantidad debe ser mayor a 0'),
-  precio_unitario: z.number().positive('El precio debe ser mayor a 0'),
-  descuento: z.number().min(0).optional(),
-  subtotal: z.number().positive('El subtotal debe ser mayor a 0')
+  producto_id: z.union([z.number(), z.string()]).transform(val => Number(val)).pipe(z.number().positive('Selecciona un producto')),
+  cantidad: z.union([z.number(), z.string()]).transform(val => Number(val)).pipe(z.number().int('La cantidad debe ser un número entero').positive('La cantidad debe ser mayor a 0')),
+  precio_unitario: z.union([z.number(), z.string()]).transform(val => Number(val)).pipe(z.number().positive('El precio debe ser mayor a 0')),
+  descuento: z.union([z.number(), z.string(), z.nan()]).optional().transform(val => {
+    const num = typeof val === 'string' ? parseFloat(val) : val
+    return isNaN(num) ? 0 : num
+  }).pipe(z.number().min(0).optional()),
+  subtotal: z.union([z.number(), z.string()]).transform(val => Number(val)).pipe(z.number().positive('El subtotal debe ser mayor a 0'))
 })
 
 const compraSchema = z.object({
-  proveedor_id: z.number().positive('Selecciona un proveedor'),
+  proveedor_id: z.union([z.number(), z.string()]).transform(val => Number(val)).pipe(z.number().positive('Selecciona un proveedor')),
   fecha: z.string().min(1, 'La fecha es requerida'),
-  subtotal: z.number().min(0.01, 'El subtotal debe ser mayor a 0'),
-  descuento: z.union([z.number().min(0), z.nan()]).optional().transform(val => isNaN(val) ? 0 : val),
-  impuesto: z.union([z.number().min(0), z.nan()]).optional().transform(val => isNaN(val) ? 0 : val),
-  total: z.number().min(0.01, 'El total debe ser mayor a 0'),
+  subtotal: z.union([z.number(), z.string()]).transform(val => Number(val)).pipe(z.number().min(0.01, 'El subtotal debe ser mayor a 0')),
+  descuento: z.union([z.number(), z.string(), z.nan()]).optional().transform(val => {
+    const num = typeof val === 'string' ? parseFloat(val) : val
+    return isNaN(num) ? 0 : num
+  }).pipe(z.number().min(0).optional()),
+  impuesto: z.union([z.number(), z.string(), z.nan()]).optional().transform(val => {
+    const num = typeof val === 'string' ? parseFloat(val) : val
+    return isNaN(num) ? 0 : num
+  }).pipe(z.number().min(0).optional()),
+  total: z.union([z.number(), z.string()]).transform(val => Number(val)).pipe(z.number().min(0.01, 'El total debe ser mayor a 0')),
   observaciones: z.string().optional(),
   detalles: z.array(detalleSchema).min(1, 'Agrega al menos un producto')
 })
@@ -236,21 +245,22 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
         return
       }
 
+      // Asegurar que todos los valores numéricos sean números
       const compra: CompraForm = {
-        proveedor_id: data.proveedor_id,
+        proveedor_id: Number(data.proveedor_id),
         numero_factura: `COMP-${Date.now()}`,
         fecha_compra: data.fecha,
-        subtotal: data.subtotal,
-        descuento: data.descuento || 0,
-        impuestos: data.impuesto || 0,
-        total: data.total,
-        observaciones: data.observaciones,
+        subtotal: Number(data.subtotal),
+        descuento: Number(data.descuento) || 0,
+        impuestos: Number(data.impuesto) || 0,
+        total: Number(data.total),
+        observaciones: data.observaciones || '',
         detalles: data.detalles.map((detalle) => ({
-          producto_id: detalle.producto_id,
-          cantidad: detalle.cantidad,
-          precio_unitario: detalle.precio_unitario,
-          descuento: detalle.descuento || 0,
-          subtotal: detalle.subtotal
+          producto_id: Number(detalle.producto_id),
+          cantidad: Number(detalle.cantidad),
+          precio_unitario: Number(detalle.precio_unitario),
+          descuento: Number(detalle.descuento) || 0,
+          subtotal: Number(detalle.subtotal)
         }))
       }
 
