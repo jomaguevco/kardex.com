@@ -12,6 +12,7 @@ import {
 // Mail y Phone se mantienen importados porque se usan en otras partes del componente
 import toast from 'react-hot-toast'
 import usuarioService from '@/services/usuarioService'
+import clientePortalService from '@/services/clientePortalService'
 import { getFotoPerfilUrl } from '@/utils/fotoPerfil'
 import Link from 'next/link'
 
@@ -39,6 +40,11 @@ export default function ClientePerfilPage() {
   // Estados para preferencias
   const [notificacionesHabilitadas, setNotificacionesHabilitadas] = useState(true)
   const [guardandoPreferencias, setGuardandoPreferencias] = useState(false)
+
+  // Estados para dashboard
+  const [dashboard, setDashboard] = useState<any>(null)
+  const [loadingDashboard, setLoadingDashboard] = useState(true)
+  const [favoritosCount, setFavoritosCount] = useState(0)
 
   // Calcular progreso del perfil
   const calcularProgresoPerfil = () => {
@@ -70,6 +76,42 @@ export default function ClientePerfilPage() {
       }
     }
   }, [user])
+
+  // Función para obtener datos del dashboard
+  const fetchDashboard = async () => {
+    try {
+      setLoadingDashboard(true)
+      const response = await clientePortalService.getEstadoCuenta()
+      if (response.success) {
+        setDashboard(response.data)
+      }
+    } catch (error) {
+      console.error('Error al cargar dashboard:', error)
+    } finally {
+      setLoadingDashboard(false)
+    }
+  }
+
+  // Cargar dashboard y favoritos cuando el componente se monte
+  useEffect(() => {
+    if (isAuthorized && !authLoading) {
+      fetchDashboard()
+      
+      // Obtener favoritos del localStorage
+      const favoritosGuardados = localStorage.getItem('favoritos')
+      if (favoritosGuardados) {
+        try {
+          const favoritos = JSON.parse(favoritosGuardados)
+          setFavoritosCount(Array.isArray(favoritos) ? favoritos.length : 0)
+        } catch (error) {
+          console.error('Error al cargar favoritos:', error)
+          setFavoritosCount(0)
+        }
+      } else {
+        setFavoritosCount(0)
+      }
+    }
+  }, [isAuthorized, authLoading])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -347,10 +389,10 @@ export default function ClientePerfilPage() {
       {/* Estadísticas rápidas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { icon: ShoppingBag, label: 'Compras', value: '12', color: 'from-blue-500 to-indigo-600' },
-          { icon: Heart, label: 'Favoritos', value: '8', color: 'from-pink-500 to-rose-600' },
-          { icon: Package, label: 'Productos', value: '45', color: 'from-emerald-500 to-teal-600' },
-          { icon: TrendingUp, label: 'Ahorro', value: 'S/150', color: 'from-orange-500 to-red-600' },
+          { icon: ShoppingBag, label: 'Compras', value: loadingDashboard ? '...' : String(dashboard?.totalCompras || 0), color: 'from-blue-500 to-indigo-600' },
+          { icon: Heart, label: 'Favoritos', value: String(favoritosCount), color: 'from-pink-500 to-rose-600' },
+          { icon: Package, label: 'Productos', value: loadingDashboard ? '...' : String(dashboard?.productosUnicos || 0), color: 'from-emerald-500 to-teal-600' },
+          { icon: TrendingUp, label: 'Ahorro', value: loadingDashboard ? '...' : `S/${Math.round((dashboard?.totalGastado || 0) * 0.1)}`, color: 'from-orange-500 to-red-600' },
         ].map((stat, index) => (
           <div 
             key={index}

@@ -244,15 +244,15 @@ function ProveedoresContent() {
 
           <div className="card overflow-hidden relative">
             <div className="overflow-x-auto -mx-6 px-6">
-              <table className="min-w-full divide-y divide-slate-200" style={{ minWidth: '1000px' }}>
+              <table className="w-full divide-y divide-slate-200 table-fixed">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Proveedor</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Documento</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Contacto</th>
-                    <th className="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo</th>
-                    <th className="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</th>
-                    <th className="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Acciones</th>
+                    <th className="w-[30%] px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Proveedor</th>
+                    <th className="w-[18%] px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Documento</th>
+                    <th className="w-[22%] px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Contacto</th>
+                    <th className="w-[10%] px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo</th>
+                    <th className="w-[10%] px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</th>
+                    <th className="w-[10%] px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
@@ -274,7 +274,7 @@ function ProveedoresContent() {
                   ) : (
                     filteredProveedores.map((proveedor) => (
                       <tr key={proveedor.id} className="transition hover:bg-slate-50">
-                        <td className="px-6 py-4 align-top text-sm text-slate-700">
+                        <td className="w-[30%] px-6 py-4 align-top text-sm text-slate-700">
                           <p className="font-semibold text-slate-900">{proveedor.nombre}</p>
                           {proveedor.codigo && (
                             <p className="text-xs text-slate-500">Código: {proveedor.codigo}</p>
@@ -285,13 +285,13 @@ function ProveedoresContent() {
                             </p>
                           )}
                         </td>
-                        <td className="px-6 py-4 align-top text-sm text-slate-700">
+                        <td className="w-[18%] px-6 py-4 align-top text-sm text-slate-700">
                           <p className="font-medium text-slate-900">
                             {proveedor.tipo_documento}: {proveedor.numero_documento}
                           </p>
                           <p className="text-xs text-slate-500">Creado: {new Date(proveedor.fecha_creacion).toLocaleDateString()}</p>
                         </td>
-                        <td className="px-6 py-4 align-top text-sm text-slate-700">
+                        <td className="w-[22%] px-6 py-4 align-top text-sm text-slate-700">
                           <div className="space-y-1">
                             {proveedor.telefono && (
                               <p className="flex items-center gap-2 text-xs text-slate-500">
@@ -310,7 +310,7 @@ function ProveedoresContent() {
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center align-top">
+                        <td className="w-[10%] px-4 py-4 text-center align-top">
                           <span
                             className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                               proveedor.tipo_proveedor === 'INTERNACIONAL'
@@ -321,7 +321,7 @@ function ProveedoresContent() {
                             {proveedor.tipo_proveedor === 'INTERNACIONAL' ? 'Internacional' : 'Nacional'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-center align-top">
+                        <td className="w-[10%] px-4 py-4 text-center align-top">
                           <span
                             className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                               proveedor.activo
@@ -332,7 +332,7 @@ function ProveedoresContent() {
                             {proveedor.activo ? 'Activo' : 'Inactivo'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-center align-top">
+                        <td className="w-[10%] px-4 py-4 text-center align-top">
                           <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => handleViewProveedor(proveedor)}

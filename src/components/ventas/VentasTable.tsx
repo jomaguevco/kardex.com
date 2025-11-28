@@ -68,6 +68,8 @@ export default function VentasTable({ onView, onEdit, onCancel, onDownloadPDF }:
             value={filters.fecha_inicio || ''}
             onChange={(event) => handleFilterChange('fecha_inicio', event.target.value)}
             className="input-field"
+            min="2000-01-01"
+            max="2099-12-31"
           />
         </div>
         <div className="space-y-1">
@@ -77,6 +79,8 @@ export default function VentasTable({ onView, onEdit, onCancel, onDownloadPDF }:
             value={filters.fecha_fin || ''}
             onChange={(event) => handleFilterChange('fecha_fin', event.target.value)}
             className="input-field"
+            min="2000-01-01"
+            max="2099-12-31"
           />
         </div>
         <div className="space-y-1">

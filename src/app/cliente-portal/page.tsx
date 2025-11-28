@@ -219,7 +219,15 @@ export default function ClientePortalPage() {
                 <span className="font-semibold text-slate-900">Cliente Premium</span>
               </div>
               <div className="text-sm text-slate-600">
-                Miembro desde <span className="font-bold">2024</span>
+                Miembro desde <span className="font-bold">
+                  {dashboard?.cliente?.fecha_creacion 
+                    ? new Date(dashboard.cliente.fecha_creacion).getFullYear()
+                    : dashboard?.cliente?.createdAt
+                    ? new Date(dashboard.cliente.createdAt).getFullYear()
+                    : user?.fecha_creacion
+                    ? new Date(user.fecha_creacion).getFullYear()
+                    : new Date().getFullYear()}
+                </span>
               </div>
             </div>
           </div>
