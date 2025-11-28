@@ -12,6 +12,18 @@ export interface CatalogoResponse {
   message?: string;
 }
 
+export interface CategoriasResponse {
+  success: boolean;
+  data: Array<{
+    id: number;
+    nombre: string;
+    descripcion?: string;
+    imagen_url?: string;
+    productos_count: number;
+  }>;
+  message?: string;
+}
+
 export interface EstadoCuentaResponse {
   success: boolean;
   data: {
@@ -55,6 +67,13 @@ class ClientePortalService {
 
     const query = queryParams.toString();
     return await apiService.get(`/cliente-portal/catalogo${query ? `?${query}` : ''}`);
+  }
+
+  /**
+   * Obtener categorías con conteo de productos
+   */
+  async getCategorias(): Promise<CategoriasResponse> {
+    return await apiService.get('/cliente-portal/categorias');
   }
 
   /**

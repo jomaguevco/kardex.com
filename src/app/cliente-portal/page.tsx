@@ -8,12 +8,14 @@ import {
   Sparkles, ChevronRight, Star, Gift, Zap, Clock,
   ChevronLeft, Heart, ShoppingCart
 } from 'lucide-react'
+import toast from 'react-hot-toast'
 import Link from 'next/link'
 
 export default function ClientePortalPage() {
   const { user, isLoading: authLoading, isAuthorized } = useClienteAuth()
   const [dashboard, setDashboard] = useState<any>(null)
   const [productosDestacados, setProductosDestacados] = useState<any[]>([])
+  const [categorias, setCategorias] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [currentPromoSlide, setCurrentPromoSlide] = useState(0)
@@ -80,10 +82,14 @@ export default function ClientePortalPage() {
 
   const fetchDashboard = async () => {
     try {
+      setIsLoading(true)
       // Obtener estado de cuenta
       const response = await clientePortalService.getEstadoCuenta()
-      if (response.success) {
+      if (response.success && response.data) {
         setDashboard(response.data)
+        console.log('Dashboard cargado:', response.data) // Debug
+      } else {
+        console.error('Error: respuesta del estado de cuenta no exitosa', response)
       }
 
       // Obtener productos del catálogo para mostrar productos reales
@@ -106,8 +112,15 @@ export default function ClientePortalPage() {
         })
         setProductosDestacados(productosReales)
       }
+
+      // Obtener categorías
+      const categoriasResponse = await clientePortalService.getCategorias()
+      if (categoriasResponse.success && categoriasResponse.data) {
+        setCategorias(categoriasResponse.data)
+      }
     } catch (error) {
       console.error('Error al cargar dashboard:', error)
+      toast.error('Error al cargar información del dashboard')
     } finally {
       setIsLoading(false)
     }
@@ -579,59 +592,48 @@ export default function ClientePortalPage() {
       {/* Sección de categorías con imágenes */}
       <div className="glass-card rounded-3xl p-8">
         <h2 className="mb-6 text-2xl font-bold text-slate-900">Explora por Categorías</h2>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <Link href="/cliente-portal/catalogo" className="group relative h-40 overflow-hidden rounded-2xl">
-            <img 
-              src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80" 
-              alt="Tecnología"
-              className="h-full w-full object-cover transition group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-            <div className="absolute bottom-4 left-4">
-              <h3 className="text-lg font-bold text-white">Tecnología</h3>
-              <p className="text-sm text-white/80">+50 productos</p>
-            </div>
-          </Link>
-          
-          <Link href="/cliente-portal/catalogo" className="group relative h-40 overflow-hidden rounded-2xl">
-            <img 
-              src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" 
-              alt="Electrodomésticos"
-              className="h-full w-full object-cover transition group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-            <div className="absolute bottom-4 left-4">
-              <h3 className="text-lg font-bold text-white">Electrodomésticos</h3>
-              <p className="text-sm text-white/80">+30 productos</p>
-            </div>
-          </Link>
-          
-          <Link href="/cliente-portal/catalogo" className="group relative h-40 overflow-hidden rounded-2xl">
-            <img 
-              src="https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400&q=80" 
-              alt="Licores"
-              className="h-full w-full object-cover transition group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-            <div className="absolute bottom-4 left-4">
-              <h3 className="text-lg font-bold text-white">Licores Premium</h3>
-              <p className="text-sm text-white/80">+25 productos</p>
-            </div>
-          </Link>
-          
-          <Link href="/cliente-portal/catalogo" className="group relative h-40 overflow-hidden rounded-2xl">
-            <img 
-              src="https://images.unsplash.com/photo-1625723044792-44de16ccb4e9?w=400&q=80" 
-              alt="Periféricos"
-              className="h-full w-full object-cover transition group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-            <div className="absolute bottom-4 left-4">
-              <h3 className="text-lg font-bold text-white">Periféricos</h3>
-              <p className="text-sm text-white/80">+40 productos</p>
-            </div>
-          </Link>
-        </div>
+        {categorias.length > 0 ? (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {categorias.slice(0, 4).map((categoria: any, index: number) => {
+              // Imágenes placeholder por defecto si no hay imagen_url
+              const placeholderImages = [
+                'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80',
+                'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80',
+                'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400&q=80',
+                'https://images.unsplash.com/photo-1625723044792-44de16ccb4e9?w=400&q=80'
+              ]
+              const imagenUrl = categoria.imagen_url || placeholderImages[index % placeholderImages.length]
+              
+              return (
+                <Link 
+                  key={categoria.id} 
+                  href={`/cliente-portal/catalogo?categoria_id=${categoria.id}`} 
+                  className="group relative h-40 overflow-hidden rounded-2xl"
+                >
+                  <img 
+                    src={imagenUrl}
+                    alt={categoria.nombre}
+                    className="h-full w-full object-cover transition group-hover:scale-110"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = placeholderImages[index % placeholderImages.length]
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute bottom-4 left-4">
+                    <h3 className="text-lg font-bold text-white">{categoria.nombre}</h3>
+                    <p className="text-sm text-white/80">+{categoria.productos_count} productos</p>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-40 rounded-2xl bg-slate-200 animate-pulse" />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Video/Animación promocional */}
@@ -674,11 +676,58 @@ export default function ClientePortalPage() {
       <div className="glass-card rounded-3xl p-8 text-center">
         <h2 className="mb-6 text-xl font-bold text-slate-900">Marcas que nos respaldan</h2>
         <div className="flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/200px-Google_2015_logo.svg.png" alt="Google" className="h-8 object-contain" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/200px-Amazon_logo.svg.png" alt="Amazon" className="h-8 object-contain" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/80px-Apple_logo_black.svg.png" alt="Apple" className="h-8 object-contain" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Sony_logo.svg/200px-Sony_logo.svg.png" alt="Sony" className="h-8 object-contain" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Samsung_Logo.svg/200px-Samsung_Logo.svg.png" alt="Samsung" className="h-6 object-contain" />
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/200px-Google_2015_logo.svg.png" 
+            alt="Google" 
+            className="h-8 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none'
+            }}
+          />
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/200px-Amazon_logo.svg.png" 
+            alt="Amazon" 
+            className="h-8 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none'
+            }}
+          />
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/80px-Apple_logo_black.svg.png" 
+            alt="Apple" 
+            className="h-8 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none'
+            }}
+          />
+          <img 
+            src="https://logos-world.net/wp-content/uploads/2020/04/Sony-Logo.png" 
+            alt="Sony" 
+            className="h-8 object-contain"
+            onError={(e) => {
+              // Fallback a otra URL si la primera falla
+              const target = e.target as HTMLImageElement
+              if (target.src.includes('logos-world')) {
+                target.src = 'https://cdn.worldvectorlogo.com/logos/sony-6.svg'
+              } else {
+                target.style.display = 'none'
+              }
+            }}
+          />
+          <img 
+            src="https://logos-world.net/wp-content/uploads/2020/06/Samsung-Logo.png" 
+            alt="Samsung" 
+            className="h-8 object-contain"
+            onError={(e) => {
+              // Fallback a otra URL si la primera falla
+              const target = e.target as HTMLImageElement
+              if (target.src.includes('logos-world')) {
+                target.src = 'https://cdn.worldvectorlogo.com/logos/samsung-2.svg'
+              } else {
+                target.style.display = 'none'
+              }
+            }}
+          />
         </div>
       </div>
     </div>
