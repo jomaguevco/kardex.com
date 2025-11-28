@@ -264,23 +264,27 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
         }))
       }
 
-      await compraService.createCompra({
+      // Preparar datos según lo que espera el backend
+      const datosParaBackend = {
         proveedor_id: compra.proveedor_id,
         numero_factura: compra.numero_factura,
         fecha_compra: compra.fecha_compra,
         subtotal: compra.subtotal,
         descuento: compra.descuento,
-        impuestos: compra.impuestos,
         total: compra.total,
         observaciones: compra.observaciones,
         detalles: compra.detalles.map((detalle) => ({
           producto_id: detalle.producto_id,
           cantidad: detalle.cantidad,
           precio_unitario: detalle.precio_unitario,
-          descuento: detalle.descuento || 0,
-          subtotal: detalle.subtotal
+          descuento: detalle.descuento || 0
+          // El backend no espera subtotal en los detalles, lo calcula automáticamente
         }))
-      })
+      }
+
+      console.log('Datos enviados al backend:', datosParaBackend)
+
+      await compraService.createCompra(datosParaBackend)
 
       toast.success('Compra registrada correctamente')
       reset({
