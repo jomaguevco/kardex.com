@@ -211,6 +211,31 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
 
   const onSubmit = async (data: CompraFormData) => {
     try {
+      console.log('Formulario enviado con datos:', data)
+      
+      // Validar que hay productos
+      if (!data.detalles || data.detalles.length === 0) {
+        toast.error('Agrega al menos un producto')
+        return
+      }
+
+      // Validar que el proveedor está seleccionado
+      if (!data.proveedor_id || data.proveedor_id <= 0) {
+        toast.error('Selecciona un proveedor')
+        return
+      }
+
+      // Validar que el subtotal y total son válidos
+      if (!data.subtotal || data.subtotal <= 0) {
+        toast.error('El subtotal debe ser mayor a 0')
+        return
+      }
+
+      if (!data.total || data.total <= 0) {
+        toast.error('El total debe ser mayor a 0')
+        return
+      }
+
       const compra: CompraForm = {
         proveedor_id: data.proveedor_id,
         numero_factura: `COMP-${Date.now()}`,
@@ -262,7 +287,20 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
       setBusquedaProducto('')
       onSuccess?.()
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || error?.message || 'No se pudo registrar la compra')
+      console.error('Error al registrar compra:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'No se pudo registrar la compra'
+      toast.error(errorMessage)
+    }
+  }
+
+  // Manejar errores de validación del formulario
+  const onError = (errors: any) => {
+    console.error('Errores de validación:', errors)
+    const firstError = Object.values(errors)[0] as any
+    if (firstError?.message) {
+      toast.error(firstError.message)
+    } else {
+      toast.error('Por favor completa todos los campos requeridos')
     }
   }
 
@@ -295,7 +333,7 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
   }, [productosData])
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
         <div>
           <label className="block text-sm font-medium text-slate-600">Proveedor</label>
@@ -525,11 +563,54 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
         <textarea {...register('observaciones')} rows={3} className="input-field" placeholder="Observaciones, condiciones de pago, notas de recepción..." />
       </div>
 
+      {/* Mostrar errores de validación */}
+      {Object.keys(errors).length > 0 && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
+          <p className="text-sm font-semibold text-rose-600 mb-2">Errores de validación:</p>
+          <ul className="list-disc list-inside text-xs text-rose-600 space-y-1">
+            {errors.proveedor_id && <li>{errors.proveedor_id.message}</li>}
+            {errors.fecha && <li>{errors.fecha.message}</li>}
+            {errors.subtotal && <li>{errors.subtotal.message}</li>}
+            {errors.total && <li>{errors.total.message}</li>}
+            {errors.detalles && <li>{errors.detalles.message}</li>}
+          </ul>
+        </div>
+      )}
+
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <button type="button" onClick={onCancel} className="btn-outline sm:min-w-[150px]">
           Cancelar
         </button>
-        <button type="submit" disabled={isSubmitting || fields.length === 0 || loadingProveedores} className="btn-primary inline-flex items-center justify-center sm:min-w-[200px] disabled:cursor-not-allowed disabled:opacity-60">
+        <button 
+          type="submit" 
+          disabled={isSubmitting || fields.length === 0 || loadingProveedores || !watch('proveedor_id') || watch('proveedor_id') <= 0} 
+          className="btn-primary inline-flex items-center justify-center sm:min-w-[200px] disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={(e) => {
+            // Validar antes de enviar
+            if (fields.length === 0) {
+              e.preventDefault()
+              toast.error('Agrega al menos un producto')
+              return
+            }
+            if (!watch('proveedor_id') || watch('proveedor_id') <= 0) {
+              e.preventDefault()
+              toast.error('Selecciona un proveedor')
+              return
+            }
+            const subtotalVal = watch('subtotal')
+            const totalVal = watch('total')
+            if (!subtotalVal || subtotalVal <= 0) {
+              e.preventDefault()
+              toast.error('El subtotal debe ser mayor a 0')
+              return
+            }
+            if (!totalVal || totalVal <= 0) {
+              e.preventDefault()
+              toast.error('El total debe ser mayor a 0')
+              return
+            }
+          }}
+        >
           {isSubmitting ? (
             <>
               <LoadingSpinner size="sm" className="mr-2" /> Registrando...
