@@ -83,13 +83,18 @@ export default function VentasTable({ onView, onEdit, onCancel, onDownloadPDF }:
           <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</label>
           <select
             value={filters.estado || ''}
-            onChange={(event) => handleFilterChange('estado', event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              // Normalizar el valor antes de guardarlo
+              const normalizedValue = value ? value.toUpperCase() : '';
+              handleFilterChange('estado', normalizedValue);
+            }}
             className="input-field"
           >
             <option value="">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="completada">Completada</option>
-            <option value="cancelada">Cancelada</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="PROCESADA">Procesada</option>
+            <option value="ANULADA">Anulada</option>
           </select>
         </div>
         <div className="flex items-end gap-2">

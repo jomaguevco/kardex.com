@@ -87,13 +87,17 @@ export default function ReporteVentas() {
             </label>
             <select
               value={filters.estado || ''}
-              onChange={(e) => handleFilterChange('estado', e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                const normalizedValue = value ? value.toUpperCase() : '';
+                handleFilterChange('estado', normalizedValue);
+              }}
               className="input-field"
             >
               <option value="">Todos los estados</option>
-              <option value="pendiente">Pendiente</option>
-              <option value="completada">Completada</option>
-              <option value="cancelada">Cancelada</option>
+              <option value="PENDIENTE">Pendiente</option>
+              <option value="PROCESADA">Procesada</option>
+              <option value="ANULADA">Anulada</option>
             </select>
           </div>
           <div className="flex items-end space-x-2">

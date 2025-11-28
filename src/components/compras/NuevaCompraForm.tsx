@@ -362,9 +362,9 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
     const impuestoValido = Number(impuesto) || 0
     const totalCalculado = subtotalCalculado - descuentoValido + impuestoValido
     
-    // Asegurar que los valores sean números válidos y mayores a 0
-    const subtotalFinal = Math.max(0.01, subtotalCalculado)
-    const totalFinal = Math.max(0.01, totalCalculado)
+    // Si no hay productos, los valores deben ser 0, no 0.01
+    const subtotalFinal = detalles.length === 0 ? 0 : Math.max(0, subtotalCalculado)
+    const totalFinal = detalles.length === 0 ? 0 : Math.max(0, totalCalculado)
     
     setValue('subtotal', subtotalFinal, { shouldValidate: false, shouldDirty: true })
     setValue('total', totalFinal, { shouldValidate: false, shouldDirty: true })

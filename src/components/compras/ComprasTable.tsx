@@ -82,14 +82,18 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
           <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</label>
           <select
             value={filters.estado || ''}
-            onChange={(event) => handleFilterChange('estado', event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              // Normalizar el valor antes de guardarlo
+              const normalizedValue = value ? value.toUpperCase() : '';
+              handleFilterChange('estado', normalizedValue);
+            }}
             className="input-field"
           >
             <option value="">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="procesada">Procesada</option>
-            <option value="cancelada">Cancelada</option>
-            <option value="anulada">Anulada</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="PROCESADA">Procesada</option>
+            <option value="ANULADA">Anulada</option>
           </select>
         </div>
         <div className="flex items-end gap-2">
@@ -157,15 +161,31 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
                         {/* PENDIENTE: Ver, Editar, Cancelar */}
                         {normalizeEstado(compra.estado) === 'pendiente' && (
                           <>
-                        {onEdit && (
-                          <AccionButton title="Editar" onClick={() => onEdit(compra)} variant="primary">
-                            <Edit className="h-4 w-4" />
-                          </AccionButton>
-                        )}
+                            {onEdit && (
+                              <AccionButton 
+                                title="Editar" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (onEdit) onEdit(compra);
+                                }} 
+                                variant="primary"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </AccionButton>
+                            )}
                             {onCancel && (
-                          <AccionButton title="Cancelar" onClick={() => onCancel(compra)} variant="danger">
-                            <X className="h-4 w-4" />
-                          </AccionButton>
+                              <AccionButton 
+                                title="Cancelar" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (onCancel) onCancel(compra);
+                                }} 
+                                variant="danger"
+                              >
+                                <X className="h-4 w-4" />
+                              </AccionButton>
                             )}
                           </>
                         )}
@@ -226,7 +246,7 @@ function EstadoBadge({ estado }: { estado: string }) {
 }
 
 function normalizeEstado(estado: string) {
-  const normalized = (estado || '').toString().toLowerCase()
+  const normalized = (estado || '').toString().toLowerCase().trim()
   // Mapear estados del backend a estados normalizados
   if (normalized === 'procesada') return 'procesada'
   if (normalized === 'pendiente') return 'pendiente'

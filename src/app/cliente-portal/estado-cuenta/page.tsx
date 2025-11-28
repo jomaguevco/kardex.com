@@ -297,12 +297,16 @@ export default function EstadoCuentaPage() {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Yape */}
                   <div className="border border-purple-200 rounded-xl p-4 text-center">
-                    {configPagos?.yape?.qr_url && (
+                    {configPagos?.yape?.qr_url && configPagos.yape.qr_url !== '/images/qr-yape.png' && (
                       <div className="w-32 h-32 mx-auto mb-3 bg-white rounded-lg p-2 border border-purple-200">
                         <img 
                           src={configPagos.yape.qr_url} 
                           alt="QR Yape" 
                           className="w-full h-full object-contain"
+                          onError={(e) => {
+                            // Ocultar la imagen si falla al cargar
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
                         />
                       </div>
                     )}
@@ -320,12 +324,16 @@ export default function EstadoCuentaPage() {
                   </div>
                   {/* Plin */}
                   <div className="border border-teal-200 rounded-xl p-4 text-center">
-                    {configPagos?.plin?.qr_url && (
+                    {configPagos?.plin?.qr_url && configPagos.plin.qr_url !== '/images/qr-plin.png' && (
                       <div className="w-32 h-32 mx-auto mb-3 bg-white rounded-lg p-2 border border-teal-200">
                         <img 
                           src={configPagos.plin.qr_url} 
                           alt="QR Plin" 
                           className="w-full h-full object-contain"
+                          onError={(e) => {
+                            // Ocultar la imagen si falla al cargar
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
                         />
                       </div>
                     )}
