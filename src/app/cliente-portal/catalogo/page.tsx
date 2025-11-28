@@ -26,17 +26,10 @@ export default function CatalogoPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
 
-  // Imagen placeholder para productos sin imagen
-  const placeholderImages = [
-    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80',
-    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80',
-    'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80',
-    'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&q=80',
-    'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=500&q=80'
-  ]
-
-  const getPlaceholderImage = (productId: number) => {
-    return placeholderImages[productId % placeholderImages.length]
+  // Placeholder genérico para productos sin imagen
+  const getPlaceholderImage = () => {
+    // Usar un placeholder SVG genérico en lugar de imágenes de Unsplash que pueden ser incorrectas
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iI2YxZjVmOSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5TaW4gaW1hZ2VuPC90ZXh0Pjwvc3ZnPg=='
   }
 
   useEffect(() => {

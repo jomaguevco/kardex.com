@@ -244,12 +244,10 @@ export default function DetalleProductoPage() {
   const stockBajo = producto.stock_actual > 0 && producto.stock_actual <= producto.stock_minimo
   const enCarrito = carrito.find(item => item.id === producto.id)
 
-  // Imágenes del producto (usar la principal y agregar placeholders)
-  const imagenes = [
-    producto.imagen_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
-    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
-    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80'
-  ]
+  // Imágenes del producto - solo mostrar si hay imagen_url, sino mostrar placeholder genérico
+  const imagenes = producto.imagen_url 
+    ? [producto.imagen_url] // Si hay imagen, solo mostrar esa
+    : [] // Si no hay imagen, no mostrar miniaturas falsas
 
   return (
     <>
@@ -300,33 +298,45 @@ export default function DetalleProductoPage() {
                   }`}
                 />
               </button>
-              <img
-                src={imagenes[selectedImage]}
-                alt={producto.nombre}
-                className="h-[500px] w-full object-cover"
-              />
+              {producto.imagen_url ? (
+                <img
+                  src={producto.imagen_url}
+                  alt={producto.nombre}
+                  className="h-[500px] w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-[500px] w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                  <div className="text-center">
+                    <Package className="mx-auto h-24 w-24 text-slate-400" />
+                    <p className="mt-4 text-lg font-semibold text-slate-600">{producto.nombre}</p>
+                    <p className="mt-2 text-sm text-slate-500">Sin imagen disponible</p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Miniaturas */}
-            <div className="grid grid-cols-3 gap-4">
-              {imagenes.map((img, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`overflow-hidden rounded-2xl transition ${
-                    selectedImage === index
-                      ? 'ring-4 ring-primary-600'
-                      : 'opacity-60 hover:opacity-100'
-                  }`}
-                >
-                  <img
-                    src={img}
-                    alt={`Vista ${index + 1}`}
-                    className="h-32 w-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+            {/* Miniaturas - solo mostrar si hay múltiples imágenes */}
+            {imagenes.length > 1 && (
+              <div className="grid grid-cols-3 gap-4">
+                {imagenes.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`overflow-hidden rounded-2xl transition ${
+                      selectedImage === index
+                        ? 'ring-4 ring-primary-600'
+                        : 'opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`Vista ${index + 1}`}
+                      className="h-32 w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Información del producto */}
@@ -411,14 +421,18 @@ export default function DetalleProductoPage() {
                   <span className="text-slate-600">Código Interno</span>
                   <span className="font-bold text-slate-900">{producto.codigo_interno}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-100 pb-3">
-                  <span className="text-slate-600">Categoría</span>
-                  <span className="font-bold text-slate-900">Electrónica</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Marca</span>
-                  <span className="font-bold text-slate-900">Premium</span>
-                </div>
+                {producto.categoria && (
+                  <div className="flex justify-between border-b border-slate-100 pb-3">
+                    <span className="text-slate-600">Categoría</span>
+                    <span className="font-bold text-slate-900">{producto.categoria.nombre || producto.categoria || 'Sin categoría'}</span>
+                  </div>
+                )}
+                {producto.marca && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Marca</span>
+                    <span className="font-bold text-slate-900">{producto.marca}</span>
+                  </div>
+                )}
               </div>
             </div>
 
