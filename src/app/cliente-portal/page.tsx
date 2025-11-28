@@ -235,8 +235,6 @@ export default function ClientePortalPage() {
                 Miembro desde <span className="font-bold">
                   {dashboard?.cliente?.fecha_creacion 
                     ? new Date(dashboard.cliente.fecha_creacion).getFullYear()
-                    : dashboard?.cliente?.createdAt
-                    ? new Date(dashboard.cliente.createdAt).getFullYear()
                     : user?.fecha_creacion
                     ? new Date(user.fecha_creacion).getFullYear()
                     : new Date().getFullYear()}

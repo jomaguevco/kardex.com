@@ -41,6 +41,7 @@ export default function HomePage() {
   const [mounted, setMounted] = useState(false)
   const [oauthProviders, setOauthProviders] = useState<any>(null)
   const [oauthLoading, setOauthLoading] = useState<string | null>(null)
+  const [googleTimeoutId, setGoogleTimeoutId] = useState<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -50,74 +51,36 @@ export default function HomePage() {
     }).catch(() => {
       // Silenciar error si no hay OAuth configurado
     })
+
+    // Cleanup: limpiar timeout al desmontar
+    return () => {
+      if (googleTimeoutId) {
+        clearTimeout(googleTimeoutId)
+      }
+    }
   }, [])
 
   const handleGoogleLogin = async () => {
     setOauthLoading('google')
     try {
-      // Verificar que el client_id esté configurado
-      const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-      if (!googleClientId) {
-        toast.error('Google Sign-In no está configurado. Contacta al administrador.')
+      // Usar el flujo de OAuth del servidor (más confiable y funciona en todos los navegadores)
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4001'
+      const googleAuthUrl = `${backendUrl}/api/oauth/google`
+      
+      // Redirigir a la URL de autenticación de Google
+      // El servidor manejará el flujo completo y redirigirá de vuelta a /oauth/callback
+      window.location.href = googleAuthUrl
+      
+      // Timeout de seguridad: si después de 60 segundos no hay redirección, mostrar error
+      const timeoutId = setTimeout(() => {
         setOauthLoading(null)
-        return
-      }
-
-      // Usar Google Identity Services para obtener credenciales
-      const google = (window as any).google
-      if (!google) {
-        toast.error('Google Sign-In no está disponible. Asegúrate de tener habilitado el script de Google.')
-        setOauthLoading(null)
-        return
-      }
-
-      google.accounts.id.initialize({
-        client_id: googleClientId,
-        callback: async (response: any) => {
-          try {
-            // Decodificar el JWT de Google para obtener información del usuario
-            const payload = JSON.parse(atob(response.credential.split('.')[1]))
-            
-            const result = await oauthService.loginWithToken({
-              provider: 'google',
-              token: response.credential,
-              email: payload.email,
-              name: payload.name,
-              picture: payload.picture,
-              oauth_id: payload.sub
-            })
-
-            if (result.success) {
-              // Guardar token y usuario
-              setToken(result.token)
-              setUser(result.user as any)
-              
-              // Guardar en localStorage
-              localStorage.setItem('token', result.token)
-              localStorage.setItem('user', JSON.stringify(result.user))
-              
-              toast.success('¡Bienvenido!')
-              
-              // Redirigir según rol
-              if (result.user.rol === 'CLIENTE') {
-                router.push('/cliente-portal')
-              } else {
-                router.push('/dashboard')
-              }
-            }
-          } catch (error) {
-            console.error('Error en OAuth:', error)
-            toast.error('Error al iniciar sesión con Google')
-          } finally {
-            setOauthLoading(null)
-          }
-        }
-      })
-
-      google.accounts.id.prompt()
-    } catch (error) {
+        toast.error('Tiempo de espera agotado. Por favor, intenta de nuevo.')
+      }, 60000)
+      
+      setGoogleTimeoutId(timeoutId)
+    } catch (error: any) {
       console.error('Error iniciando Google Sign-In:', error)
-      toast.error('Error al iniciar sesión con Google')
+      toast.error(error?.message || 'Error al iniciar sesión con Google')
       setOauthLoading(null)
     }
   }
