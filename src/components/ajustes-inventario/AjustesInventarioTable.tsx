@@ -97,27 +97,9 @@ export default function AjustesInventarioTable({
     )
   }
 
-  if (isLoading) {
-    return (
-      <div className="card p-10 text-center">
-        <LoadingSpinner size="lg" />
-        <p className="mt-3 text-sm text-slate-500">Cargando ajustes...</p>
-      </div>
-    )
-  }
-
-  if (ajustes.length === 0) {
-    return (
-      <div className="card p-10 text-center">
-        <p className="text-sm text-slate-500">No hay ajustes de inventario registrados</p>
-        <p className="text-xs text-slate-400 mt-1">Crea un nuevo ajuste para comenzar</p>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
-      {/* Filtros */}
+      {/* Filtros - Siempre visibles */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-6 pt-4">
         <div className="flex flex-1 gap-2">
           <div className="flex-1 max-w-md">
@@ -159,124 +141,137 @@ export default function AjustesInventarioTable({
       </div>
 
       {/* Tabla */}
-      <div className="overflow-hidden">
-        <TableWrapper>
-          <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-                Fecha
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-                Producto
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-                Tipo
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-                Cantidad
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-                Stock
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-                Costo Total
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-                Estado
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-                Usuario
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-500">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 bg-white">
-            {ajustes.map((ajuste) => (
-              <tr key={ajuste.id} className="hover:bg-slate-50">
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-                  {new Date(ajuste.fecha_movimiento).toLocaleDateString('es-PE', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <div>
-                    <p className="font-medium text-slate-900">
-                      {ajuste.producto?.nombre || `Producto ${ajuste.producto_id}`}
-                    </p>
-                    {ajuste.numero_documento && (
-                      <p className="text-xs text-slate-500">{ajuste.numero_documento}</p>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  {getTipoMovimientoBadge(ajuste.tipo_movimiento)}
-                </td>
-                <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                  {Number(ajuste.cantidad).toFixed(2)}
-                </td>
-                <td className="px-6 py-4 text-sm text-slate-600">
-                  <div className="flex items-center gap-1">
-                    <span className="text-slate-400">{ajuste.stock_anterior}</span>
-                    <span className="text-slate-300">→</span>
-                    <span className={cn(
-                      'font-semibold',
-                      ajuste.stock_nuevo > ajuste.stock_anterior ? 'text-emerald-600' : 'text-rose-600'
-                    )}>
-                      {ajuste.stock_nuevo}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm font-semibold text-slate-900">
-                  ${Number(ajuste.costo_total).toFixed(2)}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  {getEstadoBadge(ajuste.estado_movimiento)}
-                </td>
-                <td className="px-6 py-4 text-sm text-slate-600">
-                  {ajuste.usuario?.nombre_completo || 'Usuario no registrado'}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => setSelectedAjuste(ajuste)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                      title="Ver detalles"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    {ajuste.estado_movimiento === 'PENDIENTE' && (
-                      <>
-                        <button
-                          onClick={() => onAprobar(ajuste.id)}
-                          className="text-emerald-600 hover:text-emerald-900"
-                          title="Aprobar"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => onRechazar(ajuste.id)}
-                          className="text-rose-600 hover:text-rose-900"
-                          title="Rechazar"
-                        >
-                          <XCircle className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </TableWrapper>
-      </div>
+      {isLoading ? (
+        <div className="card p-10 text-center">
+          <LoadingSpinner size="lg" />
+          <p className="mt-3 text-sm text-slate-500">Cargando ajustes...</p>
+        </div>
+      ) : (
+        <div className="card overflow-hidden animate-fade-in">
+          {ajustes.length === 0 ? (
+            <div className="px-6 py-16 text-center text-sm text-slate-500">
+              No encontramos ajustes con los filtros seleccionados.
+            </div>
+          ) : (
+            <TableWrapper>
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Fecha
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Producto
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Tipo
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Cantidad
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Stock
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Costo Total
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Estado
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Usuario
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {ajustes.map((ajuste) => (
+                    <tr key={ajuste.id} className="hover:bg-slate-50">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                        {new Date(ajuste.fecha_movimiento).toLocaleDateString('es-PE', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div>
+                          <p className="font-medium text-slate-900">
+                            {ajuste.producto?.nombre || `Producto ${ajuste.producto_id}`}
+                          </p>
+                          {ajuste.numero_documento && (
+                            <p className="text-xs text-slate-500">{ajuste.numero_documento}</p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {getTipoMovimientoBadge(ajuste.tipo_movimiento)}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                        {Number(ajuste.cantidad).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400">{ajuste.stock_anterior}</span>
+                          <span className="text-slate-300">→</span>
+                          <span className={cn(
+                            'font-semibold',
+                            ajuste.stock_nuevo > ajuste.stock_anterior ? 'text-emerald-600' : 'text-rose-600'
+                          )}>
+                            {ajuste.stock_nuevo}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-900">
+                        ${Number(ajuste.costo_total).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {getEstadoBadge(ajuste.estado_movimiento)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {ajuste.usuario?.nombre_completo || 'Usuario no registrado'}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setSelectedAjuste(ajuste)}
+                            className="text-indigo-600 hover:text-indigo-900"
+                            title="Ver detalles"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          {ajuste.estado_movimiento === 'PENDIENTE' && (
+                            <>
+                              <button
+                                onClick={() => onAprobar(ajuste.id)}
+                                className="text-emerald-600 hover:text-emerald-900"
+                                title="Aprobar"
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => onRechazar(ajuste.id)}
+                                className="text-rose-600 hover:text-rose-900"
+                                title="Rechazar"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </TableWrapper>
+          )}
+        </div>
+      )}
 
       {/* Paginación */}
       {pagination && pagination.pages > 1 && (

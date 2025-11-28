@@ -65,7 +65,18 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
           <input
             type="date"
             value={filters.fecha_inicio || ''}
-            onChange={(event) => handleFilterChange('fecha_inicio', event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value
+              if (value) {
+                handleFilterChange('fecha_inicio', value)
+              }
+            }}
+            onBlur={(event) => {
+              const value = event.target.value
+              if (value && value !== filters.fecha_inicio) {
+                handleFilterChange('fecha_inicio', value)
+              }
+            }}
             className="input-field"
             min="2000-01-01"
             max="2099-12-31"
@@ -76,7 +87,18 @@ export default function ComprasTable({ onView, onEdit, onCancel }: ComprasTableP
           <input
             type="date"
             value={filters.fecha_fin || ''}
-            onChange={(event) => handleFilterChange('fecha_fin', event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value
+              if (value) {
+                handleFilterChange('fecha_fin', value)
+              }
+            }}
+            onBlur={(event) => {
+              const value = event.target.value
+              if (value && value !== filters.fecha_fin) {
+                handleFilterChange('fecha_fin', value)
+              }
+            }}
             className="input-field"
             min="2000-01-01"
             max="2099-12-31"
