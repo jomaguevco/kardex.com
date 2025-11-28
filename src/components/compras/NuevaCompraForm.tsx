@@ -107,22 +107,53 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
       const precioReal = Math.max(0, precio - descuento)
       const nuevoSubtotal = precioReal * nuevaCantidad
       
-      setValue(`detalles.${productoExistenteIndex}.cantidad`, nuevaCantidad)
-      setValue(`detalles.${productoExistenteIndex}.subtotal`, nuevoSubtotal)
+      setValue(`detalles.${productoExistenteIndex}.cantidad`, nuevaCantidad, { shouldValidate: true, shouldDirty: true })
+      setValue(`detalles.${productoExistenteIndex}.subtotal`, nuevoSubtotal, { shouldValidate: true, shouldDirty: true })
+      
+      // Recalcular subtotal total inmediatamente
+      const nuevosDetalles = [...detalles]
+      nuevosDetalles[productoExistenteIndex] = {
+        ...nuevosDetalles[productoExistenteIndex],
+        cantidad: nuevaCantidad,
+        subtotal: nuevoSubtotal
+      }
+      
+      const subtotalTotal = nuevosDetalles.reduce((sum, d) => sum + (Number(d.subtotal) || 0), 0)
+      const descuentoGeneral = Number(descuento) || 0
+      const impuestoValido = Number(impuesto) || 0
+      const totalCalculado = subtotalTotal - descuentoGeneral + impuestoValido
+      
+      setValue('subtotal', subtotalTotal, { shouldValidate: true })
+      setValue('total', Math.max(0, totalCalculado), { shouldValidate: true })
       
       // Sin toast para ser más rápido (solo feedback visual en la cantidad)
     } else {
       // Si no existe, agregarlo nuevo
       const precio = productoAAgregar.precio_compra || productoAAgregar.precio_venta
+      const nuevoSubtotal = precio * cantidadIncremental
+      
       append({
         producto_id: productoAAgregar.id,
         cantidad: cantidadIncremental,
         precio_unitario: precio,
         descuento: 0,
-        subtotal: precio * cantidadIncremental
-      })
+        subtotal: nuevoSubtotal
+      }, { shouldFocus: false })
 
       setProductosCache((prev) => ({ ...prev, [productoAAgregar.id]: productoAAgregar }))
+      
+      // Recalcular subtotal total después de agregar
+      setTimeout(() => {
+        const todosLosDetalles = watch('detalles')
+        const subtotalTotal = todosLosDetalles.reduce((sum, d) => sum + (Number(d.subtotal) || 0), 0)
+        const descuentoGeneral = Number(descuento) || 0
+        const impuestoValido = Number(impuesto) || 0
+        const totalCalculado = subtotalTotal - descuentoGeneral + impuestoValido
+        
+        setValue('subtotal', subtotalTotal, { shouldValidate: true })
+        setValue('total', Math.max(0, totalCalculado), { shouldValidate: true })
+      }, 0)
+      
       // Sin toast para ser más rápido - el producto aparece directamente en la lista
     }
 
@@ -150,13 +181,32 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
     const subtotal = precioReal * cantidadValida
 
     if (campo === 'cantidad') {
-      setValue(`detalles.${index}.cantidad`, cantidadValida)
+      setValue(`detalles.${index}.cantidad`, cantidadValida, { shouldValidate: true, shouldDirty: true })
     } else if (campo === 'precio_unitario') {
-      setValue(`detalles.${index}.precio_unitario`, precioValido)
+      setValue(`detalles.${index}.precio_unitario`, precioValido, { shouldValidate: true, shouldDirty: true })
     } else if (campo === 'descuento') {
-      setValue(`detalles.${index}.descuento`, descuentoValido)
+      setValue(`detalles.${index}.descuento`, descuentoValido, { shouldValidate: true, shouldDirty: true })
     }
-    setValue(`detalles.${index}.subtotal`, subtotal)
+    // Actualizar subtotal y forzar actualización del formulario
+    setValue(`detalles.${index}.subtotal`, subtotal, { shouldValidate: true, shouldDirty: true })
+    
+    // Forzar recálculo del subtotal total inmediatamente
+    const nuevosDetalles = [...detalles]
+    nuevosDetalles[index] = {
+      ...nuevosDetalles[index],
+      cantidad: cantidadValida,
+      precio_unitario: precioValido,
+      descuento: descuentoValido,
+      subtotal: subtotal
+    }
+    
+    const subtotalTotal = nuevosDetalles.reduce((sum, d) => sum + (Number(d.subtotal) || 0), 0)
+    const descuentoGeneral = Number(descuento) || 0
+    const impuestoValido = Number(impuesto) || 0
+    const totalCalculado = subtotalTotal - descuentoGeneral + impuestoValido
+    
+    setValue('subtotal', subtotalTotal, { shouldValidate: true })
+    setValue('total', Math.max(0, totalCalculado), { shouldValidate: true })
   }
 
   const onSubmit = async (data: CompraFormData) => {
@@ -216,11 +266,20 @@ export default function NuevaCompraForm({ onSuccess, onCancel }: NuevaCompraForm
     }
   }
 
+  // Recalcular subtotal y total cuando cambian los detalles, descuento o impuesto
   useEffect(() => {
-    const subtotalCalculado = detalles.reduce((sum, detalle) => sum + (detalle.subtotal || 0), 0)
-    const totalCalculado = subtotalCalculado - descuento + impuesto
-    setValue('subtotal', subtotalCalculado)
-    setValue('total', totalCalculado)
+    // Calcular subtotal sumando todos los subtotales de los detalles
+    const subtotalCalculado = detalles.reduce((sum, detalle) => {
+      const subtotalDetalle = Number(detalle.subtotal) || 0
+      return sum + subtotalDetalle
+    }, 0)
+    
+    const descuentoValido = Number(descuento) || 0
+    const impuestoValido = Number(impuesto) || 0
+    const totalCalculado = subtotalCalculado - descuentoValido + impuestoValido
+    
+    setValue('subtotal', subtotalCalculado, { shouldValidate: true })
+    setValue('total', Math.max(0, totalCalculado), { shouldValidate: true })
   }, [detalles, descuento, impuesto, setValue])
 
   useEffect(() => {
