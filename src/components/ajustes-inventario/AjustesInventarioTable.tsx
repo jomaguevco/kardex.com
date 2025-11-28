@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CheckCircle, XCircle, Clock, Eye, Filter } from 'lucide-react'
 import { AjusteInventario } from '@/services/ajusteInventarioService'
 import { cn } from '@/utils/cn'
@@ -38,6 +38,24 @@ export default function AjustesInventarioTable({
   isLoading
 }: AjustesInventarioTableProps) {
   const [selectedAjuste, setSelectedAjuste] = useState<AjusteInventario | null>(null)
+  const [searchValue, setSearchValue] = useState(filters.search)
+
+  // Debounce para el buscador: espera 500ms después de que el usuario deje de escribir
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchValue !== filters.search) {
+        onFilterChange({ ...filters, search: searchValue, page: 1 })
+      }
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue])
+
+  // Sincronizar searchValue cuando filters.search cambia externamente
+  useEffect(() => {
+    setSearchValue(filters.search)
+  }, [filters.search])
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
@@ -105,8 +123,8 @@ export default function AjustesInventarioTable({
           <div className="flex-1 max-w-md">
             <input
               type="text"
-              value={filters.search}
-              onChange={(e) => onFilterChange({ ...filters, search: e.target.value, page: 1 })}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
               className="input-field"
               placeholder="Buscar por número de documento, motivo..."
             />

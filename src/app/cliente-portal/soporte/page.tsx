@@ -3,12 +3,18 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
-import { MessageCircle, Phone, Mail, Clock, HelpCircle, Loader2, MapPin } from 'lucide-react'
+import { MessageCircle, Phone, Mail, Clock, HelpCircle, Loader2, MapPin, Bot, Send, Sparkles } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export default function SoportePage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isAuthenticated, token } = useAuthStore()
   const [isLoading, setIsLoading] = useState(true)
+  const [sugerencias, setSugerencias] = useState<string[]>([])
+  const [loadingSugerencias, setLoadingSugerencias] = useState(false)
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'model', parts: string}>>([])
+  const [inputValue, setInputValue] = useState('')
+  const [isSending, setIsSending] = useState(false)
 
   useEffect(() => {
     if (!isAuthenticated || user?.rol !== 'CLIENTE') {
@@ -16,7 +22,84 @@ export default function SoportePage() {
       return
     }
     setIsLoading(false)
-  }, [isAuthenticated, user, router])
+    if (token) {
+      fetchSugerencias()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user, router, token])
+
+  const fetchSugerencias = async () => {
+    if (!token) return
+    try {
+      setLoadingSugerencias(true)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api'}/gemini/sugerencias`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const data = await response.json()
+      if (data.success && data.data) {
+        setSugerencias(data.data)
+      }
+    } catch (error) {
+      console.error('Error al cargar sugerencias:', error)
+      // Sugerencias por defecto si falla
+      setSugerencias([
+        '¿Cuáles son los productos más vendidos?',
+        '¿Cuál es el estado de mi último pedido?',
+        '¿Tienen productos en oferta?',
+        '¿Cómo puedo hacer un pedido?',
+        '¿Cuál es mi historial de compras?',
+        '¿Qué productos tienen disponible?'
+      ])
+    } finally {
+      setLoadingSugerencias(false)
+    }
+  }
+
+  const sendMessage = async (text?: string) => {
+    const messageText = text || inputValue.trim()
+    if (!messageText || isSending || !token) return
+
+    // Agregar mensaje del usuario
+    const userMessage = { role: 'user' as const, parts: messageText }
+    setChatMessages(prev => [...prev, userMessage])
+    setInputValue('')
+    setIsSending(true)
+
+    try {
+      const history = chatMessages.map(m => ({
+        role: m.role,
+        parts: m.parts
+      }))
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api'}/gemini/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          message: messageText,
+          history
+        })
+      })
+
+      const data = await response.json()
+      
+      if (data.success && data.data?.message) {
+        const modelMessage = { role: 'model' as const, parts: data.data.message }
+        setChatMessages(prev => [...prev, modelMessage])
+      } else {
+        toast.error(data.message || 'Error al procesar la consulta')
+      }
+    } catch (error: any) {
+      console.error('Error en chat:', error)
+      toast.error('Error al conectar con el asistente')
+    } finally {
+      setIsSending(false)
+    }
+  }
 
   const handleWhatsAppClick = () => {
     const phoneNumber = '51956216912' // Teléfono oficial de contacto
@@ -216,23 +299,137 @@ export default function SoportePage() {
         </div>
       </div>
 
-      {/* Agente Virtual (Webchat unificado) */}
+      {/* Agente Virtual (Chatbot Gemini) */}
       <div className="glass-card rounded-2xl p-6">
-        <div className="flex items-start space-x-4">
+        <div className="flex items-start space-x-4 mb-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-            <MessageCircle className="h-6 w-6" />
+            <Bot className="h-6 w-6" />
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-bold text-slate-900">Agente Virtual</h3>
             <p className="mt-2 text-sm text-slate-600">
               Es el mismo bot que usa WhatsApp (ChatDex), pero aquí dentro del portal. Puedes pedir, consultar precios, ver tu pedido y pagar.
             </p>
-            <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3">
-              <iframe
-                src="/webchat"
-                title="Agente Virtual"
-                className="w-full h-[500px] rounded-xl border-0"
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Área de chat principal con robot */}
+          <div className="lg:col-span-2 rounded-xl border-2 border-slate-200 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-8 min-h-[500px] flex flex-col">
+            {chatMessages.length === 0 ? (
+              /* Estado inicial con robot grande */
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white shadow-2xl animate-pulse">
+                    <Bot className="h-16 w-16" />
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-900 mb-2">¡Hola! 👋</h4>
+                  <p className="text-slate-600">
+                    Soy tu asistente virtual de KARDEX. ¿En qué puedo ayudarte hoy?
+                  </p>
+                </div>
+              </div>
+            ) : (
+              /* Área de mensajes cuando hay conversación */
+              <div className="flex-1 flex flex-col">
+                <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+                  {chatMessages.map((msg, i) => (
+                    <div
+                      key={i}
+                      className={`flex items-start gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+                    >
+                      {msg.role === 'model' && (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex-shrink-0">
+                          <Bot className="h-5 w-5" />
+                        </div>
+                      )}
+                      <div
+                        className={`max-w-[75%] rounded-2xl px-4 py-3 ${
+                          msg.role === 'user'
+                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white'
+                            : 'bg-white text-slate-700 shadow-sm'
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{msg.parts}</p>
+                      </div>
+                      {msg.role === 'user' && (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex-shrink-0">
+                          <span className="text-xs font-bold">{user?.nombre_completo?.charAt(0) || 'U'}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {isSending && (
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex-shrink-0">
+                        <Bot className="h-5 w-5" />
+                      </div>
+                      <div className="bg-white rounded-2xl px-4 py-3 shadow-sm">
+                        <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Input de chat */}
+            <div className="mt-4 flex gap-2">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    sendMessage()
+                  }
+                }}
+                placeholder="Escribe tu mensaje..."
+                disabled={isSending}
+                className="flex-1 rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
               />
+              <button
+                onClick={() => sendMessage()}
+                disabled={!inputValue.trim() || isSending}
+                className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white transition hover:shadow-lg disabled:opacity-50"
+              >
+                {isSending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Panel de preguntas sugeridas */}
+          <div className="space-y-4">
+            <div className="rounded-xl border-2 border-slate-200 bg-white p-4">
+              <h4 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-indigo-600" />
+                Preguntas Sugeridas
+              </h4>
+              {loadingSugerencias ? (
+                <div className="space-y-2">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="h-12 rounded-lg bg-slate-200 animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {sugerencias.map((sugerencia, index) => (
+                    <button
+                      key={index}
+                      onClick={() => sendMessage(sugerencia)}
+                      disabled={isSending}
+                      className="w-full text-left rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-50"
+                    >
+                      {sugerencia}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

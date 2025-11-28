@@ -81,18 +81,25 @@ export default function ClientePortalPage() {
   }, [])
 
   const fetchDashboard = async () => {
+    setIsLoading(true)
+    
+    // Obtener estado de cuenta - CRÍTICO (mostrar error si falla)
     try {
-      setIsLoading(true)
-      // Obtener estado de cuenta
       const response = await clientePortalService.getEstadoCuenta()
       if (response.success && response.data) {
         setDashboard(response.data)
         console.log('Dashboard cargado:', response.data) // Debug
       } else {
         console.error('Error: respuesta del estado de cuenta no exitosa', response)
+        toast.error('Error al cargar información del dashboard')
       }
+    } catch (error) {
+      console.error('Error al cargar estado de cuenta:', error)
+      toast.error('Error al cargar información del dashboard')
+    }
 
-      // Obtener productos del catálogo para mostrar productos reales
+    // Obtener productos del catálogo - NO CRÍTICO (solo log si falla)
+    try {
       const catalogoResponse = await clientePortalService.getCatalogo()
       if (catalogoResponse.success && catalogoResponse.data) {
         // Tomar los primeros 8 productos para destacados
@@ -112,15 +119,23 @@ export default function ClientePortalPage() {
         })
         setProductosDestacados(productosReales)
       }
+    } catch (error) {
+      console.error('Error al cargar catálogo (no crítico):', error)
+      // No mostrar error al usuario, solo log
+    }
 
-      // Obtener categorías
+    // Obtener categorías - NO CRÍTICO (solo log si falla)
+    try {
       const categoriasResponse = await clientePortalService.getCategorias()
       if (categoriasResponse.success && categoriasResponse.data) {
-        setCategorias(categoriasResponse.data)
+        setCategorias(Array.isArray(categoriasResponse.data) ? categoriasResponse.data : [])
+      } else {
+        setCategorias([])
       }
     } catch (error) {
-      console.error('Error al cargar dashboard:', error)
-      toast.error('Error al cargar información del dashboard')
+      console.error('Error al cargar categorías (no crítico):', error)
+      // No mostrar error al usuario, solo log
+      setCategorias([]) // Establecer array vacío para evitar errores de renderizado
     } finally {
       setIsLoading(false)
     }
@@ -590,7 +605,7 @@ export default function ClientePortalPage() {
       {/* Sección de categorías con imágenes */}
       <div className="glass-card rounded-3xl p-8">
         <h2 className="mb-6 text-2xl font-bold text-slate-900">Explora por Categorías</h2>
-        {categorias.length > 0 ? (
+        {!isLoading && categorias && Array.isArray(categorias) && categorias.length > 0 ? (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {categorias.slice(0, 4).map((categoria: any, index: number) => {
               // Imágenes placeholder por defecto si no hay imagen_url
@@ -600,17 +615,17 @@ export default function ClientePortalPage() {
                 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400&q=80',
                 'https://images.unsplash.com/photo-1625723044792-44de16ccb4e9?w=400&q=80'
               ]
-              const imagenUrl = categoria.imagen_url || placeholderImages[index % placeholderImages.length]
+              const imagenUrl = categoria?.imagen_url || placeholderImages[index % placeholderImages.length]
               
               return (
                 <Link 
-                  key={categoria.id} 
-                  href={`/cliente-portal/catalogo?categoria_id=${categoria.id}`} 
+                  key={categoria?.id || index} 
+                  href={`/cliente-portal/catalogo?categoria_id=${categoria?.id || ''}`} 
                   className="group relative h-40 overflow-hidden rounded-2xl"
                 >
                   <img 
                     src={imagenUrl}
-                    alt={categoria.nombre}
+                    alt={categoria?.nombre || 'Categoría'}
                     className="h-full w-full object-cover transition group-hover:scale-110"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = placeholderImages[index % placeholderImages.length]
@@ -618,18 +633,22 @@ export default function ClientePortalPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                   <div className="absolute bottom-4 left-4">
-                    <h3 className="text-lg font-bold text-white">{categoria.nombre}</h3>
-                    <p className="text-sm text-white/80">+{categoria.productos_count} productos</p>
+                    <h3 className="text-lg font-bold text-white">{categoria?.nombre || 'Categoría'}</h3>
+                    <p className="text-sm text-white/80">+{categoria?.productos_count || 0} productos</p>
                   </div>
                 </Link>
               )
             })}
           </div>
-        ) : (
+        ) : isLoading ? (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-40 rounded-2xl bg-slate-200 animate-pulse" />
             ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-sm text-slate-500">No hay categorías disponibles en este momento</p>
           </div>
         )}
       </div>
